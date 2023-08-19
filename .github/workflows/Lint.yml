@@ -1,0 +1,26 @@
+name: Lint & Format
+
+on: [push, pull_request]
+
+jobs:
+  formatters:
+    name: Beautysh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Beautysh
+        uses: illvart/beautysh-action@latest
+        with: # not in .git and not in ./shell/zsh/.zsh-plugins
+          args: -c -i 2 -s paronly $(find . -not -path "./.git/*" \( -name "*.sh" -o -name "*.bash" -o -name "*.zsh" \))
+
+  linters:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    needs: [formatters]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run ShellCheck (no ZSH)
+        uses: ludeeus/action-shellcheck@master
+        env:
+          # SC1091: Not following. -- is fixed locally but CI still fails
+          SHELLCHECK_OPTS: -e SC1091
