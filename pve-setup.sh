@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DISTRIBUTION=$(. /etc/*-release;echo $VERSION_CODENAME)
+DISTRIBUTION=$(. /etc/*-release;echo "$VERSION_CODENAME")
 
 echo "- Checking  Sources lists"
 if grep -Fq "deb http://download.proxmox.com/debian/pve" /etc/apt/sources.list; then
@@ -18,7 +18,7 @@ else
 fi
 echo "- Checking Ceph Enterprise Source list"
 # Checking that source list file exist
-if [[ -f "/etc/apt/sources.list.d/ceph.list" ]]; then
+if test -f "/etc/apt/sources.list.d/ceph.list"; then
   # Checking if it source is already commented or not
   if grep -Fq "#deb https://enterprise.proxmox.com/debian/ceph-quincy" "/etc/apt/sources.list.d/ceph.list"; then
     # If so do nothing
