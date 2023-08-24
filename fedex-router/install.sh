@@ -9,10 +9,10 @@
 ################
 
 ############ Variables ############
-ROUTER_PRIVATE_MASK=255.255.255.240
+ROUTER_PRIVATE_MASK=255.255.255.240 # 28-bit netmask
 ROUTER_PRIVATE_IP=10.0.0.1
 DHCP_LEASE_TIME=12h
-DHCP_LEASE_START=10.0.0.2
+DHCP_LEASE_START=10.0.0.3 # using 10.0.0.2 as TrueNAS IP
 DHCP_LEASE_END=10.0.0.14
 DNS_SERVERS=1.1.1.1,8.8.8.8
 # ETH0_ADDR=$(ip addr show dev eth0 | grep "inet " | awk '{print $2}')
