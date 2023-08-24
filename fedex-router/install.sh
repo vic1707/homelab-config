@@ -3,7 +3,7 @@
 ################
 ## Min config ##
 # 1 vCPU       #
-# 32 MB RAM    #
+# 64 MB RAM    #
 # 0 MB SWAP    #
 # 1 GB HDD     #
 ################
@@ -15,6 +15,8 @@ DHCP_LEASE_TIME=12h
 DHCP_LEASE_START=10.0.0.2
 DHCP_LEASE_END=10.0.0.14
 DNS_SERVERS=1.1.1.1,8.8.8.8
+# ETH0_ADDR=$(ip addr show dev eth0 | grep "inet " | awk '{print $2}')
+ETH0_NETWORK="$(ip route | awk '/eth0/ && !/default/ {print $1}')"
 
 # Install packages
 echo "Updating repositories and installing packages..."
@@ -58,6 +60,7 @@ rc-update add local default
 echo "Configuring iptables..."
 iptables -F
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+iptables -A FORWARD -i eth1 -d "$ETH0_NETWORK" -j REJECT
 iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 # Save iptables rules
@@ -83,6 +86,6 @@ if [ "$choice" = "Y" ] || [ "$choice" = "y" ]; then
   echo "Rebooting..."
   sleep 3
   reboot
-else
-  echo "Reboot cancelled. You can manually reboot the system when ready."
 fi
+
+echo "Reboot cancelled. You can manually reboot the system when ready."
