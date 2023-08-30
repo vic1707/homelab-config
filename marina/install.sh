@@ -44,7 +44,7 @@ if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "st
   MARINA_ENV: \`$MARINA_ENV\`"
   exit 1
 fi
-exit 0
+
 ############################### NFS Setup ###############################
 ######################## Volumes to mount (fstab) #######################
 # Only add lines to fstab if they don't already exist                   #
