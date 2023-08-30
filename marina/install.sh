@@ -26,9 +26,10 @@ fi
   exit 1
 }
 
-#### Check for required variables ####
+########## Check for required variables ##########
 ## 1. MARINA_ENV: 'prod' | 'staging' | 'random' ##
-if [ -z "$MARINA_ENV" ]; then
+##################################################
+if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "staging" ] && [ "$MARINA_ENV" != "random" ]; then
   echo "MARINA_ENV is not set. Please set it to 'prod' | 'staging' | 'random'."
   exit 1
 fi
