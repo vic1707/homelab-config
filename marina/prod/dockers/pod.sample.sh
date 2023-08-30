@@ -24,8 +24,8 @@ source_env() {
 }
 
 start() {
+  # ...
   podman run \
     --name "$NAME" \
-    # ...
     "container:$VERSION"
 }
