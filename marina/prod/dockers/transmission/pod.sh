@@ -26,10 +26,11 @@ source_env() {
   ## 5. OVPN_PORT: 1-65535                  ##
   ############################################
   if [ -z "$OVPN_PROVIDER" ] || [ "$OVPN_PROVIDER" != "PIA" ] && [ "$OVPN_PROVIDER" != "WINDSCRIBE" ]; then
-    echo "\
-    OVPN_PROVIDER is not properly set.\n\
-    Please set it to 'PIA' | 'WINDSCRIBE'.\n\
-    OVPN_PROVIDER: \`$OVPN_PROVIDER\`"
+    echo "
+    OVPN_PROVIDER is not properly set.
+    Please set it to 'PIA' | 'WINDSCRIBE'.
+    OVPN_PROVIDER: \`$OVPN_PROVIDER\`
+    "
     exit 1
   fi
   if [ -z "$OVPN_USR" ]; then
@@ -45,10 +46,11 @@ source_env() {
     exit 1
   fi
   if [ -z "$OVPN_PORT" ] || [ "$OVPN_PORT" -lt 1 ] || [ "$OVPN_PORT" -gt 65535 ]; then
-    echo "\
-    OVPN_PORT is not properly set.\
-    Please set it to a value between 1 and 65535.\
-    OVPN_PORT: \`$OVPN_PORT\`"
+    echo "
+    OVPN_PORT is not properly set.
+    Please set it to a value between 1 and 65535.
+    OVPN_PORT: \`$OVPN_PORT\`
+    "
     exit 1
   fi
 }

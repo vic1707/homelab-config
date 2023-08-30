@@ -38,10 +38,11 @@ source_env "$PWD/.env" || exit 1
 ## 1. MARINA_ENV: 'prod' | 'staging' | 'random' ##
 ##################################################
 if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "staging" ] && [ "$MARINA_ENV" != "random" ]; then
-  echo "\
-  MARINA_ENV is not properly set.\n\
-  Please set it to 'prod' | 'staging' | 'random'.\n\
-  MARINA_ENV: \`$MARINA_ENV\`"
+  echo "
+  MARINA_ENV is not properly set.
+  Please set it to 'prod' | 'staging' | 'random'.
+  MARINA_ENV: \`$MARINA_ENV\`
+  "
   exit 1
 fi
 
