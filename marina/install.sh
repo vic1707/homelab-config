@@ -11,7 +11,7 @@
 ## 2. Configure NFS volumes             ##
 ##########################################
 
-PWD=$(cd `dirname "$0"` && pwd && cd - > /dev/null || exit 1)
+PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
 
 # Check for root privileges
 if [ "$(id -u)" -ne 0 ]; then
@@ -30,7 +30,10 @@ fi
 ## 1. MARINA_ENV: 'prod' | 'staging' | 'random' ##
 ##################################################
 if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "staging" ] && [ "$MARINA_ENV" != "random" ]; then
-  echo "MARINA_ENV is not set. Please set it to 'prod' | 'staging' | 'random'."
+  echo "\
+  MARINA_ENV is not properly set.\n\
+  Please set it to 'prod' | 'staging' | 'random'.\n\
+  MARIAN_ENV: \`$MARINA_ENV\`"
   exit 1
 fi
 
