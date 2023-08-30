@@ -11,7 +11,7 @@
 ## 2. Configure NFS volumes             ##
 ##########################################
 
-PWD=$(cd "$PWD" && pwd && cd - > /dev/null || exit 1)
+PWD=$(cd `dirname "$0"` && pwd && cd - > /dev/null || exit 1)
 
 # Check for root privileges
 if [ "$(id -u)" -ne 0 ]; then
