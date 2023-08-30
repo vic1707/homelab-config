@@ -1,5 +1,15 @@
 #!/bin/sh
 
+source_env() {
+  if [ -f "$1" ]; then
+    . "$1"
+    return $?
+  else
+    echo "File not found: $1"
+    exit 1
+  fi
+}
+
 ##########################################
 ## Install script for Marina            ##
 ##                                      ##
@@ -21,10 +31,8 @@ fi
 
 # Load environment variables
 # if .env file is not present, exit on failure
-(test -f "$PWD/.env" && . "$PWD/.env") || {
-  echo "No .env file found. Please provide one."
-  exit 1
-}
+echo "Loading environment variables from .env file..."
+source_env "$PWD/.env" || exit 1
 
 ########## Check for required variables ##########
 ## 1. MARINA_ENV: 'prod' | 'staging' | 'random' ##
@@ -33,10 +41,10 @@ if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "st
   echo "\
   MARINA_ENV is not properly set.\n\
   Please set it to 'prod' | 'staging' | 'random'.\n\
-  MARIAN_ENV: \`$MARINA_ENV\`"
+  MARINA_ENV: \`$MARINA_ENV\`"
   exit 1
 fi
-
+exit 0
 ############################### NFS Setup ###############################
 ######################## Volumes to mount (fstab) #######################
 # Only add lines to fstab if they don't already exist                   #
