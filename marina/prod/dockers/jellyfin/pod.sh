@@ -23,6 +23,7 @@ start() {
   podman run \
     --detach \
     --name "$NAME" \
+    --env TZ="Europe/Paris" \
     --volume "/mnt/config/$NAME/":/config \
     --volume /mnt/jellyfin_medias:/media:ro \
     --env NVIDIA_VISIBLE_DEVICES=all \

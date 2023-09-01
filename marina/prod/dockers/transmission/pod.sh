@@ -70,15 +70,16 @@ start() {
     --cap-add=NET_ADMIN \
     --volume "/mnt/bhulk/$NAME/":/data \
     --volume "/mnt/config/$NAME/":/config \
+    --env TZ="Europe/Paris" \
     --env WEBPROXY_ENABLED=false \
     --env TRANSMISSION_WEB_UI=flood-for-transmission \
     --env OPENVPN_PROVIDER="$OVPN_PROVIDER" \
     --env OPENVPN_CONFIG="$OVPN_CONFIG" \
     --env OPENVPN_USERNAME="$OVPN_USR" \
     --env OPENVPN_PASSWORD="$OVPN_PWD" \
-    --env CREATE_TUN_DEVICE=false \
     --log-driver json-file \
     --log-opt max-size=10m \
+    --env CREATE_TUN_DEVICE=false \
     --device /dev/net/tun \
     docker.io/haugene/transmission-openvpn:$VERSION
 }

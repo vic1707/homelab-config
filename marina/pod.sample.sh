@@ -35,6 +35,7 @@ start() {
   podman run \
     --detach \
     --name "$NAME" \
+    --env TZ="Europe/Paris" \
     "container:$VERSION"
 }
 
