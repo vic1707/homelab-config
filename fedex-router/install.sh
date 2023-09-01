@@ -12,7 +12,11 @@
 ROUTER_PRIVATE_MASK=255.255.255.240 # 28-bit netmask
 ROUTER_PRIVATE_IP=10.0.0.1
 DHCP_LEASE_TIME=12h
-DHCP_LEASE_START=10.0.0.3 # using 10.0.0.2 as TrueNAS IP
+# TRUENAS_IP=10.0.0.2
+MARINA_PROD_IP=10.0.0.3
+# MARINA_STAGING_IP=10.0.0.4
+# MARINA_RANDOM_IP=10.0.0.5
+DHCP_LEASE_START=10.0.0.6
 DHCP_LEASE_END=10.0.0.14
 DNS_SERVERS=1.1.1.1,8.8.8.8
 # ETH0_ADDR=$(ip addr show dev eth0 | grep "inet " | awk '{print $2}')
@@ -63,6 +67,14 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 iptables -A FORWARD -i eth1 -d "$ETH0_NETWORK" -j REJECT
 iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+### Port forwarding ###
+# Router:80 -> Maria_Prod:80
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination "$MARINA_PROD_IP:80"
+iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 80 -j ACCEPT
+# Router:443 -> Maria_Prod:443
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination "$MARINA_PROD_IP:443"
+iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 443 -j ACCEPT
+#######################
 # Save iptables rules
 /etc/init.d/iptables save
 rc-update add iptables
