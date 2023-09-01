@@ -4,6 +4,8 @@
 PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
 NAME=
 VERSION=
+# shellcheck disable=SC2034
+RESTART_POLICY= # no | always | on-success | on-failure | on-abnormal | on-abort | on-watchdog
 ########################
 
 source_env() {

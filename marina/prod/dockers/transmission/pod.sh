@@ -4,6 +4,8 @@
 PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
 NAME=transmission
 VERSION=5
+# shellcheck disable=SC2034
+RESTART_POLICY="on-failure"
 ########################
 
 source_env() {
