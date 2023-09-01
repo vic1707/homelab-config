@@ -85,5 +85,6 @@ start() {
 }
 
 requirements() {
-  mkdir -p /mnt/{bhulk,config}/"$NAME"
+  mkdir -p /mnt/bhulk/"$NAME"
+  mkdir -p /mnt/config/"$NAME"
 }

@@ -39,5 +39,6 @@ start() {
 }
 
 requirements() {
+  true;
   ## Put setup lines here, like NFS mounts, etc.
 }
