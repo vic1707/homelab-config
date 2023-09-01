@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Check for NON root privileges
+if [ "$(id -u)" -eq 0 ]; then
+  echo "This script must NOT be run as root. Please use a regular user."
+  exit 1
+fi
+
 ### STATIC VARIABLES ###
 PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
 NAME=transmission
