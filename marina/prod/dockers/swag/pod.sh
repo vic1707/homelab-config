@@ -44,7 +44,8 @@ start() {
     --detach \
     --name "$NAME" \
     --cap-add=NET_ADMIN \
-    --volume "/mnt/config/$NAME/":/config \
+    --volume "/mnt/config/$NAME/cfg":/config \
+    --volume "/mnt/config/$NAME/web":/config/www \
     --env TZ="Europe/Paris" \
     --env URL="$SWAG_DOMAIN" \
     --env VALIDATION="dns" \
