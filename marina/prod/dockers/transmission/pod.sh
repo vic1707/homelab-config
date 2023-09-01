@@ -7,7 +7,7 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 ### STATIC VARIABLES ###
-POD_PWD="$(dirname "$BASH_SOURCE")"
+POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=transmission
 VERSION=5
 # shellcheck disable=SC2034
