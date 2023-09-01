@@ -80,7 +80,6 @@ start() {
     --log-driver json-file \
     --log-opt max-size=10m \
     --device /dev/net/tun \
-    --publish "$TRANSMISSION_UI_PORT:9091" \
     docker.io/haugene/transmission-openvpn:$VERSION
 }
 
