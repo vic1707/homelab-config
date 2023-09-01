@@ -65,26 +65,26 @@ source_env() {
 start() {
   # TODO: check if `--device /dev/net/tun` and `CREATE_TUN_DEVICE=false` are needed
   podman run \
-    -d \
+    --detach \
     --name "$NAME" \
     --cap-add=NET_ADMIN \
-    -v "/mnt/bhulk/$NAME/":/data \
-    -v "/mnt/config/$NAME/":/config \
-    -e WEBPROXY_ENABLED=false \
-    -e TRANSMISSION_WEB_UI=flood-for-transmission \
-    -e OPENVPN_PROVIDER="$OVPN_PROVIDER" \
-    -e OPENVPN_CONFIG="$OVPN_CONFIG" \
-    -e OPENVPN_USERNAME="$OVPN_USR" \
-    -e OPENVPN_PASSWORD="$OVPN_PWD" \
-    -e CREATE_TUN_DEVICE=false \
+    --volume "/mnt/bhulk/$NAME/":/data \
+    --volume "/mnt/config/$NAME/":/config \
+    --env WEBPROXY_ENABLED=false \
+    --env TRANSMISSION_WEB_UI=flood-for-transmission \
+    --env OPENVPN_PROVIDER="$OVPN_PROVIDER" \
+    --env OPENVPN_CONFIG="$OVPN_CONFIG" \
+    --env OPENVPN_USERNAME="$OVPN_USR" \
+    --env OPENVPN_PASSWORD="$OVPN_PWD" \
+    --env CREATE_TUN_DEVICE=false \
     --log-driver json-file \
     --log-opt max-size=10m \
     --device /dev/net/tun \
-    -p "$TRANSMISSION_UI_PORT:9091" \
+    --publish "$TRANSMISSION_UI_PORT:9091" \
     docker.io/haugene/transmission-openvpn:$VERSION
 }
 
 requirements() {
-  mkdir -p /mnt/bhulk/"$NAME"
-  mkdir -p /mnt/config/"$NAME"
+  mkdir -p "/mnt/bhulk/$NAME"
+  mkdir -p "/mnt/config/$NAME"
 }

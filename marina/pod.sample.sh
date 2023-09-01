@@ -33,7 +33,7 @@ source_env() {
 start() {
   # ...
   podman run \
-    -d \
+    --detach \
     --name "$NAME" \
     "container:$VERSION"
 }
