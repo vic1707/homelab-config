@@ -71,5 +71,5 @@ start() {
     --log-driver json-file \
     --log-opt max-size=10m \
     -p "$OVPN_PORT:9091" \
-    haugene/transmission-openvpn:$VERSION
+    docker.io/haugene/transmission-openvpn:$VERSION
 }
