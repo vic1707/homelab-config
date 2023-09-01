@@ -7,7 +7,7 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 ### STATIC VARIABLES ###
-POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
+# POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=jellyfin
 VERSION=10.8.10
 # shellcheck disable=SC2034
