@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Check for NON root privileges
 if [ "$(id -u)" -eq 0 ]; then
@@ -7,7 +7,7 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 ### STATIC VARIABLES ###
-PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
+POD_PWD="$(dirname "$BASH_SOURCE")"
 NAME=transmission
 VERSION=5
 # shellcheck disable=SC2034
@@ -18,10 +18,10 @@ source_env() {
   # Load environment variables
   # if .env file is not present, exit on failure
   echo "Loading environment variables from .env file..."
-  if [ -f "$PWD/.env" ]; then
-    . "$PWD/.env" || exit 1
+  if [ -f "$POD_PWD/.env" ]; then
+    . "$POD_PWD/.env" || exit 1
   else
-    echo "File not found: $PWD/.env"
+    echo "File not found: $POD_PWD/.env"
     exit 1
   fi
 
