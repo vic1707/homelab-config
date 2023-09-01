@@ -77,8 +77,6 @@ start() {
     --env OPENVPN_CONFIG="$OVPN_CONFIG" \
     --env OPENVPN_USERNAME="$OVPN_USR" \
     --env OPENVPN_PASSWORD="$OVPN_PWD" \
-    --log-driver json-file \
-    --log-opt max-size=10m \
     --env CREATE_TUN_DEVICE=false \
     --device /dev/net/tun \
     docker.io/haugene/transmission-openvpn:$VERSION
