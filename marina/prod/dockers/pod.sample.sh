@@ -13,8 +13,7 @@ source_env() {
   # if .env file is not present, exit on failure
   echo "Loading environment variables from .env file..."
   if [ -f "$PWD/.env" ]; then
-    . "$PWD/.env"
-    return $?
+    . "$PWD/.env" || exit 1
   else
     echo "File not found: $PWD/.env"
     exit 1
