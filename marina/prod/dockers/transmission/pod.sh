@@ -30,7 +30,7 @@ source_env() {
   ## 2. OVPN_USR                            ##
   ## 3. OVPN_PWD                            ##
   ## 4. OVPN_CONFIG: RTFM                   ##
-  ## 5. OVPN_PORT: 1-65535                  ##
+  ## 5. TRANSMISSION_UI_PORT: 1-65535       ##
   ############################################
   if [ -z "$OVPN_PROVIDER" ] || [ "$OVPN_PROVIDER" != "PIA" ] && [ "$OVPN_PROVIDER" != "WINDSCRIBE" ]; then
     echo "
@@ -52,11 +52,11 @@ source_env() {
     echo "OVPN_CONFIG is not set. Please set it."
     exit 1
   fi
-  if [ -z "$OVPN_PORT" ] || [ "$OVPN_PORT" -lt 1 ] || [ "$OVPN_PORT" -gt 65535 ]; then
+  if [ -z "$TRANSMISSION_UI_PORT" ] || [ "$TRANSMISSION_UI_PORT" -lt 1 ] || [ "$TRANSMISSION_UI_PORT" -gt 65535 ]; then
     echo "
-    OVPN_PORT is not properly set.
+    TRANSMISSION_UI_PORT is not properly set.
     Please set it to a value between 1 and 65535.
-    OVPN_PORT: \`$OVPN_PORT\`
+    TRANSMISSION_UI_PORT: \`$TRANSMISSION_UI_PORT\`
     "
     exit 1
   fi
@@ -80,7 +80,7 @@ start() {
     --log-driver json-file \
     --log-opt max-size=10m \
     --device /dev/net/tun \
-    -p "$OVPN_PORT:9091" \
+    -p "$TRANSMISSION_UI_PORT:9091" \
     docker.io/haugene/transmission-openvpn:$VERSION
 }
 
