@@ -34,15 +34,15 @@ source_pod_file() {
   ## 5. VERSION                             ##
   ## 6. RESTART_POLICY                      ##
   ############################################
-  if [ -z "$(type -t start)" ] || [ "$(type -t start)" != () ]; then
+  if [ -z "$(type -t start)" ] || [ "$(type -t start)" != "function" ]; then
     echo "Function not found: start"
     exit 1
   fi
-  if [ -z "$(type -t source_env)" ] || [ "$(type -t source_env)" != () ]; then
+  if [ -z "$(type -t source_env)" ] || [ "$(type -t source_env)" != "function" ]; then
     echo "Function not found: source_env"
     exit 1
   fi
-  if [ -z "$(type -t requirements)" ] || [ "$(type -t requirements)" != () ]; then
+  if [ -z "$(type -t requirements)" ] || [ "$(type -t requirements)" != "function" ]; then
     echo "Function not found: requirements"
     exit 1
   fi
