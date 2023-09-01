@@ -64,9 +64,10 @@ source_env() {
 
 start() {
   podman run \
+    -d \
     --name "$NAME" \
-    --cap-add=NET_ADMIN -d \
-    -v "/mnt/bhulk/$NAME":/data \
+    --cap-add=NET_ADMIN \
+    -v "/mnt/bhulk/$NAME/":/data \
     -v /mnt/config/:/config \
     -e WEBPROXY_ENABLED=false \
     -e TRANSMISSION_WEB_UI=flood-for-transmission \
