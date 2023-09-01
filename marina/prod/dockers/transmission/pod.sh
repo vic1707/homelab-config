@@ -80,3 +80,5 @@ start() {
     -p "$OVPN_PORT:9091" \
     docker.io/haugene/transmission-openvpn:$VERSION
 }
+
+requirements() {}

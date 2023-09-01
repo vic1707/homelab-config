@@ -37,3 +37,7 @@ start() {
     --name "$NAME" \
     "container:$VERSION"
 }
+
+requirements() {
+  ## Put setup lines here, like NFS mounts, etc.
+}
