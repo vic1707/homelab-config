@@ -57,6 +57,7 @@ podman network create shared # used for communication between containers
 # to respect the principle of least privilege,                          #
 # we will use the following options:                                    #
 # - `rw`: read-write                                                    #
+# - `acl`: enable access control lists                                  #
 # - `hard`: fail after 3 retries                                        #
 # - `noatime`: don't update access time                                 #
 # - `nodev`: don't allow device files to be created                     #
@@ -69,7 +70,7 @@ podman network create shared # used for communication between containers
 ## 1. /mnt/config => 10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV   ##
 ## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV       ##
 #########################################################################
-NFS_OPTIONS="rw,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
+NFS_OPTIONS="rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 echo "Configuring config volume..."
 if ! grep -q "/mnt/config" /etc/fstab; then
   echo "Adding config volume to fstab..."
