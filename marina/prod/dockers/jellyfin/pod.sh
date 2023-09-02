@@ -29,6 +29,7 @@ start() {
     --env NVIDIA_VISIBLE_DEVICES=all \
     --runtime=nvidia \
     "lscr.io/linuxserver/jellyfin:$VERSION"
+  return $?
 }
 
 requirements() {
@@ -43,5 +44,6 @@ requirements() {
     echo "10.0.0.2:/mnt/Bhulk/Medias /mnt/jellyfin_medias nfs $NFS_OPTIONS 0 0" >> /etc/fstab
     # reload fstab
     mount -a
+    return $?
   fi
 }

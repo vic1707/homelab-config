@@ -56,6 +56,7 @@ start() {
     --env DOCKER_MODS=linuxserver/mods:swag-auto-reload \
     --publish 4443:443 \
     "lscr.io/linuxserver/swag:$VERSION"
+  return $?
 }
 
 requirements() {

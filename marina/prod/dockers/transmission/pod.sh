@@ -80,6 +80,7 @@ start() {
     --env CREATE_TUN_DEVICE=false \
     --device /dev/net/tun \
     docker.io/haugene/transmission-openvpn:$VERSION
+  return $?
 }
 
 requirements() {

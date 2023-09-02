@@ -81,10 +81,23 @@ create_systemd_service() {
 create() {
   pod="$1"
   source_pod_file "$pod"
-  source_env
-  start
+  source_env || {
+    echo "Error loading environment variables."
+    exit 1
+  }
+  requirements || {
+    echo "Error loading requirements."
+    exit 1
+  }
+  start || {
+    echo "Error starting pod."
+    exit 1
+  }
   echo "Pod $NAME created."
-  create_systemd_service
+  create_systemd_service || {
+    echo "Error creating systemd service."
+    exit 1
+  }
 }
 
 delete_systemd_service() {
