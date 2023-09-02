@@ -30,7 +30,6 @@ source_env() {
   ## 2. OVPN_USR                            ##
   ## 3. OVPN_PWD                            ##
   ## 4. OVPN_CONFIG: RTFM                   ##
-  ## 5. TRANSMISSION_UI_PORT: 1-65535       ##
   ############################################
   if [ -z "$OVPN_PROVIDER" ] || [ "$OVPN_PROVIDER" != "PIA" ] && [ "$OVPN_PROVIDER" != "WINDSCRIBE" ]; then
     echo "
@@ -50,14 +49,6 @@ source_env() {
   fi
   if [ -z "$OVPN_CONFIG" ]; then
     echo "OVPN_CONFIG is not set. Please set it."
-    exit 1
-  fi
-  if [ -z "$TRANSMISSION_UI_PORT" ] || [ "$TRANSMISSION_UI_PORT" -lt 1 ] || [ "$TRANSMISSION_UI_PORT" -gt 65535 ]; then
-    echo "
-    TRANSMISSION_UI_PORT is not properly set.
-    Please set it to a value between 1 and 65535.
-    TRANSMISSION_UI_PORT: \`$TRANSMISSION_UI_PORT\`
-    "
     exit 1
   fi
 }
