@@ -34,12 +34,17 @@ start() {
   # ...
   podman run \
     --detach \
+    --network shared \
     --name "$NAME" \
     --env TZ="Europe/Paris" \
     "container:$VERSION"
 }
 
 requirements() {
-  true;
-  ## Put setup lines here, like NFS mounts, etc.
+  ## Podman network `shared` must exist
+  if ! podman network inspect shared &>/dev/null; then
+    echo "Podman network 'shared' does not exist. Please create it."
+    exit 1
+  fi
+  ## Put other setup lines here, like NFS mounts, etc.
 }

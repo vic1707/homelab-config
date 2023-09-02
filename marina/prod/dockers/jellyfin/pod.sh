@@ -22,6 +22,7 @@ source_env() {
 start() {
   podman run \
     --detach \
+    --network shared \
     --name "$NAME" \
     --env TZ="Europe/Paris" \
     --volume "/mnt/config/$NAME/":/config \
@@ -33,7 +34,12 @@ start() {
 }
 
 requirements() {
-  ## Put setup lines here, like NFS mounts, etc.
+  ## Podman network `shared` must exist
+  if ! podman network inspect shared &>/dev/null; then
+    echo "Podman network 'shared' does not exist. Please create it."
+    exit 1
+  fi
+  ## Put other setup lines here, like NFS mounts, etc.
   mkdir -p "/mnt/bhulk/$NAME"
   mkdir -p "/mnt/config/$NAME"
 

@@ -66,6 +66,7 @@ start() {
   # TODO: check if `--device /dev/net/tun` and `CREATE_TUN_DEVICE=false` are needed
   podman run \
     --detach \
+    --network shared \
     --name "$NAME" \
     --cap-add=NET_ADMIN \
     --volume "/mnt/bhulk/$NAME/":/data \
@@ -84,6 +85,12 @@ start() {
 }
 
 requirements() {
+  ## Podman network `shared` must exist
+  if ! podman network inspect shared &>/dev/null; then
+    echo "Podman network 'shared' does not exist. Please create it."
+    exit 1
+  fi
+  ## Put other setup lines here, like NFS mounts, etc.
   mkdir -p "/mnt/bhulk/$NAME"
   mkdir -p "/mnt/config/$NAME"
 }

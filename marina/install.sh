@@ -46,6 +46,10 @@ if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "st
   exit 1
 fi
 
+############################## Podman Setup #############################
+podman network create shared # used for communication between containers
+#########################################################################
+
 ############################### NFS Setup ###############################
 ######################## Volumes to mount (fstab) #######################
 # Only add lines to fstab if they don't already exist                   #
