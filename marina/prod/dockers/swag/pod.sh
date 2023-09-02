@@ -54,7 +54,7 @@ start() {
     --env CERTPROVIDER="zerossl" \
     --env SUBDOMAINS="wildcard" \
     --env DOCKER_MODS=linuxserver/mods:swag-auto-reload \
-    --publish 443:443 \
+    --publish 4443:443 \
     "lscr.io/linuxserver/swag:$VERSION"
 }
 

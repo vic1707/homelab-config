@@ -68,12 +68,9 @@ iptables -A FORWARD -i eth1 -d "$ETH0_NETWORK" -j REJECT
 iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 ### Port forwarding ###
-# Router:80 -> Maria_Prod:80
-iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination "$MARINA_PROD_IP:80"
-iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 80 -j ACCEPT
-# Router:443 -> Maria_Prod:443
-iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination "$MARINA_PROD_IP:443"
-iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 443 -j ACCEPT
+# Router:4443 -> Maria_Prod:4443 (check marina/prod/dockers/swag/pod.sh)
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 4443 -j DNAT --to-destination "$MARINA_PROD_IP:4443"
+iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 4443 -j ACCEPT
 #######################
 # Save iptables rules
 /etc/init.d/iptables save
