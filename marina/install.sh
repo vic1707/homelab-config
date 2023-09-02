@@ -77,3 +77,5 @@ if ! grep -q "/mnt/bhulk" /etc/fstab; then
   echo "Adding bhulk volume to fstab..."
   echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
+# reload fstab
+mount -a
