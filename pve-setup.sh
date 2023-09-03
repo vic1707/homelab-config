@@ -79,3 +79,11 @@ sed -i 's/#TCPKeepAlive yes/TCPKeepAlive yes/g' /etc/ssh/sshd_config
 echo "- Restarting SSH service"
 systemctl restart ssh sshd
 
+############ Add backup pool to ZFS ###########
+## Assuming that the pool is already created ##
+## And is named "VMs_LXCs"                   ##
+###############################################
+# zfs create VMs_LXCs/VMS_Backups
+# zfs set compression=zstd VMs_LXCs/VMS_Backups
+# zfs set relatime=on VMs_LXCs/VMS_Backups
+# pvesm add dir VMs_Backups --content backup --is_mountpoint yes --shared 0 --path "/VMs_LXCs/VMS_Backups"
