@@ -50,7 +50,6 @@ fi
 
 ############################# Update System #############################
 echo "Updating repositories and installing packages..."
-dnf clean expire-cache
 dnf update -y
 dnf upgrade -y
 echo "Installing packages..."
@@ -59,8 +58,7 @@ dnf install -y podman nfs-utils
 if [ "$MARINA_ENV" = "prod" ]; then
   echo "Installing NVIDIA Drivers..."
   dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
-  dnf clean expire-cache
-  dnf update -y
+  dnf update -y # just in case
   dnf module install -y nvidia-driver
   echo "Disabling nouveau..."
   echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
