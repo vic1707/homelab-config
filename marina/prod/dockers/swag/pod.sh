@@ -54,7 +54,7 @@ start() {
     --env EMAIL="$SWAG_EMAIL" \
     --env CERTPROVIDER="zerossl" \
     --env SUBDOMAINS="wildcard" \
-    --env DOCKER_MODS=linuxserver/mods:swag-auto-reload \
+    --env DOCKER_MODS="linuxserver/mods:swag-auto-reload|linuxserver/mods:swag-dashboard" \
     --publish 4443:443 \
     "lscr.io/linuxserver/swag:$VERSION"
   return $?
