@@ -14,7 +14,8 @@ source_env() {
 ## Install script for Marina            ##
 ##                                      ##
 ## This script is meant to be run on    ##
-## a fresh <insert distro> installation ##
+## a fresh AlmaLinux:9 installation     ##
+DIST=rhel9.0
 ##                                      ##
 ## This script will:                    ##
 ## TODO. Install required packages      ##
@@ -29,6 +30,7 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+### TODO: parse as arg or choice
 # Load environment variables
 # if .env file is not present, exit on failure
 echo "Loading environment variables from .env file..."
@@ -46,10 +48,34 @@ if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "st
   exit 1
 fi
 
+############################# Update System #############################
+echo "Updating repositories and installing packages..."
+dnf clean expire-cache
+dnf update -y
+dnf upgrade -y
+echo "Installing packages..."
+dnf install -y podman nfs-utils
+############################# NVIDIA Podman #############################
+if [ "$MARINA_ENV" = "prod" ]; then
+  # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
+  echo "Installing NVIDIA REPO..."
+  curl -s -L "https://nvidia.github.io/libnvidia-container/$DIST/libnvidia-container.repo" | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+  echo "Installing NVIDIA Container Toolkit..."
+  dnf update -y
+  dnf install -y nvidia-container-toolkit
+  # allow non root containers to access the GPU
+  sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
+fi
+########################### Configure services ##########################
+echo "Configuring services..."
+## Enable and start NFS
+systemctl enable nfs-server.service
+systemctl start nfs-server.service
+## disable sshd
+systemctl disable sshd.service
+systemctl stop sshd.service
 ############################## Podman Setup #############################
 podman network create shared # used for communication between containers
-#########################################################################
-
 ############################### NFS Setup ###############################
 ######################## Volumes to mount (fstab) #######################
 # Only add lines to fstab if they don't already exist                   #
