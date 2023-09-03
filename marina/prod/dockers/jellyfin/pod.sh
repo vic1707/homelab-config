@@ -21,6 +21,7 @@ source_env() {
 
 start() {
   podman run \
+    --privileged \
     --detach \
     --network shared \
     --name "$NAME" \
@@ -28,7 +29,7 @@ start() {
     --volume "/mnt/config/$NAME/":/config \
     --volume /mnt/jellyfin_medias:/media:ro \
     --env NVIDIA_VISIBLE_DEVICES=all \
-    --runtime=nvidia \
+    --gpus all \
     "lscr.io/linuxserver/jellyfin:$VERSION"
   return $?
 }
