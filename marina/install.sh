@@ -57,14 +57,27 @@ echo "Installing packages..."
 dnf install -y podman nfs-utils
 ############################# NVIDIA Podman #############################
 if [ "$MARINA_ENV" = "prod" ]; then
+  echo "Installing NVIDIA Drivers..."
+  dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
+  dnf clean expire-cache
+  dnf update -y
+  dnf module install -y nvidia-driver
+  echo "Disabling nouveau..."
+  echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
+  echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
+  sudo dracut --regenerate-all --force
+  sudo depmod -a
+  ## Test with `nvidia-smi`
   # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
   echo "Installing NVIDIA REPO..."
-  curl -s -L "https://nvidia.github.io/libnvidia-container/$DIST/libnvidia-container.repo" | sudo tee /etc/yum.repos.d/nvidia-container-toolkit.repo
+  dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/$DIST/libnvidia-container.repo"
   echo "Installing NVIDIA Container Toolkit..."
   dnf update -y
   dnf install -y nvidia-container-toolkit
   # allow non root containers to access the GPU
   sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
+  # REBOOT IS REQUIRED
+  # Test with `podman run --rm --gpus all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
 fi
 ########################### Configure services ##########################
 echo "Configuring services..."
