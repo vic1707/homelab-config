@@ -87,6 +87,8 @@ systemctl disable sshd.service
 systemctl stop sshd.service
 ########################## Additionnal Settings #########################
 echo "Configuring additional settings..."
+## Hostname
+hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 ############################## Podman Setup #############################
