@@ -71,6 +71,9 @@ start() {
     --env OPENVPN_CONFIG="$OVPN_CONFIG" \
     --env OPENVPN_USERNAME="$OVPN_USR" \
     --env OPENVPN_PASSWORD="$OVPN_PWD" \
+    `# script used to keep a copy of the .torrent` \
+    --env TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED=true \
+    --env TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME=/config/keep_torrent_file.sh \
     `# wish i could disable these` \
     --privileged \
     --env CREATE_TUN_DEVICE=false \
@@ -88,4 +91,6 @@ requirements() {
   ## Put other setup lines here, like NFS mounts, etc.
   mkdir -p "/mnt/bhulk/$NAME"
   mkdir -p "/mnt/config/$NAME"
+  ## Create a script to keep a copy of the .torrent file
+  cp "$POD_PWD/keep_torrent_file.sh" "/mnt/config/$NAME/keep_torrent_file.sh"
 }
