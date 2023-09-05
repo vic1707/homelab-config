@@ -85,6 +85,10 @@ systemctl start nfs-server.service
 ## disable sshd
 systemctl disable sshd.service
 systemctl stop sshd.service
+########################## Additionnal Settings #########################
+echo "Configuring additional settings..."
+## Disable IPv6
+echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 ############################## Podman Setup #############################
 podman network create shared # used for communication between containers
 ############################### NFS Setup ###############################
