@@ -47,6 +47,7 @@ requirements() {
   echo "Configuring config volume..."
   NFS_OPTIONS="ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
   if ! grep -q "/mnt/jellyfin_medias" /etc/fstab; then
+    mkdir -p /mnt/jellyfin_medias
     echo "Adding config volume to fstab..."
     echo "10.0.0.2:/mnt/Bhulk/Medias /mnt/jellyfin_medias nfs $NFS_OPTIONS 0 0" >> /etc/fstab
     # reload fstab

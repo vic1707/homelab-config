@@ -116,14 +116,17 @@ podman network create shared # used for communication between containers
 NFS_OPTIONS="rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 echo "Configuring config volume..."
 if ! grep -q "/mnt/config" /etc/fstab; then
+  mkdir -p /mnt/config
   echo "Adding config volume to fstab..."
   echo "10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV /mnt/config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 
 echo "Mounting bhulk volume..."
 if ! grep -q "/mnt/bhulk" /etc/fstab; then
+  mkdir -p /mnt/bhulk
   echo "Adding bhulk volume to fstab..."
   echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 # reload fstab
 mount -a
+systemctl daemon-reload
