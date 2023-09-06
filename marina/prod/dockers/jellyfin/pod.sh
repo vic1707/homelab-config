@@ -52,7 +52,7 @@ requirements() {
   echo "Configuring JellyfinMedia volumes..."
   RELOAD_FSTAB=0
   NFS_OPTIONS="ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
-  SHARES=( "Animes" "Movies" "Music" "NSFW" "Shows" )
+  SHARES=( "Animes" "Movies" "Music" "NSFW" "Scans" "Shows" )
   for share in "${SHARES[@]}"; do
     if ! grep -q "/media/$NAME/$share" /etc/fstab; then
       RELOAD_FSTAB=1
