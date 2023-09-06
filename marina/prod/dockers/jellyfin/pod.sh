@@ -26,8 +26,8 @@ start() {
     --network shared \
     --name "$NAME" \
     --env TZ="Europe/Paris" \
-    --volume "/mnt/config/$NAME/":/config \
-    --volume /mnt/jellyfin_medias:/media:ro \
+    --volume "/mnt/config/$NAME":/config \
+    --volume "/media/$NAME":/media:ro \
     --env NVIDIA_VISIBLE_DEVICES=all \
     --gpus all \
     "lscr.io/linuxserver/jellyfin:$VERSION"
@@ -35,24 +35,38 @@ start() {
 }
 
 requirements() {
+  ## Check for sudo privileges
+  if ! sudo -v; then
+    echo "You must have sudo privileges to run this script."
+    exit 1
+  fi
+
   ## Podman network `shared` must exist
   if ! podman network inspect shared &>/dev/null; then
     echo "Podman network 'shared' does not exist. Please create it."
     exit 1
   fi
   ## Put other setup lines here, like NFS mounts, etc.
-  mkdir -p "/mnt/bhulk/$NAME"
   mkdir -p "/mnt/config/$NAME"
 
-  echo "Configuring config volume..."
+  echo "Configuring JellyfinMedia volumes..."
+  RELOAD_FSTAB=0
   NFS_OPTIONS="ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
-  if ! grep -q "/mnt/jellyfin_medias" /etc/fstab; then
-    mkdir -p /mnt/jellyfin_medias
-    echo "Adding config volume to fstab..."
-    echo "10.0.0.2:/mnt/Bhulk/Medias /mnt/jellyfin_medias nfs $NFS_OPTIONS 0 0" >> /etc/fstab
-    # reload fstab
-    echo "Reloading fstab, please enter root password..."
+  SHARES=( "Animes" "Movies" "Music" "NSFW" "Shows" )
+  for share in "${SHARES[@]}"; do
+    if ! grep -q "/media/$NAME/$share" /etc/fstab; then
+      RELOAD_FSTAB=1
+      echo "Adding $share volume to fstab..."
+      sudo mkdir -p "/media/$NAME/$share"
+      echo "10.0.0.2:/mnt/Bhulk/Medias/$share /media/$NAME/$share nfs $NFS_OPTIONS 0 0" | sudo tee -a /etc/fstab
+    fi
+  done
+
+  if [ $RELOAD_FSTAB -eq 1 ]; then
+    echo "Reloading fstab..."
     sudo mount -a
+    sudo systemctl daemon-reload
     return $?
   fi
+  return 0
 }
