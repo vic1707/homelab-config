@@ -30,6 +30,8 @@ source_env() {
   ## 2. OVPN_USR                            ##
   ## 3. OVPN_PWD                            ##
   ## 4. OVPN_CONFIG: RTFM                   ##
+  ## 5. TRANSMISSION_RPC_USERNAME           ##
+  ## 6. TRANSMISSION_RPC_PASSWORD           ##
   ############################################
   if [ -z "$OVPN_PROVIDER" ] || [ "$OVPN_PROVIDER" != "PIA" ] && [ "$OVPN_PROVIDER" != "WINDSCRIBE" ]; then
     echo "
@@ -49,6 +51,14 @@ source_env() {
   fi
   if [ -z "$OVPN_CONFIG" ]; then
     echo "OVPN_CONFIG is not set. Please set it."
+    exit 1
+  fi
+  if [ -z "$TRANSMISSION_RPC_USERNAME" ]; then
+    echo "TRANSMISSION_RPC_USERNAME is not set. Please set it."
+    exit 1
+  fi
+  if [ -z "$TRANSMISSION_RPC_PASSWORD" ]; then
+    echo "TRANSMISSION_RPC_PASSWORD is not set. Please set it."
     exit 1
   fi
 }
@@ -71,6 +81,11 @@ start() {
     --env OPENVPN_CONFIG="$OVPN_CONFIG" \
     --env OPENVPN_USERNAME="$OVPN_USR" \
     --env OPENVPN_PASSWORD="$OVPN_PWD" \
+    `# Built-in auth` \
+    --env TRANSMISSION_RPC_USERNAME="$TRANSMISSION_RPC_USERNAME" \
+    --env TRANSMISSION_RPC_PASSWORD="$TRANSMISSION_RPC_PASSWORD" \
+    --env TRANSMISSION_RPC_AUTHENTICATION_REQUIRED=true \
+    `# Transmission settings` \
     `# script used to keep a copy of the .torrent` \
     --env TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED=true \
     --env TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME=/config/keep_torrent_file.sh \
