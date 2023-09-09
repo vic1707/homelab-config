@@ -135,8 +135,8 @@ show_help() {
 while :; do
   case "$1" in
     -h|--help|-\?) show_help; exit 0 ;;
-    -c|--create) create "$2"; shift ;;
-    -d|--destroy) destroy "$2"; shift ;;
+    -c|--create) create "$2"; exit $? ;;
+    -d|--destroy) destroy "$2"; exit $? ;;
     --) shift; break ;;
     -?*) echo "invalid option: $1" 1>&2; show_help; exit 1 ;;
     *) echo "invalid argument: $1" 1>&2; show_help; exit 1 ;;
