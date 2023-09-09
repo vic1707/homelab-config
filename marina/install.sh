@@ -96,6 +96,7 @@ hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 ############################## Podman Setup #############################
+echo "Configuring podman..."
 podman network create shared # used for communication between containers
 ############################### NFS Setup ###############################
 ######################## Volumes to mount (fstab) #######################
