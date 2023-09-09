@@ -79,9 +79,6 @@ if [ "$MARINA_ENV" = "prod" ]; then
 fi
 ########################### Configure services ##########################
 echo "Configuring services..."
-## Enable and start NFS
-systemctl enable nfs-server.service
-systemctl start nfs-server.service
 ## disable sshd
 systemctl disable sshd.service
 systemctl stop sshd.service
