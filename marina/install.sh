@@ -18,7 +18,10 @@ source_env() {
 DIST=rhel9.0
 ##                                      ##
 ## This script will:                    ##
-## TODO. Install required packages      ##
+## 1. Install required packages         ##
+##  a. podman                           ##
+##  b. nfs client                       ##
+##  opt(prod). NVIDIA driver            ##
 ## 2. Configure NFS volumes             ##
 ##########################################
 
