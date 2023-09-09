@@ -102,6 +102,7 @@ create() {
 
 delete_systemd_service() {
   echo "Removing systemd service for $NAME..."
+  systemctl --user stop "container-$NAME.service"
   systemctl --user disable "container-$NAME.service"
   rm "$HOME/.config/systemd/user/container-$NAME.service"
   systemctl --user daemon-reload
@@ -111,6 +112,7 @@ destroy() {
   pod="$1"
   source_pod_file "$pod"
   source_env
+  delete_systemd_service
   echo "Stopping pod $NAME..."
   podman stop "$NAME"
   echo "Removing pod $NAME..."
