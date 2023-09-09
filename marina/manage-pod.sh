@@ -139,6 +139,6 @@ while :; do
     -d|--destroy) destroy "$2"; shift ;;
     --) shift; break ;;
     -?*) echo "invalid option: $1" 1>&2; show_help; exit 1 ;;
-    *) break ;;
+    *) echo "invalid argument: $1" 1>&2; show_help; exit 1 ;;
   esac
 done
