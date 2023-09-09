@@ -59,6 +59,8 @@ echo "Installing packages..."
 dnf install -y podman nfs-utils
 ############################# NVIDIA Podman #############################
 if [ "$MARINA_ENV" = "prod" ]; then
+  echo "Installing Epel..."
+  dnf install -y epel-release
   echo "Installing NVIDIA Drivers..."
   dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
   dnf update -y # just in case
