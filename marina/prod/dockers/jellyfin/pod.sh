@@ -29,7 +29,7 @@ start() {
     --volume "/mnt/config/$NAME":/config \
     --volume "/media/$NAME":/media:ro \
     --env NVIDIA_VISIBLE_DEVICES=all \
-    --gpus all \
+    --device nvidia.com/gpu=all \
     "lscr.io/linuxserver/jellyfin:$VERSION"
   return $?
 }

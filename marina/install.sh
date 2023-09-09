@@ -15,7 +15,6 @@ source_env() {
 ##                                      ##
 ## This script is meant to be run on    ##
 ## a fresh AlmaLinux:9 installation     ##
-DIST=rhel9.0
 ##                                      ##
 ## This script will:                    ##
 ## 1. Install required packages         ##
@@ -73,14 +72,17 @@ if [ "$MARINA_ENV" = "prod" ]; then
   ## Test with `nvidia-smi`
   # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
   echo "Installing NVIDIA REPO..."
-  dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/$DIST/libnvidia-container.repo"
+  dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
   echo "Installing NVIDIA Container Toolkit..."
   dnf update -y
   dnf install -y nvidia-container-toolkit
+  # configure nvidia-container-runtime
+  nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+  # check success with `nvida-ctk cdi list`
   # allow non root containers to access the GPU
   sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
   # REBOOT IS REQUIRED
-  # Test with `podman run --rm --gpus all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
+  # Test with `podman run --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
 fi
 ########################### Configure services ##########################
 echo "Configuring services..."
