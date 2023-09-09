@@ -136,3 +136,14 @@ fi
 # reload fstab
 mount -a
 systemctl daemon-reload
+
+# Reboot confirmation
+echo "Configuration completed. Do you want to reboot now? (Y/N)"
+read -r choice
+if [ "$choice" = "Y" ] || [ "$choice" = "y" ]; then
+  echo "Rebooting..."
+  sleep 3
+  reboot
+fi
+
+echo "Reboot cancelled. You can manually reboot the system when ready."
