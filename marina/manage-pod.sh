@@ -138,7 +138,7 @@ while :; do
     -c|--create) create "$2"; shift ;;
     -d|--destroy) destroy "$2"; shift ;;
     --) shift; break ;;
-    -?*) printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2 ;;
+    -?*) echo "invalid option: $1" 1>&2; show_help; exit 1 ;;
     *) break ;;
   esac
 done
