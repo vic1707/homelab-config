@@ -67,5 +67,6 @@ requirements() {
     exit 1
   fi
   ## Put other setup lines here, like NFS mounts, etc.
-  mkdir -p "/mnt/config/$NAME"
+  mkdir -p "/mnt/config/$NAME/cfg"
+  mkdir -p "/mnt/config/$NAME/web"
 }
