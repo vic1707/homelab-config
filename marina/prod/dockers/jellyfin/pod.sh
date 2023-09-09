@@ -46,6 +46,22 @@ requirements() {
     echo "Podman network 'shared' does not exist. Please create it."
     exit 1
   fi
+
+  ## NVIDIA container env should be created and configured
+  # if `nvidia-ctk` doesn't exist, err
+  if ! command -v nvidia-ctk &>/dev/null; then
+    echo "NVIDIA Container Toolkit is not installed. Please install it."
+    exit 1
+  fi
+  # if /etc/cdi/nvidia.yaml doesn't exist, try create it
+  if [ ! -f /etc/cdi/nvidia.yaml ]; then
+    echo "NVIDIA Container Toolkit configuration file is not present. Trying to create it..."
+    if ! sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml; then
+      echo "Failed to create NVIDIA Container Toolkit configuration file. Please create it manually."
+      exit 1
+    fi
+  fi
+
   ## Put other setup lines here, like NFS mounts, etc.
   mkdir -p "/mnt/config/$NAME"
 

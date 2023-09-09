@@ -77,7 +77,8 @@ if [ "$MARINA_ENV" = "prod" ]; then
   dnf update -y
   dnf install -y nvidia-container-toolkit
   # configure nvidia-container-runtime
-  nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+  # TODO: find a way to do it here, needs to load the driver first
+  # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
   # check success with `nvida-ctk cdi list`
   # allow non root containers to access the GPU
   sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
