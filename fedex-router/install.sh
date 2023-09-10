@@ -84,6 +84,12 @@ iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 8080 -j DNAT --to-destinati
 iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 4443 -j DNAT --to-destination "$MARINA_PROD_IP:4443"
 iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 4443 -j ACCEPT
 #######################
+### Deny everything ###
+#######################
+iptables -A INPUT -j DROP
+iptables -A FORWARD -j DROP
+iptables -A OUTPUT -j DROP
+#######################
 # Save iptables rules
 /etc/init.d/iptables save
 rc-update add iptables
