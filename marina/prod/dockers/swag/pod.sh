@@ -28,6 +28,7 @@ source_env() {
   ####### Check for required variables #######
   ## 1. SWAG_DOMAIN                         ##
   ## 2. SWAG_EMAIL                          ##
+  ## 3. SUBDOMAINS                          ##
   ############################################
   if [ -z "$SWAG_DOMAIN" ]; then
     echo "SWAG_DOMAIN is not set. Please set it."
@@ -35,6 +36,10 @@ source_env() {
   fi
   if [ -z "$SWAG_EMAIL" ]; then
     echo "SWAG_EMAIL is not set. Please set it."
+    exit 1
+  fi
+  if [ -z "$SUBDOMAINS" ]; then
+    echo "SUBDOMAINS is not set. Please set it."
     exit 1
   fi
 }
@@ -49,12 +54,12 @@ start() {
     --volume "/mnt/config/$NAME/web":/config/www \
     --env TZ="Europe/Paris" \
     --env URL="$SWAG_DOMAIN" \
-    --env VALIDATION="dns" \
-    --env DNSPLUGIN="cloudflare" \
+    --env VALIDATION="http" \
     --env EMAIL="$SWAG_EMAIL" \
     --env CERTPROVIDER="zerossl" \
-    --env SUBDOMAINS="wildcard" \
+    --env SUBDOMAINS="$SUBDOMAINS" \
     --env DOCKER_MODS="linuxserver/mods:swag-auto-reload|linuxserver/mods:swag-dashboard" \
+    --publish 8080:80 \
     --publish 4443:443 \
     "lscr.io/linuxserver/swag:$VERSION"
   return $?
