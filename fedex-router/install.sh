@@ -29,7 +29,6 @@ MARINA_PROD_IP=10.0.0.3
 #
 # MARINA_RANDOM_MAC=00:00:00:00:00:00
 # MARINA_RANDOM_IP=10.0.0.5
-##############################
 ###################################
 
 # Install packages
