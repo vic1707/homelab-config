@@ -50,13 +50,13 @@ if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "st
   exit 1
 fi
 
-############################# Update System #############################
+################################ Update System ################################
 echo "Updating repositories and installing packages..."
 dnf update -y
 dnf upgrade -y
 echo "Installing packages..."
 dnf install -y podman nfs-utils
-############################# NVIDIA Podman #############################
+################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
   echo "Installing Epel..."
   dnf install -y epel-release
@@ -85,46 +85,46 @@ if [ "$MARINA_ENV" = "prod" ]; then
   # REBOOT IS REQUIRED
   # Test with `podman run --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
 fi
-########################### Configure services ##########################
+############################## Configure services #############################
 echo "Configuring services..."
 ## disable sshd
 systemctl disable sshd.service
 systemctl stop sshd.service
-########################## Additionnal Settings #########################
+############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
 ## Hostname
 hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
-############################## Podman Setup #############################
+################################# Podman Setup ################################
 echo "Configuring podman..."
 podman network create shared # used for communication between containers
-############################### NFS Setup ###############################
-######################## Volumes to mount (fstab) #######################
-# Only add lines to fstab if they don't already exist                   #
-# Options are set explicitly and exhaustively (no `defaults`)           #
-# to respect the principle of least privilege,                          #
-# we will use the following options:                                    #
-# - `rw`: read-write                                                    #
-# - `acl`: enable access control lists                                  #
-# - `hard`: fail after 3 retries                                        #
-# - `noatime`: don't update access time                                 #
-# - `nodev`: don't allow device files to be created                     #
-# - `nodiratime`: don't update directory access time                    #
-# - `noexec`: don't allow execution of binaries on the mounted volume   #
-# - `nosuid`: don't allow set-user-identifier or set-group-identifier   #
-# - `vers=4`: use NFSv4                                                 #
-# - `minorversion=1`: use NFSv4.1                                       #
-#########################################################################
-## 1. /mnt/config => 10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV   ##
-## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV       ##
-#########################################################################
+################################## NFS Setup ##################################
+########################### Volumes to mount (fstab) ##########################
+# Only add lines to fstab if they don't already exist                         #
+# Options are set explicitly and exhaustively (no `defaults`)                 #
+# to respect the principle of least privilege,                                #
+# we will use the following options:                                          #
+# - `rw`: read-write                                                          #
+# - `acl`: enable access control lists                                        #
+# - `hard`: fail after 3 retries                                              #
+# - `noatime`: don't update access time                                       #
+# - `nodev`: don't allow device files to be created                           #
+# - `nodiratime`: don't update directory access time                          #
+# - `noexec`: don't allow execution of binaries on the mounted volume         #
+# - `nosuid`: don't allow set-user-identifier or set-group-identifier         #
+# - `vers=4`: use NFSv4                                                       #
+# - `minorversion=1`: use NFSv4.1                                             #
+###############################################################################
+## 1. /mnt/remote-config => 10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV  ##
+## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV             ##
+###############################################################################
 NFS_OPTIONS="rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 echo "Configuring config volume..."
-if ! grep -q "/mnt/config" /etc/fstab; then
-  mkdir -p /mnt/config
+if ! grep -q "/mnt/remote-config" /etc/fstab; then
+  mkdir -p /mnt/remote-config
   echo "Adding config volume to fstab..."
-  echo "10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV /mnt/config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+  echo "10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 
 echo "Mounting bhulk volume..."
@@ -136,6 +136,16 @@ fi
 # reload fstab
 mount -a
 systemctl daemon-reload
+
+# Setup sync between config volume and local config in real time
+echo "Setting up config sync using rsync..."
+mkdir -p /mnt/config
+# sync existing files from remote-config to config
+rsync -av --delete /mnt/remote-config/ /mnt/config
+# sync new files from remote-config to config on regular intervals
+echo "*/5 * * * * rsync -av --delete /mnt/config/ /mnt/remote-config" >> /etc/crontab
+# the above command will run every 5 minutes
+systemctl restart crond.service
 
 # Reboot confirmation
 echo "Configuration completed. Do you want to reboot now? (Y/N)"
