@@ -72,7 +72,7 @@ start() {
     --volume "/mnt/config/$NAME/":/config \
     --sysctl net.ipv6.conf.all.disable_ipv6=0 \
     --env TZ="Europe/Paris" \
-    --env ENABLE_UFW=true \
+    `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
     --env WEBPROXY_ENABLED=false \
     --env TRANSMISSION_WEB_UI=flood-for-transmission \
     `# allows restart on VPN failure` \
