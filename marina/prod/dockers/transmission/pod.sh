@@ -74,6 +74,7 @@ start() {
     --env TZ="Europe/Paris" \
     `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
     --env WEBPROXY_ENABLED=false \
+    --env GLOBAL_APPLY_PERMISSIONS=false `# since download path is on NFS` \
     --env TRANSMISSION_WEB_UI=flood-for-transmission \
     `# allows restart on VPN failure` \
     --env OPENVPN_OPTS="--inactive 3600 --ping 10 --ping-exit 60" \
