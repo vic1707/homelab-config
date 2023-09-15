@@ -58,17 +58,19 @@ echo "Installing packages..."
 dnf install -y podman nfs-utils rsync
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
+  echo "Blacklisting nouveau..."
+  echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
+  echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
+  ######
   echo "Installing Epel..."
   dnf install -y epel-release
   echo "Installing NVIDIA Drivers..."
   dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
   dnf update -y # just in case
   dnf module install -y nvidia-driver
-  echo "Disabling nouveau..."
-  echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
-  echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
-  sudo dracut --regenerate-all --force
-  sudo depmod -a
+  # regenerate initramfs
+  dracut --regenerate-all --force
+  depmod -a
   ## Test with `nvidia-smi`
   # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
   echo "Installing NVIDIA REPO..."
