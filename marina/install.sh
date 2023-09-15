@@ -55,7 +55,7 @@ echo "Updating repositories and installing packages..."
 dnf update -y
 dnf upgrade -y
 echo "Installing packages..."
-dnf install -y podman nfs-utils
+dnf install -y podman nfs-utils rsync
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
   echo "Installing Epel..."
