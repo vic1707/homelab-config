@@ -86,9 +86,10 @@ iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 4443 -j ACCEPT
 #######################
 ### Deny everything ###
 #######################
-iptables -A INPUT -j DROP
-iptables -A FORWARD -j DROP
-iptables -A OUTPUT -j DROP
+# disabled for now because too restrictive
+# iptables -A INPUT -j DROP
+# iptables -A FORWARD -j DROP
+# iptables -A OUTPUT -j DROP
 #######################
 # Save iptables rules
 /etc/init.d/iptables save
