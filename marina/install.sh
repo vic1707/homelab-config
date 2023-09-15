@@ -64,10 +64,14 @@ if [ "$MARINA_ENV" = "prod" ]; then
   ######
   echo "Installing Epel..."
   dnf install -y epel-release
+  dnf update -y
+  dnf upgrade -y
   echo "Installing NVIDIA Drivers..."
-  dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
-  dnf update -y # just in case
-  dnf module install -y nvidia-driver
+  dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$(uname -i)/cuda-rhel9.repo
+  ## possible dependencies
+  dnf install kernel-headers-$(uname -r) kernel-devel-$(uname -r) tar bzip2 make automake gcc gcc-c++ pciutils elfutils-libelf-devel libglvnd-opengl libglvnd-glx libglvnd-devel acpid pkgconfig dkms
+  ## driver itself
+  dnf module install -y nvidia-driver:latest-dkms
   # regenerate initramfs
   dracut --regenerate-all --force
   depmod -a
