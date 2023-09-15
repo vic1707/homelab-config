@@ -149,11 +149,13 @@ echo "*/5 * * * * rsync -av --delete /mnt/config/ /mnt/remote-config" >> /etc/cr
 systemctl restart crond.service
 
 ## Important reminder
-echo "
-  IMPORTANT: do not forget to run
-  \`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml\`
-  after rebooting the system.
-"
+if [ "$MARINA_ENV" = "prod" ]; then
+  echo "
+    IMPORTANT: do not forget to run
+    \`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml\`
+    after rebooting the system.
+  "
+fi
 
 # Reboot confirmation
 echo "Configuration completed. Do you want to reboot now? (Y/N)"
