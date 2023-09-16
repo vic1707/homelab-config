@@ -159,9 +159,9 @@ runuser -u "$SUDO_USER" -- rsync -av --no-o --no-g --delete /mnt/remote-config/ 
 # sync new files from remote-config to config on regular intervals and keep a logfile
 echo "*/5 * * * * $SUDO_USER \
   temp_log_file=\"/tmp/rsync_log_\$(date +\%Y\%m\%d\%H\%M\%S).log\"; \
-  mv /mnt/config/rsync.log \$temp_log_file; \
+  mv /mnt/remote-config/rsync.log \$temp_log_file; \
   rsync -av --no-o --no-g --delete --log-file=\$temp_log_file /mnt/config/ /mnt/remote-config; \
-  mv \$temp_log_file /mnt/config/rsync.log" >> /etc/crontab
+  mv \$temp_log_file /mnt/remote-config/rsync.log" >> /etc/crontab
 # the above command will run every 5 minutes
 systemctl restart crond.service
 
