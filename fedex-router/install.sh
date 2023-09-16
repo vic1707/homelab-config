@@ -9,14 +9,19 @@
 ################
 
 ############ Variables ############
-ROUTER_PRIVATE_MASK=255.255.255.240 # 28-bit netmask
-ROUTER_PRIVATE_IP=10.0.0.1
+### WAN ###
+WAN_INTERFACE=eth0
+# WAN_IP=$(ip addr show $WAN_INTERFACE | awk '/inet / {split($2, a, "/"); print a[1]}')
+WAN_NETWORK="$(ip route | awk '/'"$WAN_INTERFACE"'/ && !/default/ {print $1}')"
+### LAN ###
+LAN_INTERFACE=eth1
+LAN_MASK=255.255.255.240 # 28-bit netmask
+LAN_IP=10.0.0.1
+### DHCP ###
 DHCP_LEASE_TIME=12h
 DHCP_LEASE_START=10.0.0.6
 DHCP_LEASE_END=10.0.0.14
 DNS_SERVERS=1.1.1.1,8.8.8.8
-# ETH0_ADDR=$(ip addr show dev eth0 | grep "inet " | awk '{print $2}')
-ETH0_NETWORK="$(ip route | awk '/eth0/ && !/default/ {print $1}')"
 ####### Static clients #######
 BHULK_MAC=F6:3A:7B:43:B8:2C
 BHULK_IP=10.0.0.2
@@ -38,18 +43,18 @@ apk upgrade
 apk add --no-cache dnsmasq iptables bottom
 
 # Configure eth1
-echo "Configuring eth1 interface..."
+echo "Configuring $LAN_INTERFACE interface..."
 cat << EOF > /etc/network/interfaces
 auto lo
 iface lo inet loopback
 
-auto eth0
-iface eth0 inet dhcp
+auto $WAN_INTERFACE
+iface $WAN_INTERFACE inet dhcp
 
-auto eth1
-iface eth1 inet static
-  address $ROUTER_PRIVATE_IP
-  netmask $ROUTER_PRIVATE_MASK
+auto $LAN_INTERFACE
+iface $LAN_INTERFACE inet static
+  address $LAN_IP
+  netmask $LAN_MASK
 EOF
 
 # Enable IP forwarding
@@ -73,17 +78,17 @@ echo "Configuring iptables..."
 ## Cleanup
 iptables-save | awk '/^[*]/ { print substr($1, 2) }' | xargs -I {} sh -c 'iptables -t {} -F && iptables -t {} -X'
 ## Default policies
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-iptables -A FORWARD -i eth1 -d "$ETH0_NETWORK" -j REJECT
-iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE
+iptables -A FORWARD -i $LAN_INTERFACE -d "$WAN_NETWORK" -j REJECT
+iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 ### Port forwarding ###
 # Router:8080 -> Maria_Prod:8080 (check marina/prod/dockers/swag/pod.sh)
-iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 8080 -j DNAT --to-destination "$MARINA_PROD_IP":8080
-iptables -A FORWARD -i eth1 -o eth0 -p tcp --dport 8080 -j ACCEPT
+iptables -t nat -A PREROUTING -i $LAN_INTERFACE -p tcp --dport 8080 -j DNAT --to-destination $MARINA_PROD_IP:8080
+iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -p tcp --dport 8080 -j ACCEPT
 # Router:4443 -> Maria_Prod:4443 (check marina/prod/dockers/swag/pod.sh)
-iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 4443 -j DNAT --to-destination "$MARINA_PROD_IP":4443
-iptables -A FORWARD -i eth1 -o eth0 -p tcp --dport 4443 -j ACCEPT
+iptables -t nat -A PREROUTING -i $LAN_INTERFACE -p tcp --dport 4443 -j DNAT --to-destination $MARINA_PROD_IP:4443
+iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -p tcp --dport 4443 -j ACCEPT
 #######################
 ### Deny everything ###
 #######################
@@ -100,9 +105,9 @@ rc-service iptables start
 # Configure DHCP
 echo "Configuring DHCP..."
 cat << EOF > /etc/dnsmasq.conf
-interface=eth1
-dhcp-range=$DHCP_LEASE_START,$DHCP_LEASE_END,$ROUTER_PRIVATE_MASK,$DHCP_LEASE_TIME
-dhcp-option=option:router,$ROUTER_PRIVATE_IP
+interface=$LAN_INTERFACE
+dhcp-range=$DHCP_LEASE_START,$DHCP_LEASE_END,$LAN_MASK,$DHCP_LEASE_TIME
+dhcp-option=option:router,$LAN_IP
 dhcp-option=option:dns-server,$DNS_SERVERS
 dhcp-host=$BHULK_MAC,$BHULK_IP
 dhcp-host=$MARINA_PROD_MAC,$MARINA_PROD_IP
