@@ -56,8 +56,10 @@ start() {
     exit 1
   fi
 
+  # TODO: stay updated on rootless SWAG container
   podman run \
     --detach \
+    --privileged \
     --network shared \
     --name "$NAME" \
     --cap-add=NET_ADMIN \
