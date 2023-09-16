@@ -105,7 +105,7 @@ echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 ################################# Podman Setup ################################
 echo "Configuring podman..."
 # else it's created for root user only
-runuser -u "$USER" -- podman network create shared
+runuser -u "$SUDO_USER" -- podman network create shared
 ################################## NFS Setup ##################################
 ########################### Volumes to mount (fstab) ##########################
 # Only add lines to fstab if they don't already exist                         #
@@ -147,7 +147,7 @@ systemctl daemon-reload
 # Setup sync between config volume and local config in real time
 echo "Setting up config sync using rsync..."
 mkdir -p /mnt/config
-chown "$USER":"$USER" /mnt/config
+chown "$SUDO_USER":"$SUDO_USER" /mnt/config
 # sync existing files from remote-config to config
 rsync -av --delete /mnt/remote-config/ /mnt/config
 # sync new files from remote-config to config on regular intervals
