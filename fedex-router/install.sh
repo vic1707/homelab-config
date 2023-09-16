@@ -79,10 +79,11 @@ iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 ### Port forwarding ###
 # Router:8080 -> Maria_Prod:8080 (check marina/prod/dockers/swag/pod.sh)
-iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 8080 -j DNAT --to-destination "$MARINA_PROD_IP:8080"
+iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 8080 -j DNAT --to-destination "$MARINA_PROD_IP":8080
+iptables -A FORWARD -i eth1 -o eth0 -p tcp --dport 8080 -j ACCEPT
 # Router:4443 -> Maria_Prod:4443 (check marina/prod/dockers/swag/pod.sh)
-iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 4443 -j DNAT --to-destination "$MARINA_PROD_IP:4443"
-iptables -A FORWARD -p tcp -d "$MARINA_PROD_IP" --dport 4443 -j ACCEPT
+iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 4443 -j DNAT --to-destination "$MARINA_PROD_IP":4443
+iptables -A FORWARD -i eth1 -o eth0 -p tcp --dport 4443 -j ACCEPT
 #######################
 ### Deny everything ###
 #######################
