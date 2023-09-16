@@ -83,8 +83,8 @@ start() {
     --volume "/mnt/config/$NAME/":/config \
     --sysctl net.ipv6.conf.all.disable_ipv6=0 \
     --env TZ="Europe/Paris" \
-    --env PUID="$(id -u $USERNAME)" \
-    --env PGID="$(id -g $USERNAME)" \
+    --env PUID="$(id -u "$USERNAME")" \
+    --env PGID="$(id -g "$USERNAME")" \
     `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
     --env WEBPROXY_ENABLED=false \
     --env GLOBAL_APPLY_PERMISSIONS=false `# since download path is on NFS` \

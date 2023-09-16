@@ -62,8 +62,8 @@ start() {
     --name "$NAME" \
     --cap-add=NET_ADMIN \
     --volume "/mnt/config/$NAME":/config \
-    --env PUID="$(id -u $USERNAME)" \
-    --env PGID="$(id -g $USERNAME)" \
+    --env PUID="$(id -u "$USERNAME")" \
+    --env PGID="$(id -g "$USERNAME")" \
     --env TZ="Europe/Paris" \
     --env URL="$SWAG_DOMAIN" \
     --env VALIDATION="http" \

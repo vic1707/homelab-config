@@ -37,8 +37,8 @@ start() {
     --network shared \
     --name "$NAME" \
     --env TZ="Europe/Paris" \
-    --env PUID="$(id -u $USERNAME)" \
-    --env PGID="$(id -g $USERNAME)" \
+    --env PUID="$(id -u "$USERNAME")" \
+    --env PGID="$(id -g "$USERNAME")" \
     --volume "/mnt/config/$NAME":/config \
     --volume "/media/$NAME":/media:ro \
     --env NVIDIA_VISIBLE_DEVICES=all \
