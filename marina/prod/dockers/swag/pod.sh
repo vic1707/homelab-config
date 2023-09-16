@@ -61,8 +61,7 @@ start() {
     --network shared \
     --name "$NAME" \
     --cap-add=NET_ADMIN \
-    --volume "/mnt/config/$NAME/cfg":/config \
-    --volume "/mnt/config/$NAME/web":/config/www \
+    --volume "/mnt/config/$NAME":/config \
     --env PUID="$(id -u $USERNAME)" \
     --env PGID="$(id -g $USERNAME)" \
     --env TZ="Europe/Paris" \
@@ -85,6 +84,5 @@ requirements() {
     exit 1
   fi
   ## Put other setup lines here, like NFS mounts, etc.
-  mkdir -p "/mnt/config/$NAME/cfg"
-  mkdir -p "/mnt/config/$NAME/web"
+  mkdir -p "/mnt/config/$NAME"
 }
