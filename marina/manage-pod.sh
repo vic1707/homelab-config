@@ -127,6 +127,12 @@ show_help() {
   "
 }
 
+# check if repo is up to date, if not error and ask to pull
+if git status -uno | grep 'behind'; then
+  echo "Error updating repo. Please pull manually."
+  exit 1
+fi
+
 # argument parsing
 while :; do
   case "$1" in
