@@ -147,6 +147,7 @@ systemctl daemon-reload
 # Setup sync between config volume and local config in real time
 echo "Setting up config sync using rsync..."
 mkdir -p /mnt/config
+chown "$USER":"$USER" /mnt/config
 # sync existing files from remote-config to config
 rsync -av --delete /mnt/remote-config/ /mnt/config
 # sync new files from remote-config to config on regular intervals
