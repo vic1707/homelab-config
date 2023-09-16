@@ -32,6 +32,12 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+# check if repo is up to date, if not error and ask to pull
+if git fetch && git status -uno | grep 'behind'; then
+  echo "Error updating repo. Please pull manually."
+  exit 1
+fi
+
 ### TODO: parse as arg or choice
 # Load environment variables
 # if .env file is not present, exit on failure
