@@ -113,10 +113,6 @@ destroy() {
   source_pod_file "$pod"
   source_env
   delete_systemd_service
-  echo "Stopping pod $NAME..."
-  podman stop "$NAME"
-  echo "Removing pod $NAME..."
-  podman rm "$NAME"
 }
 
 show_help() {
