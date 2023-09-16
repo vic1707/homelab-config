@@ -151,7 +151,7 @@ chown "$SUDO_USER":"$SUDO_USER" /mnt/config
 # sync existing files from remote-config to config
 runuser -u "$SUDO_USER" -- rsync -av --delete /mnt/remote-config/ /mnt/config
 # sync new files from remote-config to config on regular intervals
-echo "*/5 * * * * runuser -u $SUDO_USER -- rsync -av --delete /mnt/config/ /mnt/remote-config" >> /etc/crontab
+echo "*/5 * * * * $SUDO_USER rsync -av --delete /mnt/config/ /mnt/remote-config" >> /etc/crontab
 # the above command will run every 5 minutes
 systemctl restart crond.service
 
