@@ -20,12 +20,25 @@ source_env() {
 }
 
 start() {
+  # UID is user id of the current user (shouldn't be root)
+  # GID is group id of the current user (shouldn't be root)
+  if [ -n "$USER" ]; then
+    USERNAME="$USER"
+  elif [ -n "$SUDO_USER" ]; then
+    USERNAME="$SUDO_USER"
+  else
+    echo "Could not determine current username. Please set PUID and PGID manually."
+    exit 1
+  fi
+
   podman run \
     --privileged \
     --detach \
     --network shared \
     --name "$NAME" \
     --env TZ="Europe/Paris" \
+    --env PUID="$(id -u $USERNAME)" \
+    --env PGID="$(id -g $USERNAME)" \
     --volume "/mnt/config/$NAME":/config \
     --volume "/media/$NAME":/media:ro \
     --env NVIDIA_VISIBLE_DEVICES=all \

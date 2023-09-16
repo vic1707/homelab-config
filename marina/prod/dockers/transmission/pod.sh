@@ -64,6 +64,17 @@ source_env() {
 }
 
 start() {
+  # UID is user id of the current user (shouldn't be root)
+  # GID is group id of the current user (shouldn't be root)
+  if [ -n "$USER" ]; then
+    USERNAME="$USER"
+  elif [ -n "$SUDO_USER" ]; then
+    USERNAME="$SUDO_USER"
+  else
+    echo "Could not determine current username. Please set PUID and PGID manually."
+    exit 1
+  fi
+
   podman run \
     --detach \
     --network shared \
@@ -72,6 +83,8 @@ start() {
     --volume "/mnt/config/$NAME/":/config \
     --sysctl net.ipv6.conf.all.disable_ipv6=0 \
     --env TZ="Europe/Paris" \
+    --env PUID="$(id -u $USERNAME)" \
+    --env PGID="$(id -g $USERNAME)" \
     `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
     --env WEBPROXY_ENABLED=false \
     --env GLOBAL_APPLY_PERMISSIONS=false `# since download path is on NFS` \

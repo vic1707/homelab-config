@@ -45,6 +45,17 @@ source_env() {
 }
 
 start() {
+  # UID is user id of the current user (shouldn't be root)
+  # GID is group id of the current user (shouldn't be root)
+  if [ -n "$USER" ]; then
+    USERNAME="$USER"
+  elif [ -n "$SUDO_USER" ]; then
+    USERNAME="$SUDO_USER"
+  else
+    echo "Could not determine current username. Please set PUID and PGID manually."
+    exit 1
+  fi
+
   podman run \
     --detach \
     --network shared \
@@ -52,6 +63,8 @@ start() {
     --cap-add=NET_ADMIN \
     --volume "/mnt/config/$NAME/cfg":/config \
     --volume "/mnt/config/$NAME/web":/config/www \
+    --env PUID="$(id -u $USERNAME)" \
+    --env PGID="$(id -g $USERNAME)" \
     --env TZ="Europe/Paris" \
     --env URL="$SWAG_DOMAIN" \
     --env VALIDATION="http" \
