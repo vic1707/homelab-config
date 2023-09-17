@@ -178,6 +178,11 @@ if [ "$MARINA_ENV" = "prod" ]; then
   "
 fi
 
+# sometimes git repo gets owned by root
+# preventing user from pulling
+# this will fix it
+chown -R "$SUDO_USER":"$SUDO_USER" "/home/$SUDO_USER"
+
 # Reboot confirmation
 echo "Configuration completed. Do you want to reboot now? (Y/N)"
 read -r choice
