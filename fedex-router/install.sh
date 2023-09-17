@@ -12,7 +12,7 @@
 ### WAN ###
 WAN_INTERFACE=eth0
 # WAN_IP=$(ip addr show $WAN_INTERFACE | awk '/inet / {split($2, a, "/"); print a[1]}')
-WAN_NETWORK="$(ip route | awk '/'"$WAN_INTERFACE"'/ && !/default/ {print $1}')"
+$ISP_NETWORK="$(ip route | awk '/'"$WAN_INTERFACE"'/ && !/default/ {print $1}')"
 ### LAN ###
 LAN_INTERFACE=eth1
 LAN_MASK=255.255.255.240 # 28-bit netmask
@@ -79,9 +79,9 @@ echo "Configuring iptables..."
 iptables-save | awk '/^[*]/ { print substr($1, 2) }' | xargs -I {} sh -c 'iptables -t {} -F && iptables -t {} -X'
 ## Default policies
 iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE
-iptables -A FORWARD -i $LAN_INTERFACE -d "$WAN_NETWORK" -j REJECT
-iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT
-iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -i $LAN_INTERFACE -d "$ISP_NETWORK" -j REJECT  # prevent LAN from accessing ISP network
+iptables -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT  # allow LAN to access WAN (except ISP network due to previous rule)
+iptables -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT # allow established connections
 ### Port forwarding ###
 # Router:8080 -> Maria_Prod:8080 (check marina/prod/dockers/swag/pod.sh)
 iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 8080 -j DNAT --to $MARINA_PROD_IP:8080
