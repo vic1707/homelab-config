@@ -167,6 +167,10 @@ systemctl restart crond.service
 
 ## Important reminder
 if [ "$MARINA_ENV" = "prod" ]; then
+  firewall-cmd --zone=public --permanent --add-port=8080/tcp
+  firewall-cmd --zone=public --permanent --add-port=4443/tcp
+  firewall-cmd --reload
+
   echo "
     IMPORTANT: do not forget to run
     \`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml\`
