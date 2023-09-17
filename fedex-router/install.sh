@@ -12,7 +12,7 @@
 ### WAN ###
 WAN_INTERFACE=eth0
 # WAN_IP=$(ip addr show $WAN_INTERFACE | awk '/inet / {split($2, a, "/"); print a[1]}')
-$ISP_NETWORK="$(ip route | awk '/'"$WAN_INTERFACE"'/ && !/default/ {print $1}')"
+ISP_NETWORK="$(ip route | awk '/'"$WAN_INTERFACE"'/ && !/default/ {print $1}')"
 ### LAN ###
 LAN_INTERFACE=eth1
 LAN_MASK=255.255.255.240 # 28-bit netmask
