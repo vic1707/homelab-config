@@ -40,7 +40,7 @@ MARINA_PROD_IP=10.0.0.3
 echo "Updating repositories and installing packages..."
 apk update
 apk upgrade
-apk add --no-cache dnsmasq iptables bottom
+apk add --no-cache dnsmasq iptables
 
 # Configure eth1
 echo "Configuring $LAN_INTERFACE interface..."
