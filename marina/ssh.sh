@@ -35,5 +35,5 @@ sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin no/g" /etc/ssh/sshd
 
 systemctl restart sshd
 ########## FWD Configuration ##########
-firewall-cmd --permanent --add-port=$RDM_SSH_PORT/tcp
+firewall-cmd --permanent --add-port="$RDM_SSH_PORT/tcp"
 firewall-cmd --reload
