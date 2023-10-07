@@ -97,11 +97,6 @@ if [ "$MARINA_ENV" = "prod" ]; then
   # REBOOT IS REQUIRED
   # Test with `podman run --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
 fi
-############################## Configure services #############################
-echo "Configuring services..."
-## disable sshd
-systemctl disable sshd.service
-systemctl stop sshd.service
 ############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
 ## Hostname
