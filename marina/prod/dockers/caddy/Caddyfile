@@ -5,6 +5,7 @@
 
 $DOMAIN {
 	root * /usr/share/caddy
+	file_server
 }
 
 jellyfin.$DOMAIN {
