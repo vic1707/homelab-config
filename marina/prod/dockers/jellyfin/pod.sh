@@ -27,7 +27,7 @@ start() {
     --name "$NAME" \
     --publish 8096:8096/tcp \
     --env TZ="Europe/Paris" \
-    --volume "/mnt/config/$NAME":/config:Z,rw \
+    --volume "/mnt/config/$NAME":/config \
     --volume "/media/$NAME":/media:ro \
     --device nvidia.com/gpu=all \
     "docker.io/jellyfin/jellyfin:$VERSION"

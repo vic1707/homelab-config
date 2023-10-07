@@ -71,8 +71,8 @@ start() {
     --network shared \
     --name "$NAME" \
     --publish 9091:9091/tcp \
-    --volume "/mnt/bhulk/$NAME/":/data:Z,rw \
-    --volume "/mnt/config/$NAME/":/config:Z,rw \
+    --volume "/mnt/bhulk/$NAME/":/data \
+    --volume "/mnt/config/$NAME/":/config \
     --sysctl net.ipv6.conf.all.disable_ipv6=0 \
     --env TZ="Europe/Paris" \
     `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
