@@ -72,9 +72,14 @@ __custom_env() {
 
   ####### Check for required variables #######
   ## 1. DOMAIN                              ##
+  ## 2. ZEROSSL_EMAIL                       ##
   ############################################
   if [ -z "$DOMAIN" ]; then
     echo "DOMAIN is not set. Please set it."
+    exit 1
+  fi
+  if [ -z "$ZEROSSL_EMAIL" ]; then
+    echo "ZEROSSL_EMAIL is not set. Please set it."
     exit 1
   fi
 
