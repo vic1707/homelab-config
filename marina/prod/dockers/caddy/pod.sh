@@ -51,7 +51,13 @@ requirements() {
       echo "Failed to load environment variables."
       exit 1
     fi
-    DOMAIN=$DOMAIN envsubst < "$POD_PWD/Caddyfile" > "/mnt/config/$NAME/Caddyfile"
+
+    # reload env vars
+    DOMAIN=$DOMAIN \
+    ZEROSSL_EMAIL=$ZEROSSL_EMAIL\
+    `# substitute env vars in Caddyfile` \
+    envsubst < "$POD_PWD/Caddyfile" > "/mnt/config/$NAME/Caddyfile"
+
   fi
   ## if site dir is empty, copy the index.html
   if [ "$(find "/mnt/config/$NAME/site" -mindepth 1 | wc -l)" -eq 0 ]; then
