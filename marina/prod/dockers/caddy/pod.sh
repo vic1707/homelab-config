@@ -54,9 +54,9 @@ requirements() {
 
     # reload env vars
     DOMAIN=$DOMAIN \
-    ZEROSSL_EMAIL=$ZEROSSL_EMAIL\
-    `# substitute env vars in Caddyfile` \
-    envsubst < "$POD_PWD/Caddyfile" > "/mnt/config/$NAME/Caddyfile"
+      ZEROSSL_EMAIL=$ZEROSSL_EMAIL\
+      `# substitute env vars in Caddyfile` \
+      envsubst < "$POD_PWD/Caddyfile" > "/mnt/config/$NAME/Caddyfile"
 
   fi
   ## if site dir is empty, copy the index.html
