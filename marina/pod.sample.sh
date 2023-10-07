@@ -28,23 +28,19 @@ source_env() {
   ####### Check for required variables #######
   ## 1. ...                                 ##
   ############################################
+  return 0
 }
 
 start() {
   # ...
   podman run \
     --detach \
-    --network shared \
     --name "$NAME" \
     --env TZ="Europe/Paris" \
     "container:$VERSION"
 }
 
 requirements() {
-  ## Podman network `shared` must exist
-  if ! podman network inspect shared &>/dev/null; then
-    echo "Podman network 'shared' does not exist. Please create it."
-    exit 1
-  fi
-  ## Put other setup lines here, like NFS mounts, etc.
+  ## Put setup lines here, like NFS mounts, etc.
+  true;
 }

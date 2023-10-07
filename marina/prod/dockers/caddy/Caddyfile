@@ -1,0 +1,11 @@
+$DOMAIN {
+	root * /usr/share/caddy
+}
+
+jellyfin.$DOMAIN {
+	reverse_proxy jellyfin:8096
+}
+
+transmission.$DOMAIN {
+	reverse_proxy transmission:9091
+}

@@ -95,7 +95,7 @@ if [ "$MARINA_ENV" = "prod" ]; then
   # allow non root containers to access the GPU
   sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
   # REBOOT IS REQUIRED
-  # Test with `podman run --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
+  # Test with `podman run --privileged --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
 fi
 ############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
@@ -103,11 +103,11 @@ echo "Configuring additional settings..."
 hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
-################################# Podman Setup ################################
+#################################### Podman Setup ################################
 echo "Configuring podman..."
 # else it's created for root user only
 runuser -u "$SUDO_USER" -- podman network create shared
-################################## NFS Setup ##################################
+############################### NFS Setup ##################################
 ########################### Volumes to mount (fstab) ##########################
 # Only add lines to fstab if they don't already exist                         #
 # Options are set explicitly and exhaustively (no `defaults`)                 #

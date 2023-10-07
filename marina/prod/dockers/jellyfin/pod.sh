@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 # POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=jellyfin
-VERSION=10.8.10
+VERSION=10.8.11
 # shellcheck disable=SC2034
 RESTART_POLICY=on-failure # no | always | on-success | on-failure | on-abnormal | on-abort | on-watchdog
 ########################
@@ -20,30 +20,17 @@ source_env() {
 }
 
 start() {
-  # UID is user id of the current user (shouldn't be root)
-  # GID is group id of the current user (shouldn't be root)
-  if [ -n "$USER" ]; then
-    USERNAME="$USER"
-  elif [ -n "$SUDO_USER" ]; then
-    USERNAME="$SUDO_USER"
-  else
-    echo "Could not determine current username. Please set PUID and PGID manually."
-    exit 1
-  fi
-
   podman run \
     --privileged \
     --detach \
     --network shared \
     --name "$NAME" \
+    --publish 8096:8096/tcp \
     --env TZ="Europe/Paris" \
-    --env PUID="$(id -u "$USERNAME")" \
-    --env PGID="$(id -g "$USERNAME")" \
-    --volume "/mnt/config/$NAME":/config \
+    --volume "/mnt/config/$NAME":/config:Z,rw \
     --volume "/media/$NAME":/media:ro \
-    --env NVIDIA_VISIBLE_DEVICES=all \
     --device nvidia.com/gpu=all \
-    "lscr.io/linuxserver/jellyfin:$VERSION"
+    "docker.io/jellyfin/jellyfin:$VERSION"
   return $?
 }
 
@@ -51,12 +38,6 @@ requirements() {
   ## Check for sudo privileges
   if ! sudo -v; then
     echo "You must have sudo privileges to run this script."
-    exit 1
-  fi
-
-  ## Podman network `shared` must exist
-  if ! podman network inspect shared &>/dev/null; then
-    echo "Podman network 'shared' does not exist. Please create it."
     exit 1
   fi
 

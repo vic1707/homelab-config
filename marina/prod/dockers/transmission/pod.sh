@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=transmission
-VERSION=5
+VERSION=5.2.0
 # shellcheck disable=SC2034
 RESTART_POLICY="on-failure"
 ########################
@@ -61,30 +61,20 @@ source_env() {
     echo "TRANSMISSION_RPC_PASSWORD is not set. Please set it."
     exit 1
   fi
+
+  return 0
 }
 
 start() {
-  # UID is user id of the current user (shouldn't be root)
-  # GID is group id of the current user (shouldn't be root)
-  if [ -n "$USER" ]; then
-    USERNAME="$USER"
-  elif [ -n "$SUDO_USER" ]; then
-    USERNAME="$SUDO_USER"
-  else
-    echo "Could not determine current username. Please set PUID and PGID manually."
-    exit 1
-  fi
-
   podman run \
     --detach \
     --network shared \
     --name "$NAME" \
-    --volume "/mnt/bhulk/$NAME/":/data \
-    --volume "/mnt/config/$NAME/":/config \
+    --publish 9091:9091/tcp \
+    --volume "/mnt/bhulk/$NAME/":/data:Z,rw \
+    --volume "/mnt/config/$NAME/":/config:Z,rw \
     --sysctl net.ipv6.conf.all.disable_ipv6=0 \
     --env TZ="Europe/Paris" \
-    --env PUID="$(id -u "$USERNAME")" \
-    --env PGID="$(id -g "$USERNAME")" \
     `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
     --env WEBPROXY_ENABLED=false \
     --env GLOBAL_APPLY_PERMISSIONS=false `# since download path is on NFS` \
@@ -112,12 +102,7 @@ start() {
 }
 
 requirements() {
-  ## Podman network `shared` must exist
-  if ! podman network inspect shared &>/dev/null; then
-    echo "Podman network 'shared' does not exist. Please create it."
-    exit 1
-  fi
-  ## Put other setup lines here, like NFS mounts, etc.
+  ## Put setup lines here, like NFS mounts, etc.
   mkdir -p "/mnt/bhulk/$NAME"
   mkdir -p "/mnt/config/$NAME"
   ## Create a script to keep a copy of the .torrent file
