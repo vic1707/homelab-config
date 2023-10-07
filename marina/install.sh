@@ -103,11 +103,11 @@ echo "Configuring additional settings..."
 hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
-#################################### Podman Setup ################################
+################################# Podman Setup ################################
 echo "Configuring podman..."
 # else it's created for root user only
 runuser -u "$SUDO_USER" -- podman network create shared
-############################### NFS Setup ##################################
+################################## NFS Setup ##################################
 ########################### Volumes to mount (fstab) ##########################
 # Only add lines to fstab if they don't already exist                         #
 # Options are set explicitly and exhaustively (no `defaults`)                 #
