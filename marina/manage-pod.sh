@@ -73,9 +73,9 @@ create_systemd_service() {
     --name "$NAME" \
     --restart-policy "$RESTART_POLICY" \
     > "$HOME/.config/systemd/user/container-$NAME.service"
-  systemctl --user enable "container-$NAME.service"
-  systemctl --user start "container-$NAME.service"
-  systemctl --user daemon-reload
+  systemctl enable "container-$NAME.service"
+  systemctl start "container-$NAME.service"
+  systemctl daemon-reload
 }
 
 create() {
@@ -102,10 +102,10 @@ create() {
 
 delete_systemd_service() {
   echo "Removing systemd service for $NAME..."
-  systemctl --user stop "container-$NAME.service"
-  systemctl --user disable "container-$NAME.service"
+  systemctl stop "container-$NAME.service"
+  systemctl disable "container-$NAME.service"
   rm "$HOME/.config/systemd/user/container-$NAME.service"
-  systemctl --user daemon-reload
+  systemctl daemon-reload
 }
 
 destroy() {
