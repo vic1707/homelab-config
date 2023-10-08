@@ -156,7 +156,7 @@ chown -R "$SUDO_USER":"$SUDO_USER" /mnt/config
 echo "*/5 * * * * root \
   bash -c 'temp_log_file=\"/root/rsync_log_\$(date +\%Y\%m\%d\%H\%M\%S).log\"; \
   mv /mnt/remote-config/rsync.log \"\$temp_log_file\"; \
-  rsync -av --no-group --no-owner --delete --log-file=\"\$temp_log_file\" /mnt/config/ /mnt/remote-config; \
+  rsync -aq --no-group --no-owner --delete --log-file=\"\$temp_log_file\" /mnt/config/ /mnt/remote-config; \
   mv \$temp_log_file /mnt/remote-config/rsync.log'" >> /etc/crontab
 # the above command will run every 5 minutes
 systemctl restart crond.service
