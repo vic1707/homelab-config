@@ -73,11 +73,14 @@ create_systemd_service() {
     --name "$NAME" \
     --restart-policy "$RESTART_POLICY" \
     > "$HOME/.config/systemd/user/container-$NAME.service"
-  systemctl enable "container-$NAME.service"
-  systemctl daemon-reload
+  systemctl --user enable "container-$NAME.service"
+  systemctl --user daemon-reload
 }
 
 create() {
+  echo "Ensuring lingering mode is enabled..."
+  loginctl enable-linger "$USER"
+
   pod="$1"
   source_pod_file "$pod"
   source_env || {
@@ -101,10 +104,10 @@ create() {
 
 delete_systemd_service() {
   echo "Removing systemd service for $NAME..."
-  systemctl stop "container-$NAME.service"
-  systemctl disable "container-$NAME.service"
+  systemctl --user stop "container-$NAME.service"
+  systemctl --user disable "container-$NAME.service"
   rm "$HOME/.config/systemd/user/container-$NAME.service"
-  systemctl daemon-reload
+  systemctl --user daemon-reload
 }
 
 destroy() {
