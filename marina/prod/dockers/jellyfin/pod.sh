@@ -27,6 +27,8 @@ start() {
     --name "$NAME" \
     --publish 8096:8096/tcp \
     --env TZ="Europe/Paris" \
+    --env JELLYFIN_FFmpeg__probesize=5000000000 \
+    --env JELLYFIN_FFmpeg__analyzeduration=5000000000 \
     --volume "/mnt/config/$NAME":/config \
     --volume "/media/$NAME":/media:ro \
     --device nvidia.com/gpu=all \
