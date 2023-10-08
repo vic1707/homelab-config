@@ -60,6 +60,10 @@ fi
 echo "Updating repositories and installing packages..."
 dnf update -y
 dnf upgrade -y
+echo "Installing Epel..."
+dnf install -y epel-release
+dnf update -y
+dnf upgrade -y
 echo "Installing packages..."
 dnf install -y podman nfs-utils rsync htop
 ################################ NVIDIA Podman ################################
@@ -68,10 +72,6 @@ if [ "$MARINA_ENV" = "prod" ]; then
   echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
   echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
   ######
-  echo "Installing Epel..."
-  dnf install -y epel-release
-  dnf update -y
-  dnf upgrade -y
   echo "Installing NVIDIA Drivers..."
   dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$(uname -i)/cuda-rhel9.repo"
   ## possible dependencies
