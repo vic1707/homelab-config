@@ -74,7 +74,6 @@ create_systemd_service() {
     --restart-policy "$RESTART_POLICY" \
     > "$HOME/.config/systemd/user/container-$NAME.service"
   systemctl enable "container-$NAME.service"
-  systemctl start "container-$NAME.service"
   systemctl daemon-reload
 }
 
