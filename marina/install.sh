@@ -61,7 +61,7 @@ echo "Updating repositories and installing packages..."
 dnf update -y
 dnf upgrade -y
 echo "Installing packages..."
-dnf install -y podman nfs-utils rsync
+dnf install -y podman nfs-utils rsync htop
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
   echo "Blacklisting nouveau..."
