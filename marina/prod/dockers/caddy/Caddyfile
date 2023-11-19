@@ -9,6 +9,7 @@ $DOMAIN {
 }
 
 jellyfin.$DOMAIN {
+	encode gzip
 	reverse_proxy jellyfin:8096
 }
 
