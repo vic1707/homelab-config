@@ -1,13 +1,13 @@
 #!/bin/sh
 
 source_env() {
-  if [ -f "$1" ]; then
-    . "$1"
-    return $?
-  else
-    echo "File not found: $1"
-    exit 1
-  fi
+    if [ -f "$1" ]; then
+        . "$1"
+        return $?
+    else
+        echo "File not found: $1"
+        exit 1
+    fi
 }
 
 ##########################################
@@ -28,14 +28,14 @@ PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
 
 # Check for root privileges
 if [ "$(id -u)" -ne 0 ]; then
-  echo "This script must be run as root. Please use sudo."
-  exit 1
+    echo "This script must be run as root. Please use sudo."
+    exit 1
 fi
 
 # check if repo is up to date, if not error and ask to pull
 if git fetch && git status -uno | grep 'behind'; then
-  echo "Error updating repo. Please pull manually."
-  exit 1
+    echo "Error updating repo. Please pull manually."
+    exit 1
 fi
 
 ### TODO: parse as arg or choice
@@ -48,12 +48,12 @@ source_env "$PWD/.env" || exit 1
 ## 1. MARINA_ENV: 'prod' | 'staging' | 'random' ##
 ##################################################
 if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "staging" ] && [ "$MARINA_ENV" != "random" ]; then
-  echo "
+    echo "
   MARINA_ENV is not properly set.
   Please set it to 'prod' | 'staging' | 'random'.
   MARINA_ENV: \`$MARINA_ENV\`
-  "
-  exit 1
+    "
+    exit 1
 fi
 
 ################################ Update System ################################
@@ -68,34 +68,34 @@ echo "Installing packages..."
 dnf install -y podman nfs-utils rsync htop
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
-  echo "Blacklisting nouveau..."
-  echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
-  echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
-  ######
-  echo "Installing NVIDIA Drivers..."
-  dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$(uname -i)/cuda-rhel9.repo"
-  ## possible dependencies
-  dnf install -y "kernel-headers-$(uname -r)" "kernel-devel-$(uname -r)" tar bzip2 make automake gcc gcc-c++ pciutils elfutils-libelf-devel libglvnd-opengl libglvnd-glx libglvnd-devel acpid pkgconfig dkms
-  ## driver itself
-  dnf module install -y nvidia-driver:latest-dkms
-  # regenerate initramfs
-  dracut --regenerate-all --force
-  depmod -a
-  ## Test with `nvidia-smi`
-  # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
-  echo "Installing NVIDIA REPO..."
-  dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
-  echo "Installing NVIDIA Container Toolkit..."
-  dnf update -y
-  dnf install -y nvidia-container-toolkit
-  # configure nvidia-container-runtime
-  # TODO: find a way to do it here, needs to load the driver first
-  # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
-  # check success with `nvida-ctk cdi list`
-  # allow non root containers to access the GPU
-  sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
-  # REBOOT IS REQUIRED
-  # Test with `podman run --privileged --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
+    echo "Blacklisting nouveau..."
+    echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
+    echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
+    ######
+    echo "Installing NVIDIA Drivers..."
+    dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$(uname -i)/cuda-rhel9.repo"
+    ## possible dependencies
+    dnf install -y "kernel-headers-$(uname -r)" "kernel-devel-$(uname -r)" tar bzip2 make automake gcc gcc-c++ pciutils elfutils-libelf-devel libglvnd-opengl libglvnd-glx libglvnd-devel acpid pkgconfig dkms
+    ## driver itself
+    dnf module install -y nvidia-driver:latest-dkms
+    # regenerate initramfs
+    dracut --regenerate-all --force
+    depmod -a
+    ## Test with `nvidia-smi`
+    # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
+    echo "Installing NVIDIA REPO..."
+    dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
+    echo "Installing NVIDIA Container Toolkit..."
+    dnf update -y
+    dnf install -y nvidia-container-toolkit
+    # configure nvidia-container-runtime
+    # TODO: find a way to do it here, needs to load the driver first
+    # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+    # check success with `nvida-ctk cdi list`
+    # allow non root containers to access the GPU
+    sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
+    # REBOOT IS REQUIRED
+    # Test with `podman run --privileged --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
 fi
 ############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
@@ -130,16 +130,16 @@ runuser -u "$SUDO_USER" -- podman network create shared
 NFS_OPTIONS="rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 echo "Configuring config volume..."
 if ! grep -q "/mnt/remote-config" /etc/fstab; then
-  mkdir -p /mnt/remote-config
-  echo "Adding config volume to fstab..."
-  echo "10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+    mkdir -p /mnt/remote-config
+    echo "Adding config volume to fstab..."
+    echo "10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 
 echo "Mounting bhulk volume..."
 if ! grep -q "/mnt/bhulk" /etc/fstab; then
-  mkdir -p /mnt/bhulk
-  echo "Adding bhulk volume to fstab..."
-  echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+    mkdir -p /mnt/bhulk
+    echo "Adding bhulk volume to fstab..."
+    echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 # reload fstab
 mount -a
@@ -163,16 +163,16 @@ systemctl restart crond.service
 
 ## Important reminder
 if [ "$MARINA_ENV" = "prod" ]; then
-  firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
-  firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
-  firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
-  firewall-cmd --reload
+    firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
+    firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
+    firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
+    firewall-cmd --reload
 
-  echo "
+    echo "
     IMPORTANT: do not forget to run
     \`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml\`
     after rebooting the system.
-  "
+    "
 fi
 
 # sometimes git repo gets owned by root
@@ -184,9 +184,9 @@ chown -R "$SUDO_USER":"$SUDO_USER" "/home/$SUDO_USER"
 echo "Configuration completed. Do you want to reboot now? (Y/N)"
 read -r choice
 if [ "$choice" = "Y" ] || [ "$choice" = "y" ]; then
-  echo "Rebooting..."
-  sleep 3
-  reboot
+    echo "Rebooting..."
+    sleep 3
+    reboot
 fi
 
 echo "Reboot cancelled. You can manually reboot the system when ready."

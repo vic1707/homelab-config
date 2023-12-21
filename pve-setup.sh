@@ -4,30 +4,30 @@ DISTRIBUTION=$(. /etc/*-release;echo "$VERSION_CODENAME")
 
 echo "- Checking  Sources lists"
 if grep -Fq "deb http://download.proxmox.com/debian/pve" /etc/apt/sources.list; then
-  echo "-- Source looks alredy configured - Skipping"
+    echo "-- Source looks alredy configured - Skipping"
 else
-  echo "-- Adding new entry to sources.list"
-  sed -i "\$adeb http://download.proxmox.com/debian/pve $DISTRIBUTION pve-no-subscription" /etc/apt/sources.list
+    echo "-- Adding new entry to sources.list"
+    sed -i "\$adeb http://download.proxmox.com/debian/pve $DISTRIBUTION pve-no-subscription" /etc/apt/sources.list
 fi
 echo "- Checking Enterprise Source list"
 if grep -Fq "#deb https://enterprise.proxmox.com/debian/pve" "/etc/apt/sources.list.d/pve-enterprise.list"; then
-  echo "-- Entreprise repo looks already commented - Skipping"
+    echo "-- Entreprise repo looks already commented - Skipping"
 else
-  echo "-- Hiding Enterprise sources list"
-  sed -i 's/^/#/' /etc/apt/sources.list.d/pve-enterprise.list
+    echo "-- Hiding Enterprise sources list"
+    sed -i 's/^/#/' /etc/apt/sources.list.d/pve-enterprise.list
 fi
 echo "- Checking Ceph Enterprise Source list"
 # Checking that source list file exist
 if test -f "/etc/apt/sources.list.d/ceph.list"; then
-  # Checking if it source is already commented or not
-  if grep -Fq "#deb https://enterprise.proxmox.com/debian/ceph-quincy" "/etc/apt/sources.list.d/ceph.list"; then
-    # If so do nothing
-    echo "-- Ceph Entreprise repo looks already commented - Skipping"
-  else
-    # else comment it
-    echo "-- Hiding Ceph Enterprise sources list"
-    sed -i 's/^/#/' /etc/apt/sources.list.d/ceph.list
-  fi
+    # Checking if it source is already commented or not
+    if grep -Fq "#deb https://enterprise.proxmox.com/debian/ceph-quincy" "/etc/apt/sources.list.d/ceph.list"; then
+        # If so do nothing
+        echo "-- Ceph Entreprise repo looks already commented - Skipping"
+    else
+        # else comment it
+        echo "-- Hiding Ceph Enterprise sources list"
+        sed -i 's/^/#/' /etc/apt/sources.list.d/ceph.list
+    fi
 fi
 
 ## Update and upgrade ##
