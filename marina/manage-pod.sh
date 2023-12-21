@@ -135,6 +135,9 @@ if git fetch && git status -uno | grep 'behind'; then
   exit 1
 fi
 
+# source global env file
+. "$PWD/.env.global" || exit 1
+
 # argument parsing
 while :; do
   case "$1" in

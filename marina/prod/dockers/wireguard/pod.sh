@@ -38,6 +38,14 @@ source_env() {
     exit 1
   fi
 
+  ######## Check for global variables ########
+  ## 1. FEDEX_IP                            ##
+  ############################################
+  if [ -z "$FEDEX_IP" ]; then
+    echo "FEDEX_IP is not set. Please set it."
+    exit 1
+  fi
+
   return 0
 }
 
@@ -57,6 +65,7 @@ start() {
     --env TZ="Europe/Paris" \
     --env WG_HOST="$WG_HOST" \
     --env PASSWORD="$WG_PASSWORD" \
+    --env WG_DEFAULT_DNS="$FEDEX_IP" \
     --cap-add=NET_ADMIN \
     --cap-add=SYS_MODULE \
     --cap-add=NET_RAW \
