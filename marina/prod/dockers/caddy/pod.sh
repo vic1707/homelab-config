@@ -30,6 +30,7 @@ start() {
     --volume "/mnt/config/$NAME/config":/config:Z,rw \
     --volume "/mnt/config/$NAME/data":/data:Z,rw \
     --volume "/mnt/config/$NAME/site":/usr/share/caddy:Z,ro \
+    --env TZ="Europe/Paris" \
     "docker.io/library/caddy:$VERSION"
   return $?
 }
