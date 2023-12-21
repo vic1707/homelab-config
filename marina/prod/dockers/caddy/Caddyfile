@@ -16,3 +16,7 @@ jellyfin.$DOMAIN {
 transmission.$DOMAIN {
 	reverse_proxy transmission:9091
 }
+
+wg.$DOMAIN {
+	reverse_proxy wireguard:51821
+}
