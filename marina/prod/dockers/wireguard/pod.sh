@@ -26,8 +26,8 @@ source_env() {
   fi
 
   ####### Check for required variables #######
-  ## 1. WG_HOST                              ##
-  ## 2. WG_PASSWORD                          ##
+  ## 1. WG_HOST                             ##
+  ## 2. WG_PASSWORD                         ##
   ############################################
   if [ -z "$WG_HOST" ]; then
     echo "WG_HOST is not set. Please set it."
