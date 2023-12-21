@@ -1,4 +1,5 @@
 {
+    debug # this is optional; makes Caddy log more details
 	acme_ca https://acme.zerossl.com/v2/DV90
 	email   $ZEROSSL_EMAIL
 }
