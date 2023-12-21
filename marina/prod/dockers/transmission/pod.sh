@@ -70,7 +70,6 @@ start() {
     --detach \
     --network shared \
     --name "$NAME" \
-    --publish 9091:9091/tcp \
     --volume "/mnt/bhulk/$NAME/":/data \
     --volume "/mnt/config/$NAME/":/config \
     --sysctl net.ipv6.conf.all.disable_ipv6=0 \

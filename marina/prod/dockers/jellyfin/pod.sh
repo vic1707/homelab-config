@@ -28,7 +28,6 @@ start() {
     --detach \
     --network shared \
     --name "$NAME" \
-    --publish 8096:8096/tcp \
     --env TZ="Europe/Paris" \
     --env JELLYFIN_FFmpeg__probesize=500000000 \
     --env JELLYFIN_FFmpeg__analyzeduration=60000000 \
