@@ -42,6 +42,8 @@ requirements() {
     mkdir -p "/mnt/config/$NAME/site"
     ## if `Caddyfile` doesn't exist in config dir
     ## then copy the sample one
+    ## TODO: do better
+    rm -f "/mnt/config/$NAME/Caddyfile"
     if [ ! -f "/mnt/config/$NAME/Caddyfile" ]; then
         # check if `envsubst` is installed
         if ! command -v envsubst &>/dev/null; then
