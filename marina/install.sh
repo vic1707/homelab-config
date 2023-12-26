@@ -153,7 +153,7 @@ rsync -av --delete /mnt/remote-config/ /mnt/config
 # give permissions back to user
 chown -R "$SUDO_USER":"$SUDO_USER" /mnt/config
 # sync new files from remote-config to config on regular intervals and keep a logfile
-echo "*/5 * * * * root \
+echo "0 5 * * * root \
   bash -c 'temp_log_file=\"/root/rsync_log_\$(date +\%Y\%m\%d\%H\%M\%S).log\"; \
   mv /mnt/remote-config/rsync.log \"\$temp_log_file\"; \
   rsync -aq --no-group --no-owner --delete --log-file=\"\$temp_log_file\" /mnt/config/ /mnt/remote-config; \
