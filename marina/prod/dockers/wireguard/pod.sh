@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=wireguard
-VERSION=8
+VERSION=9
 # shellcheck disable=SC2034
 RESTART_POLICY="on-failure"
 ########################

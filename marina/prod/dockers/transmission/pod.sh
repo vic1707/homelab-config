@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=transmission
-VERSION=5.2.0
+VERSION=5.3.1
 # shellcheck disable=SC2034
 RESTART_POLICY="on-failure"
 ########################
