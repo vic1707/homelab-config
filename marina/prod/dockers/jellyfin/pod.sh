@@ -82,5 +82,30 @@ requirements() {
         sudo systemctl daemon-reload
         return $?
     fi
+
+    ## TODO: fix this, it suddenly stopped working without it
+    # run `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` at boot
+    if [ ! -f /etc/systemd/system/nvidia-ctk.service ]; then
+        echo "NVIDIA Container Toolkit service is not present. Trying to create it..."
+        if ! sudo tee /etc/systemd/system/nvidia-ctk.service <<EOF
+[Unit]
+Description=NVIDIA Container Toolkit
+Documentation=
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        then
+            echo "Failed to create NVIDIA Container Toolkit service. Please create it manually."
+            exit 1
+        fi
+        sudo systemctl daemon-reload
+        sudo systemctl enable nvidia-ctk.service
+    fi
     return 0
 }
