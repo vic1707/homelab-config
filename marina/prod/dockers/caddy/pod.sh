@@ -24,8 +24,8 @@ start() {
         --detach \
         --network shared \
         --name "$NAME" \
-        --publish 8080:80 \
-        --publish 4443:443 \
+        --publish 8080:80/tcp \
+        --publish 4443:443/tcp \
         --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:Z,ro \
         --volume "/mnt/config/$NAME/config":/config:Z,rw \
         --volume "/mnt/config/$NAME/data":/data:Z,rw \
