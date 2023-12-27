@@ -52,6 +52,7 @@ source_env() {
 start() {
     podman run \
         --detach \
+        --privileged \
         --name "$NAME" \
         --network shared \
         `# Wireguard port` \
@@ -74,6 +75,5 @@ start() {
 
 requirements() {
     ## Put setup lines here, like NFS mounts, etc.
-    mkdir -p "/mnt/bhulk/$NAME"
     mkdir -p "/mnt/config/$NAME"
 }
