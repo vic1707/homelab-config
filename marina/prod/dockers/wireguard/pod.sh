@@ -58,7 +58,7 @@ start() {
         --publish 51820:51820/udp \
         `# Wireguard UI port` \
         `# --publish 51821:51821/tcp` \
-        --volume "/mnt/config/$NAME/":/etc/wireguard \
+        --volume "/mnt/config/$NAME/":/etc/wireguard:z \
         --sysctl net.ipv6.conf.all.disable_ipv6=1 \
         --sysctl net.ipv4.conf.all.src_valid_mark=1 \
         --sysctl net.ipv4.ip_forward=1 \
