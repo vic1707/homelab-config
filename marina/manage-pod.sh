@@ -114,6 +114,8 @@ destroy() {
     pod="$1"
     source_pod_file "$pod"
     source_env
+    podman stop "$NAME"
+    podman rm "$NAME"
     delete_systemd_service
 }
 
