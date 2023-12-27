@@ -76,4 +76,8 @@ start() {
 requirements() {
     ## Put setup lines here, like NFS mounts, etc.
     mkdir -p "/mnt/config/$NAME"
+
+    sudo modprobe ip-tables
+    ## equivalent to `sudo modprobe ip-tables` but ensures it's loaded on boot
+    echo "ip-tables" | sudo tee /etc/modules-load.d/ip-tables.conf
 }
