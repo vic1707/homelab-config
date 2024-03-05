@@ -23,7 +23,7 @@ PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
 TORRENT_DIR="/config/transmission-home/torrents"
 
 if [ -f "$TORRENT_DIR/$TR_TORRENT_HASH.torrent" ]; then
-    cp "$TORRENT_DIR/$TR_TORRENT_HASH.torrent" "/data/completed/$TR_TORRENT_NAME.torrent"
+    cp "$TORRENT_DIR/$TR_TORRENT_HASH.torrent" "$TR_TORRENT_DIR/$TR_TORRENT_NAME.torrent"
     __log "$(date +'%Y-%m-%d %H:%M:%S') - Backed up $TR_TORRENT_HASH.torrent as $TR_TORRENT_NAME.torrent"
     exit 0
 fi
