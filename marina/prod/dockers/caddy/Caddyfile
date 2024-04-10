@@ -11,13 +11,13 @@ $DOMAIN {
 
 jellyfin.$DOMAIN {
 	encode gzip
-	reverse_proxy jellyfin:8096
+	reverse_proxy $JELLYFIN_IP:8096
 }
 
 transmission.$DOMAIN {
-	reverse_proxy transmission:9091
+	reverse_proxy $TRANSMISSION_IP:9091
 }
 
 wg.$DOMAIN {
-	reverse_proxy wireguard:51821
+	reverse_proxy $WIREGUARD_IP:51821
 }
