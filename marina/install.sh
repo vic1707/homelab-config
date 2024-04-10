@@ -107,7 +107,7 @@ echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 ################################# Podman Setup ################################
 echo "Configuring podman..."
 # else it's created for root user only
-runuser -u "$SUDO_USER" -- podman network create shared
+runuser -u "$SUDO_USER" -- podman network create --subnet=10.99.0.0/26 shared
 ################################## NFS Setup ##################################
 ########################### Volumes to mount (fstab) ##########################
 # Only add lines to fstab if they don't already exist                         #

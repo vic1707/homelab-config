@@ -46,6 +46,7 @@ start() {
     podman run \
         --detach \
         --network shared \
+        --ip="$CADDY_IP" \
         --name "$NAME" \
         --publish 8080:80/tcp \
         --publish 4443:443/tcp \

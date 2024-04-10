@@ -27,6 +27,7 @@ start() {
         --privileged \
         --detach \
         --network shared \
+        --ip="$JELLYFIN_IP" \
         --name "$NAME" \
         --env TZ="Europe/Paris" \
         --env JELLYFIN_FFmpeg__probesize=500000000 \

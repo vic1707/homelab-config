@@ -70,6 +70,7 @@ start() {
     podman run \
         --detach \
         --network shared \
+        --ip="$TRANSMISSION_IP" \
         --name "$NAME" \
         --volume "/mnt/bhulk/$NAME/":/data:rw \
         --volume "/mnt/config/$NAME/":/config:rw \
