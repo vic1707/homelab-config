@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=caddy
-VERSION=2.7.6
+VERSION=2.8.4
 # shellcheck disable=SC2034
 RESTART_POLICY=on-failure # no | always | on-success | on-failure | on-abnormal | on-abort | on-watchdog
 ########################

@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 # POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=jellyfin
-VERSION=10.8.13
+VERSION=10.9.7
 # shellcheck disable=SC2034
 RESTART_POLICY=on-failure # no | always | on-success | on-failure | on-abnormal | on-abort | on-watchdog
 ########################
