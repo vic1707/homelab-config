@@ -26,10 +26,10 @@ start() {
         --name "$NAME" \
         --publish 8080:80/tcp \
         --publish 4443:443/tcp \
-        --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:Z,ro \
-        --volume "/mnt/config/$NAME/config":/config:Z,rw \
-        --volume "/mnt/config/$NAME/data":/data:Z,rw \
-        --volume "/mnt/config/$NAME/site":/usr/share/caddy:Z,ro \
+        --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:ro \
+        --volume "/mnt/config/$NAME/config":/config:rw \
+        --volume "/mnt/config/$NAME/data":/data:rw \
+        --volume "/mnt/config/$NAME/site":/usr/share/caddy:ro \
         --env TZ="Europe/Paris" \
         "docker.io/library/caddy:$VERSION"
     return $?

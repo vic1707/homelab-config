@@ -31,7 +31,7 @@ start() {
         --env TZ="Europe/Paris" \
         --env JELLYFIN_FFmpeg__probesize=500000000 \
         --env JELLYFIN_FFmpeg__analyzeduration=60000000 \
-        --volume "/mnt/config/$NAME":/config \
+        --volume "/mnt/config/$NAME":/config:rw \
         --volume "/media/$NAME":/media:ro \
         --device nvidia.com/gpu=all \
         "docker.io/jellyfin/jellyfin:$VERSION"

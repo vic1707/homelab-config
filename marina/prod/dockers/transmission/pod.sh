@@ -70,8 +70,8 @@ start() {
         --detach \
         --network shared \
         --name "$NAME" \
-        --volume "/mnt/bhulk/$NAME/":/data \
-        --volume "/mnt/config/$NAME/":/config \
+        --volume "/mnt/bhulk/$NAME/":/data:rw \
+        --volume "/mnt/config/$NAME/":/config:rw \
         --sysctl net.ipv6.conf.all.disable_ipv6=1 \
         --env TZ="Europe/Paris" \
         `# --env ENABLE_UFW=true # doesn't work and would probably prevent GUI` \
