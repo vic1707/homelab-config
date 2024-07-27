@@ -1,0 +1,46 @@
+cron: 0 22 * * *
+
+log:
+    timeformat: 2006-01-02 15:04:05
+    file-logging:
+        dir: data
+        file: gickup.log
+        maxage: 7
+
+destination:
+    local:
+        - path: /data
+          structured: true
+          zip: true
+          keep: 5
+          bare: true
+          lfs: false
+
+source:
+    github:
+        - user: vic1707
+          token_file: /config/token # fine grained token for vic1707
+          excludeorgs:
+              - adeo
+              - Zenika
+              - Zenika-Training
+          wiki: true
+          filter:
+              excludeforks: true
+
+        - user: hsutter
+          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+          include:
+              - cppfront
+
+        - user: zeldaret # Zelda-Reverse-Engineering-Team
+          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+
+        - user: pret # Pokemon-Reverse-Engineering-Team
+          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+
+        - user: Pokabbie
+          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+          include:
+              - pokeemerald-rogue
+              - pokeemerald-rogue-assistant
