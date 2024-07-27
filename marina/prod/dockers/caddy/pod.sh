@@ -9,7 +9,7 @@ fi
 ### STATIC VARIABLES ###
 POD_PWD="$(dirname "${BASH_SOURCE[0]}")"
 NAME=caddy
-VERSION=2.8.4
+VERSION=2.8.4-alpine
 # shellcheck disable=SC2034
 RESTART_POLICY=on-failure # no | always | on-success | on-failure | on-abnormal | on-abort | on-watchdog
 ########################
@@ -27,7 +27,6 @@ start() {
         --publish 8080:80/tcp \
         --publish 4443:443/tcp \
         --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:ro \
-        --volume "/mnt/config/$NAME/config":/config:rw \
         --volume "/mnt/config/$NAME/data":/data:rw \
         --volume "/mnt/config/$NAME/site":/usr/share/caddy:ro \
         --env TZ="Europe/Paris" \
