@@ -36,7 +36,8 @@ x-TIMEZONE: &TIMEZONE Europe/Paris
 x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.16
 x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.2
 ##
-x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
+ # from https://github.com/serfriz/caddy-custom-builds
+x-CADDY: &CADDY docker.io/serfriz/caddy-crowdsec:2.8.4
 x-CADDY_IP: &CADDY_IP 10.99.0.3
 ##
 x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
@@ -47,6 +48,9 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
+##
+x-CROWDSEC: &CROWDSEC docker.io/crowdsecurity/crowdsec:v1.6.2
+x-CROWDSEC_IP: &CROWDSEC_IP 10.99.0.60
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
@@ -60,6 +64,7 @@ x-ips: &container-ips
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    CROWDSEC_IP: *CROWDSEC_IP
     GLUETUN_IP: *GLUETUN_IP
     WIREGUARD_IP: *WIREGUARD_IP
 
@@ -149,9 +154,29 @@ services:
             ##############
             DOMAIN: ${DOMAIN}
             ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
+            CROWDSEC_API_KEY: ${CROWDSEC_API_KEY}
         volumes:
             - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
             - /mnt/config/caddy:/data/caddy:z,rw
+
+    ##############################
+    ######     Crowdsec     ######
+    ##############################
+    # https://github.com/jgwehr/homelab-docker/blob/main/services/security/docker-compose.yml
+    crowdsec:
+        container_name: crowdsec
+        <<: [*common-sysctls, *restart]
+        image: *CROWDSEC
+        networks:
+            shared:
+                ipv4_address: *CROWDSEC_IP
+        environment:
+            <<: *common-env
+            COLLECTIONS: "crowdsecurity/linux crowdsecurity/caddy crowdsecurity/linux-lpe"
+            ##############
+            ##   .env   ##
+            ##############
+            CROWDSEC_API_KEY: ${CROWDSEC_API_KEY}
 
     ##############################
     ######      Gickup      ######

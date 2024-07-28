@@ -166,7 +166,7 @@ for service in "${services[@]}"; do
             echo "Transmission OK."
             ;;
         caddy)
-            check_env_vars DOMAIN ZEROSSL_EMAIL
+            check_env_vars DOMAIN ZEROSSL_EMAIL CROWDSEC_API_KEY
             declare -A files=(
                 ["$PWD/caddy/Caddyfile"]="/mnt/config/caddy"
             )
@@ -186,6 +186,11 @@ for service in "${services[@]}"; do
             )
             copy_files_with_check files
             echo "Authelia OK."
+            ;;
+        crowdsec)
+            check_env_vars CROWDSEC_API_KEY
+            wireguard_setup
+            echo "Crowdsec OK."
             ;;
         gluetun)
             echo "No checks required for $service."

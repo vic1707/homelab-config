@@ -10,6 +10,12 @@
 
 	# set admin port
 	admin :2019
+
+	order crowdsec first
+	crowdsec {
+		api_url http://{$CROWDSEC_IP}:8080
+		api_key {$CROWDSEC_API_KEY}
+	}
 }
 
 # https://www.authelia.com/integration/proxies/caddy/
@@ -24,23 +30,28 @@
 }
 
 {$DOMAIN} {
+	crowdsec
 	redir https://github.com/vic1707
 }
 
 jellyfin.{$DOMAIN} {
+	crowdsec
 	reverse_proxy {$JELLYFIN_IP}:8096
 }
 
 transmission.{$DOMAIN} {
 	import secure *
+	crowdsec
 	reverse_proxy {$TRANSMISSION_IP}:9091
 }
 
 wg-ui.{$DOMAIN} {
 	import secure *
+	crowdsec
 	reverse_proxy {$WIREGUARD_IP}:51821
 }
 
 auth.{$DOMAIN} {
+	crowdsec
 	reverse_proxy {$AUTHELIA_IP}:9091
 }
