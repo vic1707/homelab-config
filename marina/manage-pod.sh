@@ -20,6 +20,7 @@ source_pod_file() {
     fi
     echo "Loading pod informations file..."
     if [ -f "$PWD/$pod/pod.sh" ]; then
+        # shellcheck disable=SC1090
         . "$PWD/$pod/pod.sh" || exit 1
     else
         echo "File not found: $PWD/$pod/pod.sh"
@@ -138,16 +139,37 @@ if git fetch && git status -uno | grep 'behind'; then
 fi
 
 # source global env file
+# shellcheck disable=SC1091
 . "$PWD/.env.global" || exit 1
 
 # argument parsing
 while :; do
     case "$1" in
-        -h|--help|-\?) show_help; exit 0 ;;
-        -c|--create) create "$2"; exit $? ;;
-        -d|--destroy) destroy "$2"; exit $? ;;
-        --) shift; break ;;
-        -?*) echo "invalid option: $1" 1>&2; show_help; exit 1 ;;
-        *) echo "invalid argument: $1" 1>&2; show_help; exit 1 ;;
+        -h | --help | -\?)
+            show_help
+            exit 0
+            ;;
+        -c | --create)
+            create "$2"
+            exit $?
+            ;;
+        -d | --destroy)
+            destroy "$2"
+            exit $?
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -?*)
+            echo "invalid option: $1" 1>&2
+            show_help
+            exit 1
+            ;;
+        *)
+            echo "invalid argument: $1" 1>&2
+            show_help
+            exit 1
+            ;;
     esac
 done

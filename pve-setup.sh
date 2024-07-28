@@ -1,6 +1,10 @@
 #!/bin/sh
 
-DISTRIBUTION=$(. /etc/*-release;echo "$VERSION_CODENAME")
+DISTRIBUTION=$(
+    # shellcheck disable=SC1090
+    . /etc/*-release
+    echo "$VERSION_CODENAME"
+)
 
 echo "- Checking  Sources lists"
 if grep -Fq "deb http://download.proxmox.com/debian/pve" /etc/apt/sources.list; then
@@ -39,7 +43,7 @@ echo "- Installing git and fail2ban"
 apt install git fail2ban -y
 
 ## Configure fail2ban ##
-cat <<EOF > /etc/fail2ban/filter.d/proxmox-virtual-environement.conf
+cat << EOF > /etc/fail2ban/filter.d/proxmox-virtual-environement.conf
 [proxmox]
 enabled = true
 port = https,http,8006
@@ -50,7 +54,7 @@ maxretry = 3
 bantime = 3600
 EOF
 
-cat <<EOF > /etc/fail2ban/jail.d/proxmox-virtual-environement.conf
+cat << EOF > /etc/fail2ban/jail.d/proxmox-virtual-environement.conf
 [Definition]
 failregex = pvedaemon\[.*authentication failure; rhost=<HOST> user=.* msg=.*
 ignoreregex =

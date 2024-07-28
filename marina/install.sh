@@ -2,6 +2,7 @@
 
 source_env() {
     if [ -f "$1" ]; then
+        # shellcheck disable=SC1090
         . "$1"
         return $?
     else
@@ -163,16 +164,17 @@ systemctl restart crond.service
 
 ## Important reminder
 if [ "$MARINA_ENV" = "prod" ]; then
-    firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
-    firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
+    firewall-cmd --zone=public --permanent --add-port=8080/tcp  # caddy
+    firewall-cmd --zone=public --permanent --add-port=4443/tcp  # caddy
     firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
     firewall-cmd --reload
 
-    echo "
+    # shellcheck disable=SC2016
+    echo '
     IMPORTANT: do not forget to run
-    \`nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml\`
+    `nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml`
     after rebooting the system.
-    "
+    '
 fi
 
 # sometimes git repo gets owned by root

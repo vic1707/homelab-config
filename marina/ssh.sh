@@ -7,7 +7,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # ensure firewalld is installed
-dnf update 
+dnf update
 dnf upgrade -y
 dnf install firewalld -y
 

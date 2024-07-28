@@ -19,6 +19,7 @@ source_env() {
     # if .env file is not present, exit on failure
     echo "Loading environment variables from .env file..."
     if [ -f "$POD_PWD/.env" ]; then
+        # shellcheck disable=SC1091
         . "$POD_PWD/.env" || exit 1
     else
         echo "File not found: $POD_PWD/.env"
@@ -48,7 +49,7 @@ start() {
         --name "$NAME" \
         --publish 8080:80/tcp \
         --publish 4443:443/tcp \
-        `# env config`\
+        `# env config` \
         --env DOMAIN="$DOMAIN" \
         --env ZEROSSL_EMAIL="$ZEROSSL_EMAIL" \
         `# don't know why Caddy requires the 'z' flag on volumes` \

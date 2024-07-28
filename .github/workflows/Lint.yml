@@ -8,10 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Beautysh
-        uses: illvart/beautysh-action@latest
-        with: # not in .git and not in ./shell/zsh/.zsh-plugins
-          args: -c -i 4 -s paronly $(find . -not -path "./.git/*" \( -name "*.sh" -o -name "*.bash" -o -name "*.zsh" \))
+      - uses: mfinelli/setup-shfmt@v3.0.1
+      - run: shfmt -f -d -i 4 -s -ci -bn -sr .
+      # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
 
   linters:
     name: Shellcheck
@@ -22,7 +21,5 @@ jobs:
       - name: Run ShellCheck (no ZSH)
         uses: ludeeus/action-shellcheck@master
         env:
-          ## Work locally but not on CI ##
-          # SC1090: Can't follow non-constant source.
-          # SC1091: Not following.
-          SHELLCHECK_OPTS: -e SC1090 -e SC1091
+          # SC2034 is unused vars (triggered on .env files)
+          SHELLCHECK_OPTS: -e SC2034 $(find . -type f -name '*.sh' -o -name '*.bash' -o -name '.env*')

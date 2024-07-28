@@ -79,8 +79,8 @@ echo "Configuring iptables..."
 iptables-save | awk '/^[*]/ { print substr($1, 2) }' | xargs -I {} sh -c 'iptables -t {} -F && iptables -t {} -X'
 ## Default policies
 iptables -t nat -A POSTROUTING -o $WAN_INTERFACE -j MASQUERADE
-iptables -A FORWARD -i $LAN_INTERFACE -d "$ISP_NETWORK" -j REJECT  # prevent LAN from accessing ISP network
-iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT  # allow LAN to access WAN (except ISP network due to previous rule)
+iptables -A FORWARD -i $LAN_INTERFACE -d "$ISP_NETWORK" -j REJECT        # prevent LAN from accessing ISP network
+iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT        # allow LAN to access WAN (except ISP network due to previous rule)
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT # allow established connections
 ### Port forwarding ###
 # Router:8080 -> Maria_Prod:8080 (check marina/prod/dockers/caddy/pod.sh)

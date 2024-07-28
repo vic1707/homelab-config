@@ -19,6 +19,7 @@ source_env() {
     # if .env file is not present, exit on failure
     echo "Loading environment variables from .env file..."
     if [ -f "$POD_PWD/.env" ]; then
+        # shellcheck disable=SC1091
         . "$POD_PWD/.env" || exit 1
     else
         echo "File not found: $POD_PWD/.env"
@@ -42,5 +43,5 @@ start() {
 
 requirements() {
     ## Put setup lines here, like NFS mounts, etc.
-    true;
+    true
 }

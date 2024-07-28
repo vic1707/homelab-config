@@ -16,7 +16,7 @@ RESTART_POLICY=on-failure # no | always | on-success | on-failure | on-abnormal 
 
 source_env() {
     ## Nothing to do here
-    true;
+    true
 }
 
 start() {
@@ -47,7 +47,7 @@ requirements() {
 
     ## NVIDIA container env should be created and configured
     # if `nvidia-ctk` doesn't exist, err
-    if ! command -v nvidia-ctk &>/dev/null; then
+    if ! command -v nvidia-ctk &> /dev/null; then
         echo "NVIDIA Container Toolkit is not installed. Please install it."
         exit 1
     fi
@@ -66,7 +66,7 @@ requirements() {
     echo "Configuring JellyfinMedia volumes..."
     RELOAD_FSTAB=0
     NFS_OPTIONS="ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
-    SHARES=( "Animes" "Movies" "Music" "NSFW" "Scans" "Shows" )
+    SHARES=("Animes" "Movies" "Music" "NSFW" "Scans" "Shows")
     for share in "${SHARES[@]}"; do
         if ! grep -q "/media/$NAME/$share" /etc/fstab; then
             RELOAD_FSTAB=1
@@ -84,10 +84,10 @@ requirements() {
     fi
 
     ## TODO: fix this, it suddenly stopped working without it
-    # run `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` at boot
+    # runs `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` at boot
     if [ ! -f /etc/systemd/system/nvidia-ctk.service ]; then
         echo "NVIDIA Container Toolkit service is not present. Trying to create it..."
-        if ! sudo tee /etc/systemd/system/nvidia-ctk.service <<EOF
+        sudo tee /etc/systemd/system/nvidia-ctk.service << EOF
 [Unit]
 Description=NVIDIA Container Toolkit
 Documentation=
@@ -100,10 +100,13 @@ ExecStart=/usr/bin/nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 [Install]
 WantedBy=multi-user.target
 EOF
-        then
+
+        # shellcheck disable=SC2181
+        if [ $? -ne 0 ]; then
             echo "Failed to create NVIDIA Container Toolkit service. Please create it manually."
             exit 1
         fi
+
         sudo systemctl daemon-reload
         sudo systemctl enable nvidia-ctk.service
     fi
