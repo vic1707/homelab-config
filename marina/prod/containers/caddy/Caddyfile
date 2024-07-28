@@ -10,17 +10,26 @@
 
 	# set admin port
 	admin :2019
+
+	order crowdsec first
+	crowdsec {
+		api_url http://{$CROWDSEC_IP}:8080
+		api_key {$CROWDSEC_API_KEY}
+	}
 }
 
 {$DOMAIN} {
+	crowdsec
 	root * /usr/share/caddy
 	file_server
 }
 
 jellyfin.{$DOMAIN} {
+	crowdsec
 	reverse_proxy {$JELLYFIN_IP}:8096
 }
 
 transmission.{$DOMAIN} {
+	crowdsec
 	reverse_proxy {$TRANSMISSION_IP}:9091
 }

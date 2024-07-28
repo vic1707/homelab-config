@@ -92,7 +92,7 @@ caddy_setup() {
 
     ## Check ENV ##
     local maybe_error_msg
-    maybe_error_msg=$(check_env_vars DOMAIN ZEROSSL_EMAIL)
+    maybe_error_msg=$(check_env_vars DOMAIN ZEROSSL_EMAIL CROWDSEC_API_KEY)
     local ret=$?
     # shellcheck disable=SC2181
     if [ "$ret" -ne 0 ]; then
