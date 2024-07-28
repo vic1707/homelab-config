@@ -53,6 +53,8 @@ start() {
         `# env config` \
         --env DOMAIN="$DOMAIN" \
         --env ZEROSSL_EMAIL="$ZEROSSL_EMAIL" \
+        --env JELLYFIN_IP="$JELLYFIN_IP" \
+        --env TRANSMISSION_IP="$TRANSMISSION_IP" \
         `# don't know why Caddy requires the 'z' flag on volumes` \
         --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:z,ro \
         --volume "/mnt/config/$NAME/data":/data:z,rw \
