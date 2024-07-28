@@ -23,7 +23,7 @@ secrets:
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
-x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
+x-CADDY: &CADDY docker.io/serfriz/caddy-crowdsec:2.8.4 # from https://github.com/serfriz/caddy-custom-builds
 x-CADDY_IP: &CADDY_IP 10.99.0.2
 ##
 x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
@@ -37,12 +37,16 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
+##
+x-CROWDSEC: &CROWDSEC docker.io/crowdsecurity/crowdsec:v1.6.2
+x-CROWDSEC_IP: &CROWDSEC_IP 10.99.0.7
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    CROWDSEC_IP: *CROWDSEC_IP
 
 x-common-settings: &common-settings
     sysctls:
@@ -75,10 +79,29 @@ services:
             ##############
             DOMAIN: ${DOMAIN}
             ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
+            CROWDSEC_API_KEY: ${CROWDSEC_API_KEY}
         volumes:
             - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
             - /mnt/config/caddy/data:/data:z,rw
 
+    ##############################
+    ######     Crowdsec     ######
+    ##############################
+    # https://github.com/jgwehr/homelab-docker/blob/main/services/security/docker-compose.yml
+    crowdsec:
+        container_name: crowdsec
+        <<: [*common-sysctls, *restart]
+        image: *CROWDSEC
+        networks:
+            shared:
+                ipv4_address: *CROWDSEC_IP
+        environment:
+            <<: *common-env
+            COLLECTIONS: "crowdsecurity/linux crowdsecurity/caddy crowdsecurity/linux-lpe timokoessler/uptime-kuma"
+            ##############
+            ##   .env   ##
+            ##############
+            CROWDSEC_API_KEY: ${CROWDSEC_API_KEY}
     ##############################
     ######      Gickup      ######
     ##############################
