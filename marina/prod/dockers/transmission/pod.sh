@@ -98,6 +98,7 @@ start() {
         --privileged \
         --env CREATE_TUN_DEVICE=false \
         --device /dev/net/tun \
+        --env OVERRIDE_DNS_1=1.1.1.1 \
         docker.io/haugene/transmission-openvpn:$VERSION
     return $?
 }
