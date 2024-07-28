@@ -15,60 +15,6 @@ RESTART_POLICY=on-failure # no | always | on-success | on-failure | on-abnormal 
 ########################
 
 source_env() {
-    ## Nothing to do here
-    true;
-}
-
-start() {
-    podman run \
-        --detach \
-        --network shared \
-        --name "$NAME" \
-        --publish 8080:80/tcp \
-        --publish 4443:443/tcp \
-        `# don't know why Caddy requires the 'z' flag on volumes` \
-        --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:z,ro \
-        --volume "/mnt/config/$NAME/data":/data:z,rw \
-        --volume "/mnt/config/$NAME/site":/usr/share/caddy:z,ro \
-        --env TZ="Europe/Paris" \
-        "docker.io/library/caddy:$VERSION"
-    return $?
-}
-
-requirements() {
-    ## Put setup lines here, like NFS mounts, etc.
-    mkdir -p "/mnt/config/$NAME/config"
-    mkdir -p "/mnt/config/$NAME/data"
-    mkdir -p "/mnt/config/$NAME/site"
-    ## if `Caddyfile` doesn't exist in config dir
-    ## then copy the sample one
-    ## TODO: do better
-    rm -f "/mnt/config/$NAME/Caddyfile"
-    if [ ! -f "/mnt/config/$NAME/Caddyfile" ]; then
-        # check if `envsubst` is installed
-        if ! command -v envsubst &>/dev/null; then
-            echo "envsubst is not installed. Please install it."
-            exit 1
-        fi
-        if ! __custom_env; then
-            echo "Failed to load environment variables."
-            exit 1
-        fi
-
-        # reload env vars
-        DOMAIN=$DOMAIN \
-            ZEROSSL_EMAIL=$ZEROSSL_EMAIL\
-            `# substitute env vars in Caddyfile` \
-            envsubst < "$POD_PWD/Caddyfile" > "/mnt/config/$NAME/Caddyfile"
-
-    fi
-    ## if site dir is empty, copy the index.html
-    if [ "$(find "/mnt/config/$NAME/site" -mindepth 1 | wc -l)" -eq 0 ]; then
-        cp "$POD_PWD/index.html" "/mnt/config/$NAME/site/index.html"
-    fi
-}
-
-__custom_env() {
     # Load environment variables
     # if .env file is not present, exit on failure
     echo "Loading environment variables from .env file..."
@@ -93,4 +39,33 @@ __custom_env() {
     fi
 
     return 0
+}
+
+start() {
+    podman run \
+        --detach \
+        --network shared \
+        --name "$NAME" \
+        --publish 8080:80/tcp \
+        --publish 4443:443/tcp \
+        `# env config`\
+        --env DOMAIN="$DOMAIN" \
+        --env ZEROSSL_EMAIL="$ZEROSSL_EMAIL" \
+        `# don't know why Caddy requires the 'z' flag on volumes` \
+        --volume "/mnt/config/$NAME/Caddyfile":/etc/caddy/Caddyfile:z,ro \
+        --volume "/mnt/config/$NAME/data":/data:z,rw \
+        --volume "/mnt/config/$NAME/site":/usr/share/caddy:z,ro \
+        --env TZ="Europe/Paris" \
+        "docker.io/library/caddy:$VERSION"
+    return $?
+}
+
+requirements() {
+    ## Put setup lines here, like NFS mounts, etc.
+    mkdir -p "/mnt/config/$NAME/config"
+    mkdir -p "/mnt/config/$NAME/data"
+    mkdir -p "/mnt/config/$NAME/site"
+    ## override some config files
+    cp "$POD_PWD/Caddyfile" "/mnt/config/$NAME/Caddyfile"
+    cp "$POD_PWD/index.html" "/mnt/config/$NAME/site/index.html"
 }
