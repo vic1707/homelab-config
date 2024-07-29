@@ -28,9 +28,7 @@ Steps done for each backup on proxmox:
 1. run the `install.sh` script
 2. reboot
     #### on prod only
-    3.a. run the `sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` command
-    3.b. check everything is ok with `nvidia-ctk cdi list`
-    3.c. run `podman run --privileged --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi` and check that the output is ok
+    3.a. run `podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi` and check that the output is ok
 
 ---
 

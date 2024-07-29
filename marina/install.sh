@@ -68,34 +68,24 @@ dnf install bottom -y
 dnf upgrade -y
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
-    echo "Blacklisting nouveau..."
-    echo "blacklist nouveau" | sudo tee /etc/modprobe.d/blacklist-nouveau.conf
-    echo 'omit_drivers+=" nouveau "' | sudo tee /etc/dracut.conf.d/blacklist-nouveau.conf
-    ######
-    echo "Installing NVIDIA Drivers..."
-    dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/$(uname -i)/cuda-rhel9.repo"
-    ## possible dependencies
-    dnf install -y "kernel-headers-$(uname -r)" "kernel-devel-$(uname -r)" tar bzip2 make automake gcc gcc-c++ pciutils elfutils-libelf-devel libglvnd-opengl libglvnd-glx libglvnd-devel acpid pkgconfig dkms
-    ## driver itself
-    dnf module install -y nvidia-driver:latest-dkms
-    # regenerate initramfs
-    dracut --regenerate-all --force
-    depmod -a
-    ## Test with `nvidia-smi`
+    echo "Installing NVIDIA Driver..."
+    dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo"
+    dnf module install -y nvidia-driver:latest
     # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
-    echo "Installing NVIDIA REPO..."
-    dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     echo "Installing NVIDIA Container Toolkit..."
-    dnf update -y
+    dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     dnf install -y nvidia-container-toolkit
-    # configure nvidia-container-runtime
-    # TODO: find a way to do it here, needs to load the driver first
-    # nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
-    # check success with `nvida-ctk cdi list`
     # allow non root containers to access the GPU
     sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
-    # REBOOT IS REQUIRED
-    # Test with `podman run --privileged --rm --device nvidia.com/gpu=all docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`
+    # generate config files
+    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+    nvida-ctk cdi list
+    # shellcheck disable=SC2016
+    echo 'don'\''t forget to try with `podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`'
+
+    # might be needed ?
+    # nvidia-container-cli -k list | sudo restorecon -v -f -
+    # sudo restorecon -Rv /dev
 fi
 ############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
@@ -165,13 +155,6 @@ if [ "$MARINA_ENV" = "prod" ]; then
     firewall-cmd --zone=public --permanent --add-port=4443/tcp  # caddy
     firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
     firewall-cmd --reload
-
-    # shellcheck disable=SC2016
-    echo '
-    IMPORTANT: do not forget to run
-    `nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml`
-    after rebooting the system.
-    '
 fi
 
 # sometimes git repo gets owned by root
