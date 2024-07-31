@@ -18,7 +18,6 @@
 }
 
 jellyfin.{$DOMAIN} {
-    encode gzip
     reverse_proxy {$JELLYFIN_IP}:8096
 }
 
