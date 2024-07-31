@@ -59,14 +59,13 @@ fi
 
 ################################ Update System ################################
 echo "Updating repositories and installing packages..."
-dnf update -y
-dnf upgrade -y
 echo "Installing Epel..."
 dnf install -y epel-release
-dnf update -y
+echo "Installing other packages..."
+dnf install -y podman podman-compose nfs-utils rsync
+dnf copr enable atim/bottom
+dnf install bottom -y
 dnf upgrade -y
-echo "Installing packages..."
-dnf install -y podman nfs-utils rsync htop
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
     echo "Blacklisting nouveau..."
@@ -104,10 +103,8 @@ echo "Configuring additional settings..."
 hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
-################################# Podman Setup ################################
-echo "Configuring podman..."
-# else it's created for root user only
-runuser -u "$SUDO_USER" -- podman network create --subnet=10.99.0.0/26 shared
+echo "Enabling auto-restart of containers"
+runuser -u "$SUDO_USER" -- systemctl enable podman-restart.service
 ################################## NFS Setup ##################################
 ########################### Volumes to mount (fstab) ##########################
 # Only add lines to fstab if they don't already exist                         #

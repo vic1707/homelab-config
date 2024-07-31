@@ -1,0 +1,153 @@
+# TODO: fix volumes z options
+# TODO: privileged transmission?
+
+networks:
+    shared:
+        name: shared
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.99.0.0/26
+
+############# GLOBAL VARIABLES ##############
+PREFERRED_DNS: &DNS 1.1.1.1
+##
+CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
+CADDY_IP: &CADDY_IP 10.99.0.1
+##
+GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.30
+GICKUP_IP: &GICKUP_IP 10.99.0.2
+##
+TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
+TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.3
+##
+JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.7
+JELLYFIN_IP: &JELLYFIN_IP 10.99.0.4
+########### GLOBAL CONFIGURATIONS ###########
+x-ips: &container-ips
+    CADDY_IP: *CADDY_IP
+    GICKUP_IP: *GICKUP_IP
+    JELLYFIN_IP: *JELLYFIN_IP
+    TRANSMISSION_IP: *TRANSMISSION_IP
+
+x-common-env: &common-env
+    TZ: Europe/Paris
+
+x-common-sysctls: &common-sysctls
+    sysctls:
+        - net.ipv6.conf.all.disable_ipv6=1
+
+x-restart: &restart
+    restart: always
+#############################################
+
+services:
+    ##############################
+    ######      Caddy       ######
+    ##############################
+    caddy:
+        container_name: caddy
+        <<: *common-sysctls
+        <<: *restart
+        image: *CADDY
+        networks:
+            shared:
+                ipv4_address: *CADDY_IP
+        ports:
+            - 8080:80
+            - 4443:443
+        environment:
+            <<: *common-env
+            <<: *container-ips
+            ##############
+            ##   .env   ##
+            ##############
+            DOMAIN: ${DOMAIN}
+            ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
+        volumes:
+            - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
+            - /mnt/config/caddy/data:/data:z,rw
+            - /mnt/config/caddy/site:/usr/share/caddy:z,ro
+
+    ##############################
+    ######      Gickup      ######
+    ##############################
+    gickup:
+        container_name: gickup
+        <<: *common-sysctls
+        <<: *restart
+        image: *GICKUP
+        networks:
+            shared:
+                ipv4_address: *GICKUP_IP
+        environment:
+            <<: *common-env
+        volumes:
+            - /mnt/bhulk/gickup/:/data:rw
+            - /mnt/config/gickup:/config:z,ro
+        command: /config/conf.yml
+
+    ##############################
+    ######     Jellyfin     ######
+    ##############################
+    jellyfin:
+        container_name: jellyfin
+        <<: *common-sysctls
+        <<: *restart
+        image: *JELLYFIN
+        security_opt:
+            - label=disable
+        networks:
+            shared:
+                ipv4_address: *JELLYFIN_IP
+        environment:
+            <<: *common-env
+            # https://ffmpeg.org/ffmpeg-formats.html
+            # probesize: 500000000 Bytes = 500 MB
+            # analyzeduration: 60000000 Microseconds = 1 minute
+            JELLYFIN_FFmpeg__probesize: 500000000
+            JELLYFIN_FFmpeg__analyzeduration: 60000000
+        volumes:
+            - /mnt/config/jellyfin:/config:rw
+            - /media/jellyfin:/media:ro
+        devices:
+            - nvidia.com/gpu=all
+
+    ##############################
+    ######   Transmission   ######
+    ##############################
+    transmission:
+        container_name: transmission
+        <<: *common-sysctls
+        <<: *restart
+        image: *TRANSMISSION
+        privileged: true #  needed to acces /dev/net/tun
+        networks:
+            shared:
+                ipv4_address: *TRANSMISSION_IP
+        environment:
+            <<: *common-env
+            GLOBAL_APPLY_PERMISSIONS: false
+            OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
+            TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: true
+            TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED: true
+            TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
+            TRANSMISSION_WEB_UI: flood-for-transmission
+            WEBPROXY_ENABLED: false
+            ## Wish I could remove ##
+            CREATE_TUN_DEVICE: false
+            OVERRIDE_DNS_1: *DNS
+            ##############
+            ##   .env   ##
+            ##############
+            OPENVPN_CONFIG: ${OVPN_CONFIG}
+            OPENVPN_PROVIDER: ${OVPN_PROVIDER}
+            OPENVPN_USERNAME: ${OVPN_USR}
+            OPENVPN_PASSWORD: ${OVPN_PWD}
+            TRANSMISSION_RPC_USERNAME: ${TRANSMISSION_RPC_USERNAME}
+            TRANSMISSION_RPC_PASSWORD: ${TRANSMISSION_RPC_PASSWORD}
+        volumes:
+            - /mnt/bhulk/transmission:/data:rw
+            - /mnt/config/transmission:/config:rw
+        devices: # wish I could remove
+            - /dev/net/tun
