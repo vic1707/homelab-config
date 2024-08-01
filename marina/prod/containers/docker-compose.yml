@@ -21,12 +21,16 @@ x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.8
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
+##
+x-UPTIME_KUMA: &UPTIME_KUMA docker.io/louislam/uptime-kuma:1.23.13
+x-UPTIME_KUMA_IP: &UPTIME_KUMA_IP 10.99.0.6
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    UPTIME_KUMA_IP: *UPTIME_KUMA_IP
 
 x-common-env: &common-env
     TZ: Europe/Paris
@@ -143,3 +147,18 @@ services:
             - /mnt/config/transmission:/config:rw
         devices: # wish I could remove
             - /dev/net/tun
+
+    ##############################
+    ######    Uptime Kuma   ######
+    ##############################
+    uptime-kuma:
+        container_name: uptime-kuma
+        <<: [*common-sysctls, *restart]
+        image: *UPTIME_KUMA
+        networks:
+            shared:
+                ipv4_address: *UPTIME_KUMA_IP
+        environment:
+            <<: *common-env
+        volumes:
+            - /mnt/config/uptime-kuma:/app/data:rw

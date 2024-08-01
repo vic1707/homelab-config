@@ -24,3 +24,7 @@ jellyfin.{$DOMAIN} {
 transmission.{$DOMAIN} {
 	reverse_proxy {$TRANSMISSION_IP}:9091
 }
+
+uptime.{$DOMAIN} {
+	reverse_proxy {$UPTIME_KUMA_IP}:3001
+}
