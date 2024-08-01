@@ -48,6 +48,9 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
 ##
+x-NTFY: &NTFY docker.io/binwiederhier/ntfy:v2.11.0
+x-NTFY_IP: &NTFY_IP 10.99.0.7
+##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ##
@@ -60,6 +63,7 @@ x-ips: &container-ips
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    NTFY_IP: *NTFY_IP
     GLUETUN_IP: *GLUETUN_IP
     WIREGUARD_IP: *WIREGUARD_IP
 
@@ -262,3 +266,18 @@ services:
             net.ipv4.conf.all.src_valid_mark: 1
             net.ipv4.ip_forward: 1
             net.ipv6.conf.all.disable_ipv6: 1
+
+    ##############################
+    ######       NTFY       ######
+    ##############################
+    ntfy:
+        container_name: ntfy
+        <<: *common-settings
+        image: *NTFY
+        networks:
+            shared:
+                ipv4_address: *NTFY_IP
+        volumes:
+            - /mnt/bhulk/ntfy:/var/cache/ntfy:rw
+            - /mnt/config/ntfy:/etc/ntfy:rw
+        command: serve

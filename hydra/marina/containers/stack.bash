@@ -165,6 +165,13 @@ for service in "${services[@]}"; do
             copy_files_with_check files
             echo "Transmission OK."
             ;;
+        ntfy)
+            declare -A files=(
+                ["$PWD/ntfy/server.yml"]="/mnt/config/ntfy"
+            )
+            copy_files_with_check files
+            echo "Ntfy OK."
+            ;;
         caddy)
             check_env_vars DOMAIN ZEROSSL_EMAIL
             declare -A files=(

@@ -1,0 +1,28 @@
+base-url: https://ntfy.nasvic.top
+behind-proxy: true
+listen-http: :80
+
+## Auth settings
+auth-file: /etc/ntfy/user.db
+auth-default-access: deny-all
+enable-login: true
+# enable-signup: true
+
+## Local data
+# Attachments
+attachment-cache-dir: /var/cache/ntfy/attachments
+attachment-total-size-limit: 10G
+attachment-file-size-limit: 100M
+attachment-expiry-duration: 7d
+# Cache
+cache-file: /var/cache/ntfy/cache.db
+cache-duration: 7d
+
+## Logging
+log-file: /var/cache/ntfy/ntfy.log
+log-format: json
+log-level: info
+
+## Prometheus metrics
+enable-metrics: true
+metrics-listen-http: :9090
