@@ -15,13 +15,13 @@ x-PREFERRED_DNS: &DNS 1.1.1.1
 x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
 x-CADDY_IP: &CADDY_IP 10.99.0.1
 ##
-x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.30
+x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.31
 x-GICKUP_IP: &GICKUP_IP 10.99.0.2
 ##
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.3
 ##
-x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.7
+x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.8
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.4
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
