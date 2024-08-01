@@ -1,4 +1,3 @@
-# TODO: fix volumes z options
 # TODO: rm privileged transmission?
 # TODO: execution capabilities on transmission config dir instead of just the script
 
@@ -52,6 +51,10 @@ x-common-settings: &common-settings
     restart: always
     environment: &common-env
         TZ: *TIMEZONE
+        # PUID: "${PUID}"
+        # PGID: "${PGID}"
+    user: &user "${PUID}:${PGID}"
+
 #############################################
 
 services:
@@ -76,8 +79,8 @@ services:
             DOMAIN: ${DOMAIN}
             ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
         volumes:
-            - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
-            - /mnt/config/caddy/data:/data:z,rw
+            - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+            - /mnt/config/caddy/data:/data:rw
 
     ##############################
     ######      Gickup      ######
@@ -91,7 +94,7 @@ services:
                 ipv4_address: *GICKUP_IP
         volumes:
             - /mnt/bhulk/gickup:/data:rw
-            - /mnt/config/gickup/conf.yml:/gickup/conf.yml:z,ro
+            - /mnt/config/gickup/conf.yml:/gickup/conf.yml:ro
         secrets:
             - gickup_vic1707_github_token
 
