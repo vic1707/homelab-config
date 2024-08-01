@@ -33,6 +33,9 @@ x-ips: &container-ips
 x-common-env: &common-env
     TZ: Europe/Paris
 
+x-common-dns: &common-dns
+    dns: *DNS
+
 x-common-sysctls: &common-sysctls
     sysctls:
         - net.ipv6.conf.all.disable_ipv6=1
@@ -47,7 +50,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-dns]
         image: *CADDY
         networks:
             shared:
@@ -72,7 +75,7 @@ services:
     ##############################
     gickup:
         container_name: gickup
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-dns]
         image: *GICKUP
         networks:
             shared:
@@ -89,7 +92,7 @@ services:
     ##############################
     jellyfin:
         container_name: jellyfin
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-dns]
         image: *JELLYFIN
         security_opt:
             - label=disable
@@ -114,7 +117,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-dns]
         image: *TRANSMISSION
         privileged: true #  needed to acces /dev/net/tun
         networks:
