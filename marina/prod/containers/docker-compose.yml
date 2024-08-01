@@ -1,4 +1,3 @@
-# TODO: fix volumes z options
 # TODO: privileged transmission?
 
 networks:
@@ -30,6 +29,11 @@ x-ips: &container-ips
 
 x-common-env: &common-env
     TZ: Europe/Paris
+    # PUID: "${PUID}"
+    # PGID: "${PGID}"
+
+x-user: &user
+    user: "${PUID}:${PGID}"
 
 x-common-sysctls: &common-sysctls
     sysctls:
@@ -45,7 +49,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *user]
         image: *CADDY
         networks:
             shared:
@@ -61,16 +65,16 @@ services:
             DOMAIN: ${DOMAIN}
             ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
         volumes:
-            - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
-            - /mnt/config/caddy/data:/data:z,rw
-            - /mnt/config/caddy/site:/usr/share/caddy:z,ro
+            - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+            - /mnt/config/caddy/data:/data:rw
+            - /mnt/config/caddy/site:/usr/share/caddy:ro
 
     ##############################
     ######      Gickup      ######
     ##############################
     gickup:
         container_name: gickup
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *user]
         image: *GICKUP
         networks:
             shared:
@@ -79,7 +83,7 @@ services:
             <<: *common-env
         volumes:
             - /mnt/bhulk/gickup/:/data:rw
-            - /mnt/config/gickup:/config:z,ro
+            - /mnt/config/gickup:/config:ro
         command: /config/conf.yml
 
     ##############################
@@ -87,7 +91,7 @@ services:
     ##############################
     jellyfin:
         container_name: jellyfin
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *user]
         image: *JELLYFIN
         security_opt:
             - label=disable
@@ -112,7 +116,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *user]
         image: *TRANSMISSION
         privileged: true #  needed to acces /dev/net/tun
         networks:

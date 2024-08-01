@@ -139,6 +139,10 @@ sudoer_required
 # shellcheck disable=SC1091
 source .env
 
+# Ensures PUID and GUID are set and !== 0
+[[ -n $PUID && $PUID -ne 0 ]] || exit_on_error "Error: PUID is not set, empty, or is 0."
+[[ -n $PGID && $PGID -ne 0 ]] || exit_on_error "Error: PGID is not set, empty, or is 0."
+
 # Default services if no specific services are provided
 mapfile -t DEFAULT_SERVICES < <(podman run --rm -i docker.io/mikefarah/yq '.services | to_entries | .[] | .key' < docker-compose.yml)
 
