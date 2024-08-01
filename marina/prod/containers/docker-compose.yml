@@ -47,8 +47,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: *common-sysctls
-        <<: *restart
+        <<: [*common-sysctls, *restart]
         image: *CADDY
         networks:
             shared:
@@ -57,8 +56,7 @@ services:
             - 8080:80
             - 4443:443
         environment:
-            <<: *common-env
-            <<: *container-ips
+            <<: [*common-env, *container-ips]
             ##############
             ##   .env   ##
             ##############
@@ -74,8 +72,7 @@ services:
     ##############################
     gickup:
         container_name: gickup
-        <<: *common-sysctls
-        <<: *restart
+        <<: [*common-sysctls, *restart]
         image: *GICKUP
         networks:
             shared:
@@ -92,8 +89,7 @@ services:
     ##############################
     jellyfin:
         container_name: jellyfin
-        <<: *common-sysctls
-        <<: *restart
+        <<: [*common-sysctls, *restart]
         image: *JELLYFIN
         security_opt:
             - label=disable
@@ -118,8 +114,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: *common-sysctls
-        <<: *restart
+        <<: [*common-sysctls, *restart]
         image: *TRANSMISSION
         privileged: true #  needed to acces /dev/net/tun
         networks:
