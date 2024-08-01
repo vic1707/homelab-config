@@ -23,3 +23,7 @@ jellyfin.{$DOMAIN} {
 transmission.{$DOMAIN} {
 	reverse_proxy {$TRANSMISSION_IP}:9091
 }
+
+nfty.{$DOMAIN} {
+	reverse_proxy {$NTFY_IP}:80
+}
