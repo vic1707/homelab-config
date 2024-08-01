@@ -21,12 +21,16 @@ x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.8
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
+##
+x-NTFY: &NTFY docker.io/binwiederhier/ntfy:v2.11.0
+x-NTFY_IP: &NTFY_IP 10.99.0.6
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    NTFY_IP: *NTFY_IP
 
 x-common-env: &common-env
     TZ: Europe/Paris
@@ -143,3 +147,20 @@ services:
             - /mnt/config/transmission:/config:rw
         devices: # wish I could remove
             - /dev/net/tun
+
+    ##############################
+    ######       NTFY       ######
+    ##############################
+    ntfy:
+        container_name: ntfy
+        <<: [*common-sysctls, *restart]
+        image: *NTFY
+        networks:
+            shared:
+                ipv4_address: *NTFY_IP
+        environment:
+            <<: *common-env
+        volumes:
+            - /mnt/bhulk/ntfy:/var/cache/ntfy:rw
+            - /mnt/config/ntfy:/etc/ntfy:rw
+        command: serve
