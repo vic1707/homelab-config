@@ -10,14 +10,13 @@ Steps done for each backup on proxmox:
 
 1. Install `git`, ssh keys, and change password
     - **ON LOCAL COMPUTER**: `ssh-copy-id -i ~/.ssh/marina-prod.pub marina@10.0.0.3`
-    - `sudo dnf update -y`
     - `sudo dnf install -y git`
     - `git clone https://github.com/vic1707/homelab-config`
-    - `sudo passwd`
+    - `passwd`
 
 ---
 
-### Backup `SSH Hardening`
+### Backup `SSH Hardening (<port>)`
 
 1. run the `ssh.sh` script
 

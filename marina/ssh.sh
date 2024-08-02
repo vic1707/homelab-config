@@ -7,8 +7,6 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # ensure firewalld is installed
-dnf update
-dnf upgrade -y
 dnf install firewalld -y
 
 RDM_SSH_PORT=$(shuf -n 1 -i 10000-65500)
