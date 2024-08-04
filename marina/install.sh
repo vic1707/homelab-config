@@ -1,5 +1,8 @@
 #!/bin/sh
 
+## Ensure you are running the latest kernel
+## Reinstall the VM if not sure
+
 source_env() {
     if [ -f "$1" ]; then
         # shellcheck disable=SC1090
@@ -63,29 +66,38 @@ echo "Installing Epel..."
 dnf install -y epel-release
 echo "Installing other packages..."
 dnf install -y podman podman-compose nfs-utils rsync
-dnf copr enable atim/bottom
+dnf copr enable -y atim/bottom
 dnf install bottom -y
 dnf upgrade -y
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
     echo "Installing NVIDIA Driver..."
     dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo"
-    dnf module install -y nvidia-driver:latest
+    dnf module install -y nvidia-driver:latest-dkms
     # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
     echo "Installing NVIDIA Container Toolkit..."
     dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
     dnf install -y nvidia-container-toolkit
     # allow non root containers to access the GPU
     sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
-    # generate config files
-    nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
-    nvida-ctk cdi list
-    # shellcheck disable=SC2016
-    echo 'don'\''t forget to try with `podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi`'
 
-    # might be needed ?
-    # nvidia-container-cli -k list | sudo restorecon -v -f -
-    # sudo restorecon -Rv /dev
+    ############################# NVIDIA CDI Service #############################
+    echo "Creating systemd service for NVIDIA CDI configuration..."
+    cat <<EOF >  /etc/systemd/system/nvidia-cdi-generator.service
+    [Unit]
+    Description=Generate NVIDIA CDI Configuration
+    After=multi-user.target
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/bin/nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+
+    systemctl enable nvidia-cdi-generator.service
+    ########################### End NVIDIA CDI Service ###########################
 fi
 ############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
@@ -93,8 +105,6 @@ echo "Configuring additional settings..."
 hostnamectl set-hostname "marina-$MARINA_ENV"
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
-echo "Enabling auto-restart of containers"
-runuser -u "$SUDO_USER" -- systemctl enable podman-restart.service
 ################################## NFS Setup ##################################
 ########################### Volumes to mount (fstab) ##########################
 # Only add lines to fstab if they don't already exist                         #
@@ -154,6 +164,10 @@ if [ "$MARINA_ENV" = "prod" ]; then
     firewall-cmd --zone=public --permanent --add-port=8080/tcp  # caddy
     firewall-cmd --zone=public --permanent --add-port=4443/tcp  # caddy
     firewall-cmd --reload
+
+    echo 'do not forget to check that everything is good by running
+    > podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi
+    on your next boot'
 fi
 
 # sometimes git repo gets owned by root

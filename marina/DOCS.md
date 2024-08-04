@@ -22,12 +22,22 @@ Steps done for each backup on proxmox:
 
 ---
 
+### Backup `Linux kernel upgrade`
+
+1. `sudo dnf upgrade -y`
+2. `reboot`
+   **repeat until no upgrade available**
+
+---
+
 ### Backup `Basic installation & nvidia drivers`
 
 1. run the `install.sh` script
 2. reboot
     #### on prod only
     3.a. run `podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi` and check that the output is ok
+    3.c. reboot
+    3.c. re-check before backuping
 
 ---
 

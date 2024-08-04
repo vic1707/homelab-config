@@ -6,6 +6,13 @@ if git fetch && git status -uno | grep 'behind'; then
     exit 1
 fi
 
+# if podman-restart.service is disabled we enable it
+loginctl enable-linger "$USER"
+if ! systemctl --user is-enabled podman-restart.service; then
+    systemctl --user enable podman-restart.service
+    systemctl --user start podman-restart.service
+fi
+
 ########################################
 ####       Utilities functions      ####
 ########################################
