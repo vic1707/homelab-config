@@ -47,11 +47,30 @@ check_env_vars() {
 ########################################
 ####    Setup & checks functions    ####
 ########################################
+NFS_OPTIONS="ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 jellyfin_setup() {
     ## Check required NFS mounts ##
     local SHARES=("Animes" "Movies" "Music" "NSFW" "Scans" "Shows")
     for share in "${SHARES[@]}"; do
         local mount_point="/media/jellyfin/$share"
+
+        if ! grep -q "$mount_point" /etc/fstab; then
+            RELOAD_FSTAB=1
+            echo "Adding $share volume to fstab..."
+            sudo mkdir -p "$mount_point"
+            echo "10.0.0.2:/mnt/Bhulk/Medias/$share $mount_point nfs $NFS_OPTIONS 0 0" | sudo tee -a /etc/fstab
+        fi
+    done
+    if [ "$RELOAD_FSTAB" -eq 1 ]; then
+        echo "Reloading fstab..."
+        sudo mount -a
+        sudo systemctl daemon-reload
+        return $?
+    fi
+
+    for share in "${SHARES[@]}"; do
+        local mount_point="/media/jellyfin/$share"
+
         if ! findmnt "$mount_point" > /dev/null; then
             echo "[$share] isn't correctly mounted at $mount_point."
             return 1
