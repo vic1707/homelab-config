@@ -9,12 +9,14 @@ fi
 # if podman-restart.service is disabled we enable it
 loginctl enable-linger "$USER"
 if ! systemctl --user is-enabled podman-restart.service; then
+    echo "Enabling podman-restart.service"
     systemctl --user enable podman-restart.service
     systemctl --user start podman-restart.service
 fi
 
 # if network shared doesn't exist we create it
 if ! podman network exists shared; then
+    echo "Creating podman 'shared' network."
     podman network create --disable-dns --subnet 10.99.0.0/26 shared
 fi
 
