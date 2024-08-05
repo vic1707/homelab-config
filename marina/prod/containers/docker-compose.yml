@@ -2,25 +2,25 @@
 # TODO: privileged transmission?
 
 networks:
-    # 10.99.0.0/26
     shared:
         name: shared
-        external: true
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.99.0.0/26
 
 ############# GLOBAL VARIABLES ##############
-x-PREFERRED_DNS: &DNS 1.1.1.1
-##
 x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
-x-CADDY_IP: &CADDY_IP 10.99.0.1
+x-CADDY_IP: &CADDY_IP 10.99.0.2
 ##
 x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.31
-x-GICKUP_IP: &GICKUP_IP 10.99.0.2
+x-GICKUP_IP: &GICKUP_IP 10.99.0.3
 ##
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
-x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.3
+x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.8
-x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.4
+x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
@@ -30,9 +30,6 @@ x-ips: &container-ips
 
 x-common-env: &common-env
     TZ: Europe/Paris
-
-x-common-dns: &common-dns
-    dns: *DNS
 
 x-common-sysctls: &common-sysctls
     sysctls:
@@ -48,7 +45,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: [*common-sysctls, *restart, *common-dns]
+        <<: [*common-sysctls, *restart]
         image: *CADDY
         networks:
             shared:
@@ -73,7 +70,7 @@ services:
     ##############################
     gickup:
         container_name: gickup
-        <<: [*common-sysctls, *restart, *common-dns]
+        <<: [*common-sysctls, *restart]
         image: *GICKUP
         networks:
             shared:
@@ -90,7 +87,7 @@ services:
     ##############################
     jellyfin:
         container_name: jellyfin
-        <<: [*common-sysctls, *restart, *common-dns]
+        <<: [*common-sysctls, *restart]
         image: *JELLYFIN
         security_opt:
             - label=disable
@@ -115,7 +112,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: [*common-sysctls, *restart, *common-dns]
+        <<: [*common-sysctls, *restart]
         image: *TRANSMISSION
         privileged: true #  needed to acces /dev/net/tun
         networks:
@@ -132,7 +129,6 @@ services:
             WEBPROXY_ENABLED: false
             ## Wish I could remove ##
             CREATE_TUN_DEVICE: false
-            OVERRIDE_DNS_1: *DNS
             ##############
             ##   .env   ##
             ##############
