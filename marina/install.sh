@@ -83,7 +83,7 @@ if [ "$MARINA_ENV" = "prod" ]; then
 
     ############################# NVIDIA CDI Service #############################
     echo "Creating systemd service for NVIDIA CDI configuration..."
-    cat <<EOF >  /etc/systemd/system/nvidia-cdi-generator.service
+    cat << EOF > /etc/systemd/system/nvidia-cdi-generator.service
     [Unit]
     Description=Generate NVIDIA CDI Configuration
     After=multi-user.target
@@ -161,8 +161,8 @@ systemctl restart crond.service
 
 ## Important reminder
 if [ "$MARINA_ENV" = "prod" ]; then
-    firewall-cmd --zone=public --permanent --add-port=8080/tcp  # caddy
-    firewall-cmd --zone=public --permanent --add-port=4443/tcp  # caddy
+    firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
+    firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
     firewall-cmd --reload
 
     echo 'do not forget to check that everything is good by running
