@@ -1,26 +1,26 @@
 {
-    # debug # this is optional - makes Caddy log more details
-    acme_ca https://acme.zerossl.com/v2/DV90
-    email   {$ZEROSSL_EMAIL}
+	# debug # this is optional - makes Caddy log more details
+	acme_ca https://acme.zerossl.com/v2/DV90
+	email {$ZEROSSL_EMAIL}
 
-    # enables prometheus metrics
-    servers {
-        metrics
-    }
+	# enables prometheus metrics
+	servers {
+		metrics
+	}
 
-    # set admin port
-    admin :2019
+	# set admin port
+	admin :2019
 }
 
 {$DOMAIN} {
-    root * /usr/share/caddy
-    file_server
+	root * /usr/share/caddy
+	file_server
 }
 
 jellyfin.{$DOMAIN} {
-    reverse_proxy {$JELLYFIN_IP}:8096
+	reverse_proxy {$JELLYFIN_IP}:8096
 }
 
 transmission.{$DOMAIN} {
-    reverse_proxy {$TRANSMISSION_IP}:9091
+	reverse_proxy {$TRANSMISSION_IP}:9091
 }
