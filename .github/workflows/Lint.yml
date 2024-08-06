@@ -11,6 +11,18 @@ jobs:
       - uses: mfinelli/setup-shfmt@v3.0.1
       - run: shfmt -f -d -i 4 -s -ci -bn -sr .
       # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
+      - uses: KengoTODA/actions-setup-docker-compose@v1
+      - run: |
+            set -e # exits immediately if any command fails
+            for f in $(find . -type f -name 'docker-compose.yml' -o -name 'docker-compose.yaml'); do
+                docker compose -f "$f" config;
+            done
+      - name: Format caddy file
+        run: |
+            set -e # exits immediately if any command fails
+            for f in $(find . -type f -name 'Caddyfile'); do
+                docker run --rm -v $f:/app/Caddyfile caddy caddy fmt --overwrite /app/Caddyfile
+            done
 
   linters:
     name: Shellcheck
@@ -18,8 +30,7 @@ jobs:
     needs: [formatters]
     steps:
       - uses: actions/checkout@v4
-      - name: Run ShellCheck (no ZSH)
-        uses: ludeeus/action-shellcheck@master
+      - uses: ludeeus/action-shellcheck@master
         env:
           # SC2034 is unused vars (triggered on .env files)
           SHELLCHECK_OPTS: -e SC2034 $(find . -type f -name '*.sh' -o -name '*.bash' -o -name '.env*')
