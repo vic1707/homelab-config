@@ -35,4 +35,8 @@ jobs:
       - uses: ludeeus/action-shellcheck@master
         env:
           # SC2034 is unused vars (triggered on .env files)
-          SHELLCHECK_OPTS: -e SC2034 $(find . -type f -name '*.sh' -o -name '*.bash' -o -name '.env*')
+          SHELLCHECK_OPTS: -e SC2034
+        with:
+          additional_files: -<
+            .env
+            .env.example
