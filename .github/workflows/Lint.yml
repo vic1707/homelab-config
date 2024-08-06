@@ -3,40 +3,40 @@ name: Lint & Format
 on: [push, pull_request]
 
 jobs:
-  formatters:
-    name: Beautysh
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: mfinelli/setup-shfmt@v3.0.1
-      - run: shfmt -f -d -i 4 -s -ci -bn -sr .
-      # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
-      - uses: KengoTODA/actions-setup-docker-compose@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: |
-            set -e # exits immediately if any command fails
-            for f in $(find . -type f -name 'docker-compose.yml' -o -name 'docker-compose.yaml'); do
-                docker compose -f "$f" config;
-            done
-      - name: Format caddy file
-        run: |
-            set -e # exits immediately if any command fails
-            for f in $(find . -type f -name 'Caddyfile'); do
-                docker run --rm -v $f:/app/Caddyfile caddy caddy fmt --overwrite /app/Caddyfile
-            done
+    formatters:
+        name: formatters
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: mfinelli/setup-shfmt@v3.0.1
+            - run: shfmt -f -d -i 4 -s -ci -bn -sr .
+            # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
+            - uses: KengoTODA/actions-setup-docker-compose@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - run: |
+                  set -e # exits immediately if any command fails
+                  for f in $(find . -type f -name 'docker-compose.yml' -o -name 'docker-compose.yaml'); do
+                      docker compose -f "$f" config;
+                  done
+            - name: Format caddy file
+              run: |
+                  set -e # exits immediately if any command fails
+                  for f in $(find . -type f -name 'Caddyfile'); do
+                      docker run --rm -v $f:/app/Caddyfile caddy caddy fmt --overwrite /app/Caddyfile
+                  done
 
-  linters:
-    name: Shellcheck
-    runs-on: ubuntu-latest
-    needs: [formatters]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ludeeus/action-shellcheck@master
-        env:
-          # SC2034 is unused vars (triggered on .env files)
-          SHELLCHECK_OPTS: -e SC2034
-        with:
-          additional_files: -<
-            .env
-            .env.example
+    linters:
+        name: linters
+        runs-on: ubuntu-latest
+        needs: [formatters]
+        steps:
+            - uses: actions/checkout@v4
+            - uses: ludeeus/action-shellcheck@master
+              env:
+                  # SC2034 is unused vars (triggered on .env files)
+                  SHELLCHECK_OPTS: -e SC2034
+              with:
+                  additional_files: -<
+                      .env
+                      .env.example
