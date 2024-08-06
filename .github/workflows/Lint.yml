@@ -12,6 +12,8 @@ jobs:
       - run: shfmt -f -d -i 4 -s -ci -bn -sr .
       # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
       - uses: KengoTODA/actions-setup-docker-compose@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
             set -e # exits immediately if any command fails
             for f in $(find . -type f -name 'docker-compose.yml' -o -name 'docker-compose.yaml'); do
