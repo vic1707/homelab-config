@@ -8,7 +8,7 @@ fi
 
 # if podman-restart.service is disabled we enable it
 loginctl enable-linger "$USER"
-if ! systemctl --user is-enabled podman-restart.service; then
+if ! systemctl --user is-enabled podman-restart.service > /dev/null; then
     echo "Enabling podman-restart.service"
     systemctl --user enable podman-restart.service
     systemctl --user start podman-restart.service
