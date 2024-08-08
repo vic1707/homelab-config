@@ -1,5 +1,6 @@
 # TODO: fix volumes z options
-# TODO: privileged transmission?
+# TODO: rm privileged transmission?
+# TODO: execution capabilities on transmission config dir instead of just the script
 
 networks:
     shared:
@@ -129,6 +130,7 @@ services:
             WEBPROXY_ENABLED: false
             ## Wish I could remove ##
             CREATE_TUN_DEVICE: false
+            DISABLE_PORT_UPDATER: true
             ##############
             ##   .env   ##
             ##############
@@ -140,6 +142,6 @@ services:
             TRANSMISSION_RPC_PASSWORD: ${TRANSMISSION_RPC_PASSWORD}
         volumes:
             - /mnt/bhulk/transmission:/data:rw
-            - /mnt/config/transmission:/config:rw
+            - /mnt/config/transmission:/config # because keep_torrent_file script
         devices: # wish I could remove
             - /dev/net/tun
