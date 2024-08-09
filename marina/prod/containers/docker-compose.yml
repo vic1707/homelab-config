@@ -22,6 +22,9 @@ x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.8
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
+##
+x-WIREGUARD: &WIREGUARD docker.io/linuxserver/wireguard@1.0.20210914-r4-ls47
+x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
@@ -145,3 +148,23 @@ services:
             - /mnt/config/transmission:/config # because keep_torrent_file script
         devices: # wish I could remove
             - /dev/net/tun
+
+    ##############################
+    ######    Wireguard     ######
+    ##############################
+    wireguard:
+        container_name: wireguard
+        <<: [*common-sysctls, *restart]
+        image: *WIREGUARD
+        networks:
+            shared:
+                ipv4_address: *WIREGUARD_IP
+        cap_add:
+            - NET_ADMIN
+        volumes:
+            - /mnt/config/wireguard:/config:rw
+        ports:
+            - 51820:51820/udp
+        environment:
+            <<: [*common-env, *container-ips]
+            SERVERURL: wireguard.${DOMAIN}
