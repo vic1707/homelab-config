@@ -36,6 +36,10 @@ x-common-sysctls: &common-sysctls
     sysctls:
         - net.ipv6.conf.all.disable_ipv6=1
 
+x-common-security-opts: &common-security-opts
+    security_opt:
+        - &no-privilege no-new-privileges=true
+
 x-restart: &restart
     restart: always
 #############################################
@@ -46,7 +50,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-security-opts]
         image: *CADDY
         networks:
             shared:
@@ -70,7 +74,7 @@ services:
     ##############################
     gickup:
         container_name: gickup
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-security-opts]
         image: *GICKUP
         networks:
             shared:
@@ -90,6 +94,7 @@ services:
         <<: [*common-sysctls, *restart]
         image: *JELLYFIN
         security_opt:
+            - *no-privilege
             - label=disable
         networks:
             shared:
@@ -112,7 +117,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: [*common-sysctls, *restart]
+        <<: [*common-sysctls, *restart, *common-security-opts]
         image: *TRANSMISSION
         privileged: true #  needed to acces /dev/net/tun
         networks:
