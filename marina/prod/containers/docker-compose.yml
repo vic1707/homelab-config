@@ -64,7 +64,6 @@ services:
         volumes:
             - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
             - /mnt/config/caddy/data:/data:z,rw
-            - /mnt/config/caddy/site:/usr/share/caddy:z,ro
 
     ##############################
     ######      Gickup      ######

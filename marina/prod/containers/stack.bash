@@ -88,7 +88,6 @@ gickup_setup() {
 caddy_setup() {
     mkdir -p /mnt/config/caddy/config
     mkdir -p /mnt/config/caddy/data
-    mkdir -p /mnt/config/caddy/site
 
     ## Check ENV ##
     local maybe_error_msg
@@ -106,12 +105,6 @@ caddy_setup() {
         return 1
     fi
     cp "$PWD/caddy/Caddyfile" /mnt/config/caddy/Caddyfile
-
-    if [ ! -f "$PWD/caddy/index.html" ]; then
-        echo "HTML index not found."
-        return 1
-    fi
-    cp "$PWD/caddy/index.html" /mnt/config/caddy/site/index.html
 }
 transmission_setup() {
     ## Check ENV ##

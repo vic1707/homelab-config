@@ -13,8 +13,7 @@
 }
 
 {$DOMAIN} {
-	root * /usr/share/caddy
-	file_server
+	redir https://github.com/vic1707
 }
 
 jellyfin.{$DOMAIN} {
