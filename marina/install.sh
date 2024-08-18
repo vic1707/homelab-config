@@ -163,6 +163,8 @@ systemctl restart crond.service
 if [ "$MARINA_ENV" = "prod" ]; then
     firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
     firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
+    firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
+    firewall-cmd --zone=public --permanent --add-port=51821/tcp # wireguard-ui
     firewall-cmd --reload
 
     echo 'do not forget to check that everything is good by running

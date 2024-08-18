@@ -124,6 +124,32 @@ transmission_setup() {
     fi
     cp "$PWD/transmission/keep_torrent_file.sh" "/mnt/config/transmission/keep_torrent_file.sh"
 }
+wireguard_setup() {
+    # https://github.com/wg-easy/wg-easy/wiki/Using-WireGuard-Easy-with-Podman#loading-kernel-modules
+    modules=("ip_tables" "iptable_filter" "iptable_nat" "wireguard" "xt_MASQUERADE")
+    autoload_file="/etc/modules"
+    touch $autoload_file
+
+    for module in "${modules[@]}"; do
+        if ! lsmod | grep -q "^${module}"; then
+            echo "${module} not loaded. Loading now..."
+            sudo modprobe "$module"
+            if ! grep -q "^${module}" "$autoload_file"; then
+                echo "$module" | sudo tee -a "$autoload_file" > /dev/null
+            fi
+        fi
+    done
+
+    ## Check ENV ##
+    local maybe_error_msg
+    maybe_error_msg=$(check_env_vars DOMAIN WGUI_PASSWORD_HASH)
+    local ret=$?
+    # shellcheck disable=SC2181
+    if [ "$ret" -ne 0 ]; then
+        echo "$maybe_error_msg"
+        return $ret
+    fi
+}
 ########################################
 
 root_forbidden
@@ -213,6 +239,14 @@ for service in "${services[@]}"; do
                 exit_on_error "Caddy checks didn't pass: $maybe_error_msg"
             fi
             echo "Caddy OK."
+            ;;
+        wireguard)
+            maybe_error_msg=$(wireguard_setup)
+            # shellcheck disable=SC2181
+            if [ "$?" -ne 0 ]; then
+                exit_on_error "Wireguard checks didn't pass: $maybe_error_msg"
+            fi
+            echo "Wireguard OK."
             ;;
         *)
             rmdir "/mnt/config/$service" 2> /dev/null

@@ -83,12 +83,15 @@ iptables -A FORWARD -i $LAN_INTERFACE -d "$ISP_NETWORK" -j REJECT        # preve
 iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT        # allow LAN to access WAN (except ISP network due to previous rule)
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT # allow established connections
 ### Port forwarding ###
-# Router:8080 -> Maria_Prod:8080 (check marina/prod/dockers/caddy/pod.sh)
+# Router:8080 -> Maria_Prod:8080
 iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 8080 -j DNAT --to $MARINA_PROD_IP:8080
 iptables -A FORWARD -p tcp -d $MARINA_PROD_IP --dport 8080 -j ACCEPT
-# Router:4443 -> Maria_Prod:4443 (check marina/prod/dockers/caddy/pod.sh)
+# Router:4443 -> Maria_Prod:4443
 iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 4443 -j DNAT --to $MARINA_PROD_IP:4443
 iptables -A FORWARD -p tcp -d $MARINA_PROD_IP --dport 4443 -j ACCEPT
+# Router:51820 -> Maria_Prod:51820 => NO Cloudflare PROXY !!
+iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p udp --dport 51820 -j DNAT --to $MARINA_PROD_IP:51820
+iptables -A FORWARD -p udp -d $MARINA_PROD_IP --dport 51820 -j ACCEPT
 #######################
 ### Deny everything ###
 #######################
