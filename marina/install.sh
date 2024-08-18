@@ -71,6 +71,7 @@ dnf install bottom -y
 dnf upgrade -y
 ################################ NVIDIA Podman ################################
 if [ "$MARINA_ENV" = "prod" ]; then
+    # ATM it is 560.28.03
     echo "Installing NVIDIA Driver..."
     dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo"
     dnf module install -y nvidia-driver:latest-dkms
