@@ -1,55 +1,30 @@
-server:
-    endpoints:
-        authz:
-            forward-auth:
-                implementation: "ForwardAuth"
+access_control:
+    default_policy: "one_factor"
 
 authentication_backend:
+    password_reset:
+        disable: true
     file:
         path: "/config/users_database.yml"
 
-regulation:
-    max_retries: 3
-    find_time: "2 minutes"
-    ban_time: "5 minutes"
+# regulation:
+
+server:
+  endpoints:
+    authz:
+      forward-auth:
+        implementation: 'ForwardAuth'
 
 storage:
-    encryption_key: "12345678901234567890"
     local:
         path: "/config/db.sqlite3"
 
 session:
-    secret: "jwt"
-    name: "authelia_session"
-    same_site: "lax"
-    inactivity: "5m"
-    expiration: "1h"
-    remember_me: "1M"
     cookies:
-        - domain: "example.com"
-          authelia_url: "https://auth.example.com"
-          default_redirection_url: "https://www.example.com"
-          name: "authelia_session"
-          same_site: "lax"
-          inactivity: "5m"
-          expiration: "1h"
-          remember_me: "1d"
+        - domain: "${DOMAIN}"
+          authelia_url: "https://auth.${DOMAIN}"
 
 notifier:
     disable_startup_check: false
     filesystem:
         filename: "/config/notification.txt"
-
-identity_validation:
-    reset_password:
-        jwt_lifespan: "5 minutes"
-        jwt_algorithm: "HS256"
-        jwt_secret: "jwt"
-
-access_control:
-    default_policy: 'deny'
-    rules:
-        -   domain: 'transmission.example.com'
-            policy: 'one_factor'
-            subject:
-                - 'group:admin'

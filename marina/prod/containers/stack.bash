@@ -151,17 +151,29 @@ wireguard_setup() {
     fi
 }
 authelia_setup() {
+    ## Check ENV ##
+    local maybe_error_msg
+    maybe_error_msg=$(check_env_vars DOMAIN VIC1707_PWD)
+    local ret=$?
+    # shellcheck disable=SC2181
+    if [ "$ret" -ne 0 ]; then
+        echo "$maybe_error_msg"
+        return $ret
+    fi
+
     ## Check required files ##
     if [ ! -f "$PWD/authelia/configuration.yml" ]; then
         echo "Authelia configuration not found."
         return 1
     fi
-    cp "$PWD/authelia/configuration.yml" /mnt/config/authelia/configuration.yml
+    DOMAIN=$DOMAIN \
+        envsubst < "$PWD/authelia/configuration.yml" > /mnt/config/authelia/configuration.yml
     if [ ! -f "$PWD/authelia/users_database.yml" ]; then
         echo "Authelia user db not found."
         return 1
     fi
-    cp "$PWD/authelia/users_database.yml" /mnt/config/authelia/users_database.yml
+    VIC1707_PWD=$VIC1707_PWD \
+        envsubst "$PWD/authelia/users_database.yml" /mnt/config/authelia/users_database.yml
 }
 ########################################
 

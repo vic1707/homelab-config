@@ -61,8 +61,12 @@ services:
                 ipv4_address: *AUTHELIA_IP
         environment:
             <<: *common-env
+            ##############
+            ##   .env   ##
+            ##############
         volumes:
             - /mnt/config/authelia:/config:z,rw
+            - /mnt/config/authelia/secrects:/opt/secrets:ro
     ##############################
     ######      Caddy       ######
     ##############################

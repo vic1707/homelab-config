@@ -5,8 +5,7 @@
 users:
     vic1707:
         disabled: false
-        # 1234
-        password: $argon2id$v=19$m=65536,t=3,p=4$5Goi+jEhxQ6xsBiac2GLVQ$f8v3lGyUxpaFKzqChjOKtsz5mAHVEj+IrM25xdSyz8o
+        password: ${VIC1707_PWD}
         displayname: "vic1707"
         email: dev@vic1707.xyz
         groups:

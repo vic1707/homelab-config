@@ -1,2 +1,3 @@
 .env
 marina/prod/containers/gickup/token
+marina/prod/containers/authelia/secrets
