@@ -11,6 +11,8 @@ networks:
                 - subnet: 10.99.0.0/26
 
 ############# GLOBAL VARIABLES ##############
+x-TIMEZONE: &TIMEZONE Europe/Paris
+##
 x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
 x-CADDY_IP: &CADDY_IP 10.99.0.2
 ##
@@ -32,19 +34,14 @@ x-ips: &container-ips
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
 
-x-common-env: &common-env
-    TZ: Europe/Paris
-
-x-common-sysctls: &common-sysctls
+x-common-settings: &common-settings
     sysctls:
         - net.ipv6.conf.all.disable_ipv6=1
-
-x-common-security-opts: &common-security-opts
     security_opt:
         - &no-privilege no-new-privileges=true
-
-x-restart: &restart
     restart: always
+    environment: &common-env
+        TZ: *TIMEZONE
 #############################################
 
 services:
@@ -53,7 +50,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: [*common-sysctls, *restart, *common-security-opts]
+        <<: *common-settings
         image: *CADDY
         networks:
             shared:
@@ -77,13 +74,11 @@ services:
     ##############################
     gickup:
         container_name: gickup
-        <<: [*common-sysctls, *restart, *common-security-opts]
+        <<: *common-settings
         image: *GICKUP
         networks:
             shared:
                 ipv4_address: *GICKUP_IP
-        environment:
-            <<: *common-env
         volumes:
             - /mnt/bhulk/gickup/:/data:rw
             - /mnt/config/gickup:/config:z,ro
@@ -94,7 +89,7 @@ services:
     ##############################
     jellyfin:
         container_name: jellyfin
-        <<: [*common-sysctls, *restart]
+        <<: *common-settings
         image: *JELLYFIN
         security_opt:
             - *no-privilege
@@ -120,7 +115,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: [*common-sysctls, *restart, *common-security-opts]
+        <<: *common-settings
         image: *TRANSMISSION
         privileged: true #  needed to acces /dev/net/tun
         networks:
@@ -158,7 +153,7 @@ services:
     ##############################
     wireguard:
         container_name: wireguard
-        <<: [*restart, *common-security-opts]
+        <<: *common-settings
         image: *WIREGUARD
         networks:
             shared:
