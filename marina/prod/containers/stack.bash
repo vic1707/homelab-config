@@ -127,7 +127,7 @@ transmission_setup() {
 wireguard_setup() {
     # https://github.com/wg-easy/wg-easy/wiki/Using-WireGuard-Easy-with-Podman#loading-kernel-modules
     modules=("ip_tables" "iptable_filter" "iptable_nat" "wireguard" "xt_MASQUERADE")
-    autoload_file="/etc/modules"
+    autoload_file="/etc/modules-load.d/wireguard.conf"
     touch $autoload_file
 
     for module in "${modules[@]}"; do
