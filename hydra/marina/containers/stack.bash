@@ -144,6 +144,9 @@ wireguard_setup() {
         return $ret
     fi
 }
+crafty_setup() {
+    true
+}
 ########################################
 
 root_forbidden
@@ -241,6 +244,14 @@ for service in "${services[@]}"; do
                 exit_on_error "Wireguard checks didn't pass: $maybe_error_msg"
             fi
             echo "Wireguard OK."
+            ;;
+        crafty)
+            maybe_error_msg=$(crafty_setup)
+            # shellcheck disable=SC2181
+            if [ "$?" -ne 0 ]; then
+                exit_on_error "Crafty checks didn't pass: $maybe_error_msg"
+            fi
+            echo "Crafty OK."
             ;;
         *)
             rmdir "/mnt/config/$service" 2> /dev/null
