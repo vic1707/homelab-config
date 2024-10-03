@@ -44,3 +44,7 @@ wg-ui.{$DOMAIN} {
 auth.{$DOMAIN} {
 	reverse_proxy {$AUTHELIA_IP}:9091
 }
+
+mc-manager.{$DOMAIN} {
+	reverse_proxy {$CRAFTY_IP}:8443
+}

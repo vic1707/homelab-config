@@ -187,7 +187,7 @@ for service in "${services[@]}"; do
             copy_files_with_check files
             echo "Authelia OK."
             ;;
-        gluetun)
+        gluetun | crafty)
             echo "No checks required for $service."
             ;;
         *)

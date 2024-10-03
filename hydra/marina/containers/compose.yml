@@ -48,6 +48,9 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
 ##
+x-CRAFTY: &CRAFTY registry.gitlab.com/crafty-controller/crafty-4:4.4.4
+x-CRAFTY_IP: &CRAFTY_IP 10.99.0.7
+##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ##
@@ -60,6 +63,7 @@ x-ips: &container-ips
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    CRAFTY_IP: *CRAFTY_IP
     GLUETUN_IP: *GLUETUN_IP
     WIREGUARD_IP: *WIREGUARD_IP
 
@@ -152,6 +156,24 @@ services:
         volumes:
             - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
             - /mnt/config/caddy:/data/caddy:z,rw
+
+    ##############################
+    ######      Crafty      ######
+    ##############################
+    crafty:
+        container_name: crafty
+        <<: *common-settings
+        image: *CRAFTY
+        networks:
+            shared:
+                ipv4_address: *CRAFTY_IP
+        # 8443: HTTPS - 8123: DYNMAP - 19132/udp: BEDROCK - 25500-25600: MC SERV PORT RANGE
+        volumes:
+            - /mnt/bhulk/crafty/backups:/crafty/backups,rw
+            - /mnt/bhulk/crafty/logs:/crafty/logs,rw
+            - /mnt/bhulk/crafty/servers:/crafty/servers,rw
+            - /mnt/bhulk/crafty/import:/crafty/import,rw
+            - /mnt/config/crafty:/crafty/app/config,rw
 
     ##############################
     ######      Gickup      ######
