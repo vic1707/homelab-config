@@ -16,13 +16,13 @@ x-TIMEZONE: &TIMEZONE Europe/Paris
 x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
 x-CADDY_IP: &CADDY_IP 10.99.0.2
 ##
-x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.31
+x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
 x-GICKUP_IP: &GICKUP_IP 10.99.0.3
 ##
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.4
 ##
-x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.8
+x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.11
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
