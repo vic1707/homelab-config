@@ -10,6 +10,16 @@ networks:
             config:
                 - subnet: 10.99.0.0/26
 
+secrets:
+    ## TRANSMISSION
+    openvpn_creds:
+        file: "$PWD/secrets/transmission-ovpn-credentials"
+    rpc_creds:
+        file: "$PWD/secrets/transmission-rpc-credentials"
+    ## GICKUP
+    gickup_vic1707_github_token:
+        file: "$PWD/secrets/gickup-token"
+
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
@@ -80,9 +90,10 @@ services:
             shared:
                 ipv4_address: *GICKUP_IP
         volumes:
-            - /mnt/bhulk/gickup/:/data:rw
-            - /mnt/config/gickup:/config:z,ro
-        command: /config/conf.yml
+            - /mnt/bhulk/gickup:/data:rw
+            - /mnt/config/gickup/conf.yml:/gickup/conf.yml:z,ro
+        secrets:
+            - gickup_vic1707_github_token
 
     ##############################
     ######     Jellyfin     ######
@@ -138,10 +149,9 @@ services:
             ##############
             OPENVPN_CONFIG: ${OVPN_CONFIG}
             OPENVPN_PROVIDER: ${OVPN_PROVIDER}
-            OPENVPN_USERNAME: ${OVPN_USR}
-            OPENVPN_PASSWORD: ${OVPN_PWD}
-            TRANSMISSION_RPC_USERNAME: ${TRANSMISSION_RPC_USERNAME}
-            TRANSMISSION_RPC_PASSWORD: ${TRANSMISSION_RPC_PASSWORD}
+        secrets:
+            - openvpn_creds
+            - rpc_creds
         volumes:
             - /mnt/bhulk/transmission:/data:rw
             - /mnt/config/transmission:/config # because keep_torrent_file script

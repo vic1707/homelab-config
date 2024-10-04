@@ -1,5 +1,7 @@
 cron: 0 22 * * *
 
+x-TOKEN_PATH: &VIC1707_GH_TOKEN_FILE /run/secrets/gickup_vic1707_github_token
+
 log:
     timeformat: 2006-01-02 15:04:05
     file-logging:
@@ -19,7 +21,7 @@ destination:
 source:
     github:
         - user: vic1707
-          token_file: /config/token # fine grained token for vic1707
+          token_file: *VIC1707_GH_TOKEN_FILE
           excludeorgs:
               - adeo
               - Zenika
@@ -29,18 +31,18 @@ source:
               excludeforks: true
 
         - user: hsutter
-          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+          token_file: *VIC1707_GH_TOKEN_FILE
           include:
               - cppfront
 
         - user: zeldaret # Zelda-Reverse-Engineering-Team
-          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+          token_file: *VIC1707_GH_TOKEN_FILE
 
         - user: pret # Pokemon-Reverse-Engineering-Team
-          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+          token_file: *VIC1707_GH_TOKEN_FILE
 
         - user: Pokabbie
-          token_file: /config/token # fine grained token for vic1707 - necessary even if strange
+          token_file: *VIC1707_GH_TOKEN_FILE
           include:
               - pokeemerald-rogue
               - pokeemerald-rogue-assistant

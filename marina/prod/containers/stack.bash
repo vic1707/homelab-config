@@ -78,12 +78,6 @@ gickup_setup() {
         return 1
     fi
     cp "$PWD/gickup/conf.yml" /mnt/config/gickup/conf.yml
-
-    if [ ! -f "$PWD/gickup/token" ]; then
-        echo "Token file not found."
-        return 1
-    fi
-    cp "$PWD/gickup/token" /mnt/config/gickup/token
 }
 caddy_setup() {
     mkdir -p /mnt/config/caddy/config
@@ -109,7 +103,7 @@ caddy_setup() {
 transmission_setup() {
     ## Check ENV ##
     local maybe_error_msg
-    maybe_error_msg=$(check_env_vars OVPN_CONFIG OVPN_PROVIDER OVPN_USR OVPN_PWD TRANSMISSION_RPC_USERNAME TRANSMISSION_RPC_PASSWORD)
+    maybe_error_msg=$(check_env_vars OVPN_CONFIG OVPN_PROVIDER)
     local ret=$?
     # shellcheck disable=SC2181
     if [ "$ret" -ne 0 ]; then
