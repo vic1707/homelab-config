@@ -28,12 +28,6 @@ BHULK_IP=10.0.0.2
 #
 MARINA_PROD_MAC=0A:A8:F3:7E:9D:64
 MARINA_PROD_IP=10.0.0.3
-#
-# MARINA_STAGING_MAC=00:00:00:00:00:00
-# MARINA_STAGING_IP=10.0.0.4
-#
-# MARINA_RANDOM_MAC=00:00:00:00:00:00
-# MARINA_RANDOM_IP=10.0.0.5
 ###################################
 
 # Install packages
@@ -114,8 +108,6 @@ dhcp-option=option:router,$LAN_IP
 dhcp-option=option:dns-server,$DNS_SERVERS
 dhcp-host=$BHULK_MAC,$BHULK_IP
 dhcp-host=$MARINA_PROD_MAC,$MARINA_PROD_IP
-# dhcp-host=$MARINA_STAGING_MAC,$MARINA_STAGING_IP
-# dhcp-host=$MARINA_RANDOM_MAC,$MARINA_RANDOM_IP
 EOF
 rc-update add dnsmasq
 rc-service dnsmasq start
