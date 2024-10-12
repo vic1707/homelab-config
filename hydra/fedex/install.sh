@@ -1,13 +1,5 @@
 #!/bin/sh
 
-################
-## Min config ##
-# 1 vCPU       #
-# 64 MB RAM    #
-# 0 MB SWAP    #
-# 1 GB HDD     #
-################
-
 ############ Variables ############
 ### WAN ###
 WAN_INTERFACE=eth0
