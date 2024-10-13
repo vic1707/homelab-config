@@ -2,6 +2,7 @@ Create CT
 
 ---
 Hostname: fedex
+No nesting, no privileged
 ---
 template: alpine
 ---
@@ -24,7 +25,7 @@ boot order: 0
 features: None
 
 ## Network
-Add device interface `fedexnet` as `eth1`
+Add device interface `fedexnet` as `eth1` w/ everything as default
 
 
 [x] Backup on `VMS_Backups` as `Configured, not started`

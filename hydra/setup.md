@@ -46,8 +46,8 @@
 
 BTRFS raid 0 single drive.
 email: homelab@v...
-hostname: hydra.homelab - enp8s0 atlantic msi 10Gb nic
-ip: --.110 - dns: 1.1.1.1
+hostname: hydra.homelab - solarflare 10Gb enp66s0f1np1
+ip: --.115 - dns: 1.1.1.1
 
 ### once Proxmox installed
 
@@ -55,6 +55,7 @@ BIOS:
 - [x] Mode: UEFI
 
 Proxmox:
+- [x] Change admin user password
 - [x] Updates -> Repository
     - Disable : `https://enterprise.proxmox.com/debian/ceph-quincy`
     - Disable : `https://enterprise.proxmox.com/debian/pve`
@@ -108,6 +109,7 @@ apcaccess status
 local-btrfs
     - [x] ISO Images: 
         - `https://boot.netboot.xyz/ipxe/netboot.xyz.iso`
+        - `https://download-core.sys.truenas.net/13.3/STABLE/RELEASE/x64/TrueNAS-13.3-RELEASE.iso`
     - [x] CT Templates:
         - get alpine latest
 Storage:
@@ -120,3 +122,11 @@ zfs set compression=zstd VMs_LXCs/VMS_Backups
 zfs set relatime=on VMs_LXCs/VMS_Backups
 pvesm add dir VMs_Backups --content backup --is_mountpoint yes --shared 0 --path "/VMs_LXCs/VMS_Backups"
 ```
+
+### Network
+- [x] `fedexnet` 
+    - MTU 1500,
+    - binded:
+        - the second port of the solarflare
+        - eno1 (dangling fedex cable) 
+
