@@ -1,2 +1,2 @@
 .env
-marina/prod/containers/gickup/token
+hydra/marina/containers/secrets
