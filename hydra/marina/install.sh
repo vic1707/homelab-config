@@ -3,17 +3,6 @@
 ## Ensure you are running the latest kernel
 ## Reinstall the VM if not sure
 
-source_env() {
-    if [ -f "$1" ]; then
-        # shellcheck disable=SC1090
-        . "$1"
-        return $?
-    else
-        echo "File not found: $1"
-        exit 1
-    fi
-}
-
 ##########################################
 ## Install script for Marina            ##
 ##                                      ##
@@ -42,24 +31,6 @@ if git fetch && git status -uno | grep 'behind'; then
     exit 1
 fi
 
-### TODO: parse as arg or choice
-# Load environment variables
-# if .env file is not present, exit on failure
-echo "Loading environment variables from .env file..."
-source_env "$PWD/.env" || exit 1
-
-########## Check for required variables ##########
-## 1. MARINA_ENV: 'prod' | 'staging' | 'random' ##
-##################################################
-if [ -z "$MARINA_ENV" ] || [ "$MARINA_ENV" != "prod" ] && [ "$MARINA_ENV" != "staging" ] && [ "$MARINA_ENV" != "random" ]; then
-    echo "
-  MARINA_ENV is not properly set.
-  Please set it to 'prod' | 'staging' | 'random'.
-  MARINA_ENV: \`$MARINA_ENV\`
-    "
-    exit 1
-fi
-
 ################################ Update System ################################
 echo "Updating repositories and installing packages..."
 echo "Installing Epel..."
@@ -70,40 +41,38 @@ dnf copr enable -y atim/bottom
 dnf install bottom -y
 dnf upgrade -y
 ################################ NVIDIA Podman ################################
-if [ "$MARINA_ENV" = "prod" ]; then
-    # ATM it is 560.28.03
-    echo "Installing NVIDIA Driver..."
-    dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo"
-    dnf module install -y nvidia-driver:latest-dkms
-    # https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
-    echo "Installing NVIDIA Container Toolkit..."
-    dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
-    dnf install -y nvidia-container-toolkit
-    # allow non root containers to access the GPU
-    sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
+# ATM it is 560.28.03
+echo "Installing NVIDIA Driver..."
+dnf config-manager --add-repo "https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo"
+dnf module install -y nvidia-driver:latest-dkms
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#id7
+echo "Installing NVIDIA Container Toolkit..."
+dnf config-manager --add-repo "https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo"
+dnf install -y nvidia-container-toolkit
+# allow non root containers to access the GPU
+sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
 
-    ############################# NVIDIA CDI Service #############################
-    echo "Creating systemd service for NVIDIA CDI configuration..."
-    cat << EOF > /etc/systemd/system/nvidia-cdi-generator.service
-    [Unit]
-    Description=Generate NVIDIA CDI Configuration
-    After=multi-user.target
+############################# NVIDIA CDI Service #############################
+echo "Creating systemd service for NVIDIA CDI configuration..."
+cat << EOF > /etc/systemd/system/nvidia-cdi-generator.service
+[Unit]
+Description=Generate NVIDIA CDI Configuration
+After=multi-user.target
 
-    [Service]
-    Type=oneshot
-    ExecStart=/usr/bin/nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
 
-    [Install]
-    WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 EOF
 
-    systemctl enable nvidia-cdi-generator.service
-    ########################### End NVIDIA CDI Service ###########################
-fi
+systemctl enable nvidia-cdi-generator.service
+########################### End NVIDIA CDI Service ###########################
 ############################# Additionnal Settings ############################
 echo "Configuring additional settings..."
 ## Hostname
-hostnamectl set-hostname "marina-$MARINA_ENV"
+hostnamectl set-hostname marina
 ## Disable IPv6
 echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 ################################## NFS Setup ##################################
@@ -123,22 +92,22 @@ echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 # - `vers=4`: use NFSv4                                                       #
 # - `minorversion=1`: use NFSv4.1                                             #
 ###############################################################################
-## 1. /mnt/remote-config => 10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV  ##
-## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV             ##
+## 1. /mnt/remote-config => 10.0.0.2:/mnt/Marina-config/Configs              ##
+## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/Marina-Bhulk                         ##
 ###############################################################################
 NFS_OPTIONS="rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 echo "Configuring config volume..."
 if ! grep -q "/mnt/remote-config" /etc/fstab; then
     mkdir -p /mnt/remote-config
     echo "Adding config volume to fstab..."
-    echo "10.0.0.2:/mnt/Marina-config/Configs/$MARINA_ENV /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+    echo "10.0.0.2:/mnt/Marina-config/Configs /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 
 echo "Mounting bhulk volume..."
 if ! grep -q "/mnt/bhulk" /etc/fstab; then
     mkdir -p /mnt/bhulk
     echo "Adding bhulk volume to fstab..."
-    echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk/$MARINA_ENV /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+    echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 # reload fstab
 mount -a
@@ -161,17 +130,15 @@ echo "0 5 * * * root \
 systemctl restart crond.service
 
 ## Important reminder
-if [ "$MARINA_ENV" = "prod" ]; then
-    firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
-    firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
-    firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
-    firewall-cmd --zone=public --permanent --add-port=51821/tcp # wireguard-ui
-    firewall-cmd --reload
+firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
+firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
+firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
+firewall-cmd --zone=public --permanent --add-port=51821/tcp # wireguard-ui
+firewall-cmd --reload
 
-    echo 'do not forget to check that everything is good by running
+echo 'do not forget to check that everything is good by running
     > podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi
-    on your next boot'
-fi
+on your next boot'
 
 # sometimes git repo gets owned by root
 # preventing user from pulling
