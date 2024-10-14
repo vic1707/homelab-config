@@ -92,22 +92,22 @@ echo "net.ipv6.conf.all.disable_ipv6=1" >> /etc/sysctl.conf
 # - `vers=4`: use NFSv4                                                       #
 # - `minorversion=1`: use NFSv4.1                                             #
 ###############################################################################
-## 1. /mnt/remote-config => 10.0.0.2:/mnt/Marina-config/Configs              ##
-## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/Marina-Bhulk                         ##
+## 1. /mnt/remote-config => 10.0.0.2:/mnt/Fluffy/Marina                      ##
+## 2. /mnt/bhulk => 10.0.0.2:/mnt/Bhulk/VMs                                  ##
 ###############################################################################
 NFS_OPTIONS="rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 echo "Configuring config volume..."
 if ! grep -q "/mnt/remote-config" /etc/fstab; then
     mkdir -p /mnt/remote-config
     echo "Adding config volume to fstab..."
-    echo "10.0.0.2:/mnt/Marina-config/Configs /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+    echo "10.0.0.2:/mnt/Fluffy/Marina /mnt/remote-config nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 
 echo "Mounting bhulk volume..."
 if ! grep -q "/mnt/bhulk" /etc/fstab; then
     mkdir -p /mnt/bhulk
     echo "Adding bhulk volume to fstab..."
-    echo "10.0.0.2:/mnt/Bhulk/Marina-Bhulk /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
+    echo "10.0.0.2:/mnt/Bhulk/VMs/Marina /mnt/bhulk nfs $NFS_OPTIONS 0 0" >> /etc/fstab
 fi
 # reload fstab
 mount -a
