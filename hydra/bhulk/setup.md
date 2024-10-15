@@ -97,7 +97,7 @@ PCI-Express: Yes
 ### Services
 Start auto - Enabled
 [x] SSH - Port `XXXXXX` - No root login - No password auth - No weak ciphers
-[x] NFS - Nb Servers: 2 - both logs
+[x] NFS - Nb Servers: 2 - both logs, NFS v4, NFSv3 ownership model for NFSv4
 
 ### NFS Mounts
 /mnt/Bhulk/Media/*
