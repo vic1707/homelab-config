@@ -6,7 +6,7 @@ Startup order: 1
 
 ---
 
-mount TrueNAS CORE ISO
+mount TrueNAS SCALE ISO
 GuestOS: Other
 
 ---
@@ -63,53 +63,61 @@ PCI-Express: Yes
 
 ## Initial Setup
 
-### Accounts
+### [x] Dashboard
+Do whatever you want
 
-[x] change root password
-[x] Create `created-users` with authorization for samba auth
+### [x] Accounts
+
+[x] change admin password
+[x] Create `created-users` with all defaults
 [x] Create users (locking prevents SSH with keys)
 
--   `vic1707`: no email, ZSH, permits sudo, samba auth, paste ssh pub (ensure owning of home dir)
--   `marina`: no email, ZSH, lock user
+-   `vic1707`: no email, tmux, permits all sudo cmd, samba auth, paste ssh pub (ensure owning of home dir), auxialiary group: truenas admin
+-   `marina`: no email, nologin, lock user
 
-### System
+### [x] System
 
-[x] GUI only available through the LAN (not fedex)
+TODO: Can't do that ??
+<!-- [x] GUI only available through the LAN (not fedex) -->
 [x] TZ: Paris
 [x] No telemerty
+[x] Show Console Messages
+[x] redirect HTTP to HTTPS
+
+#### [x] Advanced
 
 [x] System dataset is boot pool
+[x] untick `Show Text Console without Password Prompt`
 
-#### Advanced
-
-[x] tick, `show advanced`/`console messages`/`Autotune`
-
-### Network
-
-[x] set both static interfaces, MTU 1500, no DHCP
+### [x] Network
 [x] Set hostname to bhulk.homelab
+[x] 1.1.1.1 DNS
+[x] only updates can outbound
 
-### Tasks
+Nothing to do for interfaces it seems but just in case:
+[x] set both static interfaces, MTU 1500, no DHCP
 
-[x] SMART tests: All disks - LONG: 3AM, 1st of the month - SHORT: 3AM, 8,15,22,28th of the month
+### [x] Data Protection
+
+[x] SMART tests: All disks - LONG: 3AM, 1st of the month - SHORT: 3AM, 8,15,22,29th of the month
 [x] Edit scrubs to be - 0 threshhold - 1 & 15th of month - 6AM
 
 ### Services
 Start auto - Enabled
 [x] SSH - Port `XXXXXX` - No root login - No password auth - No weak ciphers
-[x] NFS - Nb Servers: 2 - both logs, NFS v4, NFSv3 ownership model for NFSv4
+[x] NFS - Nb Servers: auto - both logs, NFS v4, NFSv3 ownership model for NFSv4
 
 ### NFS Mounts
-/mnt/Bhulk/Media/*
+/mnt/Bhulk/Media/* - (RO)
 /mnt/Bhulk/VMs/Marina
 /mnt/Fluffy/Marina
 Options: 
- - all dirs
  - enabled
  - map all user: marina
  - map all group: created-users
  - authorized nets: 10.0.0.0/28
  - authorized IP: 10.0.0.3
 
-### Storage
+### [x] Storage
 TODO: Permissions: Big Fucking Mess 
+Note: Home folder should be 700 and 600 for .ssh in order to allow ssh 

@@ -109,7 +109,7 @@ apcaccess status
 local-btrfs
     - [x] ISO Images: 
         - `https://boot.netboot.xyz/ipxe/netboot.xyz.iso`
-        - `https://download-core.sys.truenas.net/13.3/STABLE/RELEASE/x64/TrueNAS-13.3-RELEASE.iso`
+        - `https://download.sys.truenas.net/TrueNAS-ElectricEel-RC/24.10-RC.2/TrueNAS-SCALE-24.10-RC.2.iso`
     - [x] CT Templates:
         - get alpine latest
 Storage:
