@@ -19,6 +19,9 @@ secrets:
     ## GICKUP
     gickup_vic1707_github_token:
         file: "$PWD/secrets/gickup-token"
+    ## AUTHELIA
+    authelia_secret:
+        file: "$PWD/secrets/gickup-token"
 
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
@@ -37,8 +40,12 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
+##
+x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.10
+x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.7
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
+    AUTHELIA_IP: *AUTHELIA_IP
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
@@ -55,6 +62,25 @@ x-common-settings: &common-settings
 #############################################
 
 services:
+    ##############################
+    ######    Authelia      ######
+    ##############################
+    authelia:
+        container_name: authelia
+        <<: [*common-sysctls, *restart, *common-security-opts]
+        image: *AUTHELIA
+        networks:
+            shared:
+                ipv4_address: *AUTHELIA_IP
+        environment:
+            <<: *common-env
+            ##############
+            ##   .env   ##
+            ##############
+        volumes:
+            - /mnt/config/authelia:/config:z,rw
+        secrets:
+            - authelia_secret
     ##############################
     ######      Caddy       ######
     ##############################

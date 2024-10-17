@@ -1,0 +1,13 @@
+# User file database https://www.authelia.com/reference/guides/passwords/#yaml-format
+# Generate passwords https://www.authelia.com/reference/guides/passwords/#passwords
+# docker run --rm -it authelia/authelia:latest authelia crypto hash generate argon2
+
+users:
+    vic1707:
+        disabled: false
+        password: ${VIC1707_PWD}
+        displayname: "vic1707"
+        email: dev@vic1707.xyz
+        groups:
+            - admin
+            - dev

@@ -1,0 +1,30 @@
+access_control:
+    default_policy: "one_factor"
+
+authentication_backend:
+    password_reset:
+        disable: true
+    file:
+        path: "/config/users_database.yml"
+
+# regulation:
+
+server:
+  endpoints:
+    authz:
+      forward-auth:
+        implementation: 'ForwardAuth'
+
+storage:
+    local:
+        path: "/config/db.sqlite3"
+
+session:
+    cookies:
+        - domain: "${DOMAIN}"
+          authelia_url: "https://auth.${DOMAIN}"
+
+notifier:
+    disable_startup_check: false
+    filesystem:
+        filename: "/config/notification.txt"
