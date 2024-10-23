@@ -130,3 +130,19 @@ pvesm add dir VMs_Backups --content backup --is_mountpoint yes --shared 0 --path
         - the second port of the solarflare
         - eno1 (dangling fedex cable) 
 
+### Set up email notifications
+Datacenter > Notifications > Add > SMTP
+[x] disable existing `mail-to-root`
+
+[x] add new SMTP
+- Endpoint name: `mail-notifications`
+- Server: `smtp.eu.mailgun.org`
+- Port: `587`
+- Encryption: `STARTTLS`
+- Username: `postmaster@mg.n...`
+- Password: from mailgun
+- From address: `hydra@mg.n...`
+- Recipient: root email.
+- Author: `Homelab - HYDRA`
+
+[x] Modify the default matcher to target the newly created SMTP

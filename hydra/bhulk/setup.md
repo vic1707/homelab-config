@@ -69,6 +69,7 @@ Do whatever you want
 ### [x] Accounts
 
 [x] change admin password
+[x] root & admin user: add `homelab@v...` email.
 [x] Create `created-users` with all defaults
 [x] Create users (locking prevents SSH with keys)
 
@@ -92,7 +93,7 @@ TODO: Can't do that ??
 ### [x] Network
 [x] Set hostname to bhulk.homelab
 [x] 1.1.1.1 DNS
-[x] only updates can outbound
+[x] only mails & updates can outbound
 
 Nothing to do for interfaces it seems but just in case:
 [x] set both static interfaces, MTU 1500, no DHCP
@@ -121,3 +122,18 @@ Options:
 ### [x] Storage
 TODO: Permissions: Big Fucking Mess 
 Note: Home folder should be 700 and 600 for .ssh in order to allow ssh 
+
+### [x] Email notifications
+System > Global settings > Email
+
+- From address: `bhulk@mg.n...`
+- From Name: `Homelab - BHULK`
+- Outgoing Mail Server: `smtp.eu.mailgun.org`
+- Mail Server Port: `587`
+- Security: `TLS (STARTTLS)`
+
+- Username: `postmaster@mg.n...`
+- Password: from mailgun
+
+System > Alert Settings > Email
+[x] Authentication > Email: `homelab@v...`
