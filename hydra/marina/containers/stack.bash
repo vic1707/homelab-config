@@ -80,9 +80,6 @@ gickup_setup() {
     cp "$PWD/gickup/conf.yml" /mnt/config/gickup/conf.yml
 }
 caddy_setup() {
-    mkdir -p /mnt/config/caddy/config
-    mkdir -p /mnt/config/caddy/data
-
     ## Check ENV ##
     local maybe_error_msg
     maybe_error_msg=$(check_env_vars DOMAIN ZEROSSL_EMAIL)
@@ -193,12 +190,6 @@ fi
 
 echo "Checking requirements for ${services[*]}"
 
-# Ensure config & data directories exist
-for service in "${services[@]}"; do
-    mkdir -p "/mnt/config/$service"
-    mkdir -p "/mnt/bhulk/$service"
-done
-
 # Check conditions for given services
 for service in "${services[@]}"; do
     case "$service" in
@@ -243,8 +234,6 @@ for service in "${services[@]}"; do
             echo "Wireguard OK."
             ;;
         *)
-            rmdir "/mnt/config/$service" 2> /dev/null
-            rmdir "/mnt/data/$service" 2> /dev/null
             exit_on_error "Unregistered service: $service."
             ;;
     esac
