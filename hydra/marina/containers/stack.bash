@@ -31,12 +31,19 @@ sudoer_required() {
 }
 check_env_vars() {
     for var in "$@"; do
-        if [ -z "${!var}" ]; then
-            echo "Environment variable $var is not set or empty."
-            return 1
-        fi
+        [ -n "${!var}" ] || exit_on_error "Environment variable $var is not set or empty."
     done
-    return 0
+}
+copy_files_with_check() {
+    declare -n pairs="$1"
+
+    for src in "${!pairs[@]}"; do
+        dest_dir="${pairs[$src]}"
+
+        [[ -f $src ]] || exit_on_error "Source file does not exist: $src"
+        mkdir -p "$dest_dir" || exit_on_error "Failed to create destination directory: $dest_dir"
+        cp "$src" "$dest_dir" || exit_on_error "Failed to copy $src to $dest_dir"
+    done
 }
 ########################################
 ####    Setup & checks functions    ####
@@ -59,64 +66,13 @@ jellyfin_setup() {
         echo "Reloading fstab..."
         sudo mount -a
         sudo systemctl daemon-reload
-        return $?
     fi
 
     for share in "${SHARES[@]}"; do
         local mount_point="/media/jellyfin/$share"
 
-        if ! findmnt "$mount_point" > /dev/null; then
-            echo "[$share] isn't correctly mounted at $mount_point."
-            return 1
-        fi
+        findmnt "$mount_point" > /dev/null || exit_on_error "[$share] isn't correctly mounted at $mount_point."
     done
-}
-gickup_setup() {
-    ## Check required files ##
-    if [ ! -f "$PWD/gickup/conf.yml" ]; then
-        echo "Config not found."
-        return 1
-    fi
-    cp "$PWD/gickup/conf.yml" /mnt/config/gickup/conf.yml
-}
-caddy_setup() {
-    mkdir -p /mnt/config/caddy/config
-    mkdir -p /mnt/config/caddy/data
-
-    ## Check ENV ##
-    local maybe_error_msg
-    maybe_error_msg=$(check_env_vars DOMAIN ZEROSSL_EMAIL)
-    local ret=$?
-    # shellcheck disable=SC2181
-    if [ "$ret" -ne 0 ]; then
-        echo "$maybe_error_msg"
-        return $ret
-    fi
-
-    ## Check required files ##
-    if [ ! -f "$PWD/caddy/Caddyfile" ]; then
-        echo "Caddyfile not found."
-        return 1
-    fi
-    cp "$PWD/caddy/Caddyfile" /mnt/config/caddy/Caddyfile
-}
-transmission_setup() {
-    ## Check ENV ##
-    local maybe_error_msg
-    maybe_error_msg=$(check_env_vars OVPN_CONFIG OVPN_PROVIDER)
-    local ret=$?
-    # shellcheck disable=SC2181
-    if [ "$ret" -ne 0 ]; then
-        echo "$maybe_error_msg"
-        return $ret
-    fi
-
-    ## Check required files ##
-    if [ ! -f "$PWD/transmission/keep_torrent_file.sh" ]; then
-        echo "Custom script 'keep_torrent_file.sh' not found."
-        return 1
-    fi
-    cp "$PWD/transmission/keep_torrent_file.sh" "/mnt/config/transmission/keep_torrent_file.sh"
 }
 wireguard_setup() {
     # https://github.com/wg-easy/wg-easy/wiki/Using-WireGuard-Easy-with-Podman#loading-kernel-modules
@@ -133,16 +89,6 @@ wireguard_setup() {
             fi
         fi
     done
-
-    ## Check ENV ##
-    local maybe_error_msg
-    maybe_error_msg=$(check_env_vars DOMAIN WGUI_PASSWORD_HASH)
-    local ret=$?
-    # shellcheck disable=SC2181
-    if [ "$ret" -ne 0 ]; then
-        echo "$maybe_error_msg"
-        return $ret
-    fi
 }
 ########################################
 
@@ -197,12 +143,6 @@ fi
 
 echo "Checking requirements for ${services[*]}"
 
-# Ensure config & data directories exist
-for service in "${services[@]}"; do
-    mkdir -p "/mnt/config/$service"
-    mkdir -p "/mnt/bhulk/$service"
-done
-
 # Check conditions for given services
 for service in "${services[@]}"; do
     case "$service" in
@@ -215,35 +155,31 @@ for service in "${services[@]}"; do
             echo "Jellyfin OK."
             ;;
         gickup)
-            maybe_error_msg=$(gickup_setup)
-            # shellcheck disable=SC2181
-            if [ "$?" -ne 0 ]; then
-                exit_on_error "Gickup checks didn't pass: $maybe_error_msg"
-            fi
+            declare -A files=(
+                ["$PWD/gickup/conf.yml"]="/mnt/config/gickup"
+            )
+            copy_files_with_check files
             echo "Gickup OK."
             ;;
         transmission)
-            maybe_error_msg=$(transmission_setup)
-            # shellcheck disable=SC2181
-            if [ "$?" -ne 0 ]; then
-                exit_on_error "Transmission checks didn't pass: $maybe_error_msg"
-            fi
+            check_env_vars OVPN_CONFIG OVPN_PROVIDER
+            declare -A files=(
+                ["$PWD/transmission/keep_torrent_file.sh"]="/mnt/config/transmission"
+            )
+            copy_files_with_check files
             echo "Transmission OK."
             ;;
         caddy)
-            maybe_error_msg=$(caddy_setup)
-            # shellcheck disable=SC2181
-            if [ "$?" -ne 0 ]; then
-                exit_on_error "Caddy checks didn't pass: $maybe_error_msg"
-            fi
+            check_env_vars DOMAIN ZEROSSL_EMAIL
+            declare -A files=(
+                ["$PWD/caddy/Caddyfile"]="/mnt/config/caddy"
+            )
+            copy_files_with_check files
             echo "Caddy OK."
             ;;
         wireguard)
-            maybe_error_msg=$(wireguard_setup)
-            # shellcheck disable=SC2181
-            if [ "$?" -ne 0 ]; then
-                exit_on_error "Wireguard checks didn't pass: $maybe_error_msg"
-            fi
+            check_env_vars DOMAIN WGUI_PASSWORD_HASH
+            wireguard_setup
             echo "Wireguard OK."
             ;;
         *)
