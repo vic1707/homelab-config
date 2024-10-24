@@ -45,6 +45,8 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
 ##
+x-RTORRENT: &RTORRENT docker.io/jesec/rtorrent-flood
+##
 x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
 x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
 ########### GLOBAL CONFIGURATIONS ###########
@@ -67,6 +69,21 @@ x-common-settings: &common-settings
 
 services:
     ##############################
+    ######     Rtorrent     ######
+    ##############################
+    rtorrent:
+        container_name: rtorrent
+        <<: *common-settings
+        image: *RTORRENT
+        network_mode: 'service:gluetun'
+        environment:
+            <<: *common-env
+            FLOOD_OPTION_auth: none # authelia handles that
+            FLOOD_OPTION_rtsocket: /home/download/.local/share/rtorrent/rtorrent.sock
+        volumes:
+            - /mnt/config/rtorrent:/home/download/.local/share:rw
+            - /mnt/bhulk/rtorrent:/data:rw # TODO: unused, need to fix that
+    ##############################
     ######     Gluetun      ######
     ##############################
     gluetun:
@@ -78,6 +95,8 @@ services:
                 ipv4_address: *GLUETUN_IP
         cap_add:
             - NET_ADMIN
+        ports:
+            - 3000:3000
         environment:
             <<: *common-env
             VPN_TYPE: wireguard
