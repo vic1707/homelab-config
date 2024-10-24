@@ -182,6 +182,15 @@ for service in "${services[@]}"; do
             wireguard_setup
             echo "Wireguard OK."
             ;;
+        authelia)
+            check_env_vars DOMAIN SMTP_USERNAME
+            declare -A files=(
+                ["$PWD/authelia/configuration.yml"]="/mnt/config/authelia"
+                ["$PWD/authelia/users_database.yml"]="/mnt/config/authelia"
+            )
+            copy_files_with_check files
+            echo "Authelia OK."
+            ;;
         *)
             rmdir "/mnt/config/$service" 2> /dev/null
             rmdir "/mnt/data/$service" 2> /dev/null

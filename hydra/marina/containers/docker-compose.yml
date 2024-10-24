@@ -19,6 +19,13 @@ secrets:
     ## GICKUP
     gickup_vic1707_github_token:
         file: "$PWD/secrets/gickup-token"
+    ## AUTHELIA
+    authelia_storage_encryption_key:
+        file: "$PWD/secrets/authelia-storage-encryption-key"
+    authelia_jwt_secret:
+        file: "$PWD/secrets/authelia-jwt-secret"
+    authelia_smtp_password:
+        file: "$PWD/secrets/authelia-smtp-password"
 
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
@@ -37,8 +44,12 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
+##
+x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.16
+x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.7
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
+    AUTHELIA_IP: *AUTHELIA_IP
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
@@ -55,6 +66,33 @@ x-common-settings: &common-settings
 #############################################
 
 services:
+    ##############################
+    ######    Authelia      ######
+    ##############################
+    authelia:
+        container_name: authelia
+        <<: *common-settings
+        image: *AUTHELIA
+        networks:
+            shared:
+                ipv4_address: *AUTHELIA_IP
+        secrets:
+            - authelia_storage_encryption_key
+            - authelia_jwt_secret
+            - authelia_smtp_password
+        environment:
+            <<: *common-env
+            X_AUTHELIA_CONFIG_FILTERS: template # Allows env var interpolation
+            AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/authelia_storage_encryption_key
+            AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: /run/secrets/authelia_jwt_secret
+            AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE: /run/secrets/authelia_smtp_password
+            ##############
+            ##   .env   ##
+            ##############
+            DOMAIN: ${DOMAIN}
+            SMTP_USERNAME: ${SMTP_USERNAME}
+        volumes:
+            - /mnt/config/authelia:/config:z,rw
     ##############################
     ######      Caddy       ######
     ##############################
