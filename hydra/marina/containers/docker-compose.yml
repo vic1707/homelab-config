@@ -19,6 +19,13 @@ secrets:
     ## GICKUP
     gickup_vic1707_github_token:
         file: "$PWD/secrets/gickup-token"
+    ## Gluetun
+    wireguard_private_key:
+        file: "$PWD/secrets/gluetun-wireguard-private-key"
+    wireguard_addresses:
+        file: "$PWD/secrets/gluetun-wireguard-addresses"
+    wireguard_preshared_key:
+        file: "$PWD/secrets/gluetun-wireguard-preshared-key"
 
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
@@ -37,12 +44,16 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
+##
+x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
+x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    GLUETUN_IP: *GLUETUN_IP
 
 x-common-settings: &common-settings
     sysctls:
@@ -55,6 +66,26 @@ x-common-settings: &common-settings
 #############################################
 
 services:
+    ##############################
+    ######     Gluetun      ######
+    ##############################
+    gluetun:
+        container_name: gluetun
+        <<: *common-settings
+        image: *GLUETUN
+        networks:
+            shared:
+                ipv4_address: *GLUETUN_IP
+        cap_add:
+            - NET_ADMIN
+        environment:
+            <<: *common-env
+            VPN_TYPE: wireguard
+            VPN_SERVICE_PROVIDER: windscribe
+        secrets:
+            - wireguard_private_key
+            - wireguard_addresses
+            - wireguard_preshared_key
     ##############################
     ######      Caddy       ######
     ##############################
