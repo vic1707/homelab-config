@@ -14,8 +14,6 @@ secrets:
     ## TRANSMISSION
     openvpn_creds:
         file: "$PWD/secrets/transmission-ovpn-credentials"
-    rpc_creds:
-        file: "$PWD/secrets/transmission-rpc-credentials"
     ## GICKUP
     gickup_vic1707_github_token:
         file: "$PWD/secrets/gickup-token"
@@ -174,7 +172,6 @@ services:
             <<: *common-env
             GLOBAL_APPLY_PERMISSIONS: false
             OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
-            TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: true
             TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED: true
             TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
             TRANSMISSION_WEB_UI: flood-for-transmission
@@ -185,11 +182,10 @@ services:
             ##############
             ##   .env   ##
             ##############
-            OPENVPN_CONFIG: ${OVPN_CONFIG}
-            OPENVPN_PROVIDER: ${OVPN_PROVIDER}
+            OPENVPN_CONFIG: netherlands
+            OPENVPN_PROVIDER: PIA
         secrets:
             - openvpn_creds
-            - rpc_creds
         volumes:
             - /mnt/bhulk/transmission:/data:rw
             - /mnt/config/transmission:/config # because keep_torrent_file script

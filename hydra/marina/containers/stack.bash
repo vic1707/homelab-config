@@ -162,7 +162,6 @@ for service in "${services[@]}"; do
             echo "Gickup OK."
             ;;
         transmission)
-            check_env_vars OVPN_CONFIG OVPN_PROVIDER
             declare -A files=(
                 ["$PWD/transmission/keep_torrent_file.sh"]="/mnt/config/transmission"
             )

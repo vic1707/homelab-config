@@ -32,7 +32,7 @@ jellyfin.{$DOMAIN} {
 }
 
 transmission.{$DOMAIN} {
-	# import secure *
+	import secure *
 	reverse_proxy {$TRANSMISSION_IP}:9091
 }
 
