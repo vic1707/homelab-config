@@ -183,8 +183,6 @@ for service in "${services[@]}"; do
             echo "Wireguard OK."
             ;;
         *)
-            rmdir "/mnt/config/$service" 2> /dev/null
-            rmdir "/mnt/data/$service" 2> /dev/null
             exit_on_error "Unregistered service: $service."
             ;;
     esac
