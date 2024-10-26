@@ -13,7 +13,7 @@ networks:
 secrets:
     ## GICKUP
     gickup_vic1707_github_token:
-        file: "$PWD/secrets/gickup-token"
+        external: true
     ## Gluetun
     wireguard_private_key:
         external: true
