@@ -11,14 +11,16 @@ networks:
                 - subnet: 10.99.0.0/26
 
 secrets:
-    ## TRANSMISSION
-    openvpn_creds:
-        file: "$PWD/secrets/transmission-ovpn-credentials"
-    rpc_creds:
-        file: "$PWD/secrets/transmission-rpc-credentials"
     ## GICKUP
     gickup_vic1707_github_token:
         file: "$PWD/secrets/gickup-token"
+    ## Gluetun
+    wireguard_private_key:
+        external: true
+    wireguard_addresses:
+        external: true
+    wireguard_preshared_key:
+        external: true
 
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
@@ -29,20 +31,27 @@ x-CADDY_IP: &CADDY_IP 10.99.0.2
 x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
 x-GICKUP_IP: &GICKUP_IP 10.99.0.3
 ##
-x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
-x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.4
+x-TRANSMISSION: &TRANSMISSION docker.io/linuxserver/transmission:4.0.6
 ##
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.11
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
+##
+x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
+x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
-    TRANSMISSION_IP: *TRANSMISSION_IP
+    GLUETUN_IP: *GLUETUN_IP
+
+x-vpn: &VPN
+    network_mode: "service:gluetun"
+    depends_on:
+        - gluetun
 
 x-common-settings: &common-settings
     sysctls:
@@ -55,6 +64,28 @@ x-common-settings: &common-settings
 #############################################
 
 services:
+    ##############################
+    ######     Gluetun      ######
+    ##############################
+    gluetun:
+        container_name: gluetun
+        # see https://github.com/qdm12/gluetun-wiki/blob/main/errors/tun.md#tun-device-is-not-available-open-devnettun-permission-denied
+        privileged: true
+        <<: *common-settings
+        image: *GLUETUN
+        networks:
+            shared:
+                ipv4_address: *GLUETUN_IP
+        cap_add:
+            - NET_ADMIN
+        environment:
+            <<: *common-env
+            VPN_TYPE: wireguard
+            VPN_SERVICE_PROVIDER: windscribe
+        secrets:
+            - wireguard_private_key
+            - wireguard_addresses
+            - wireguard_preshared_key
     ##############################
     ######      Caddy       ######
     ##############################
@@ -126,38 +157,16 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: *common-settings
+        <<: [*common-settings, *VPN]
         image: *TRANSMISSION
-        privileged: true #  needed to acces /dev/net/tun
-        networks:
-            shared:
-                ipv4_address: *TRANSMISSION_IP
         environment:
             <<: *common-env
-            GLOBAL_APPLY_PERMISSIONS: false
-            OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
-            TRANSMISSION_RPC_AUTHENTICATION_REQUIRED: true
+            DOCKER_MODS: linuxserver/mods:transmission-floodui|linuxserver/mods:transmission-env-var-settings
             TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED: true
             TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
-            TRANSMISSION_WEB_UI: flood-for-transmission
-            WEBPROXY_ENABLED: false
-            ## Wish I could remove ##
-            CREATE_TUN_DEVICE: false
-            DISABLE_PORT_UPDATER: true
-            ##############
-            ##   .env   ##
-            ##############
-            OPENVPN_CONFIG: ${OVPN_CONFIG}
-            OPENVPN_PROVIDER: ${OVPN_PROVIDER}
-        secrets:
-            - openvpn_creds
-            - rpc_creds
         volumes:
-            - /mnt/bhulk/transmission:/data:rw
-            - /mnt/config/transmission:/config # because keep_torrent_file script
-        devices: # wish I could remove
-            - /dev/net/tun
-
+            - /mnt/bhulk/transmission:/downloads:rw
+            - /mnt/config/transmission:/config:z
     ##############################
     ######    Wireguard     ######
     ##############################

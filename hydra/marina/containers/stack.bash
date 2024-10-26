@@ -162,7 +162,6 @@ for service in "${services[@]}"; do
             echo "Gickup OK."
             ;;
         transmission)
-            check_env_vars OVPN_CONFIG OVPN_PROVIDER
             declare -A files=(
                 ["$PWD/transmission/keep_torrent_file.sh"]="/mnt/config/transmission"
             )
@@ -181,6 +180,9 @@ for service in "${services[@]}"; do
             check_env_vars DOMAIN WGUI_PASSWORD_HASH
             wireguard_setup
             echo "Wireguard OK."
+            ;;
+        gluetun)
+            echo "No checks required for $service."
             ;;
         *)
             exit_on_error "Unregistered service: $service."

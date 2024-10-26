@@ -21,5 +21,5 @@ jellyfin.{$DOMAIN} {
 }
 
 transmission.{$DOMAIN} {
-	reverse_proxy {$TRANSMISSION_IP}:9091
+	reverse_proxy {$GLUETUN}:9091
 }

@@ -1,8 +1,9 @@
 #!/bin/sh
 
 __log() {
-    echo "$1" >> "$PWD/keep_torrent_file.log"
-    echo "$1" >> /proc/1/fd/1
+    log="$(date +'%Y-%m-%d %H:%M:%S') - $1"
+    echo "$log" >> "$PWD/keep_torrent_file.log"
+    # echo "$1" >> /proc/1/fd/1 # not available on linuxserver's images
 }
 
 ################################ Pre-existing variables #################################
@@ -20,12 +21,13 @@ __log() {
 #########################################################################################
 
 PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)
-TORRENT_DIR="/config/transmission-home/torrents"
+TORRENT_DIR="$PWD/torrents"
+TORRENT_FILE_PATH="$TORRENT_DIR/$TR_TORRENT_HASH.torrent"
 
-if [ -f "$TORRENT_DIR/$TR_TORRENT_HASH.torrent" ]; then
-    cp "$TORRENT_DIR/$TR_TORRENT_HASH.torrent" "$TR_TORRENT_DIR/$TR_TORRENT_NAME.torrent"
-    __log "$(date +'%Y-%m-%d %H:%M:%S') - Backed up $TR_TORRENT_HASH.torrent as $TR_TORRENT_NAME.torrent"
-    exit 0
+if ! [ -f "$TORRENT_FILE_PATH" ]; then
+    __log "[$TR_TORRENT_NAME] - $TORRENT_FILE_PATH not found for $TR_TORRENT_NAME !"
+    exit 1
 fi
-__log "$(date +'%Y-%m-%d %H:%M:%S') - $TR_TORRENT_HASH.torrent not found for $TR_TORRENT_NAME"
-exit 1
+
+cp "$TORRENT_FILE_PATH" "$TR_TORRENT_DIR/$TR_TORRENT_NAME.torrent"
+__log "[$TR_TORRENT_NAME] - $TR_TORRENT_HASH.torrent"
