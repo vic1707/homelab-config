@@ -99,7 +99,7 @@ sudoer_required
 source .env
 
 # Default services if no specific services are provided
-mapfile -t DEFAULT_SERVICES < <(podman run --rm -i docker.io/mikefarah/yq '.services | to_entries | .[] | .key' < docker-compose.yml)
+mapfile -t DEFAULT_SERVICES < <(podman run --rm -i docker.io/mikefarah/yq '.services | to_entries | .[] | .key' < compose.yml)
 
 echo "AVAILABLE SERVICES: ${DEFAULT_SERVICES[*]}"
 

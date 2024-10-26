@@ -67,7 +67,7 @@ x-common-settings: &common-settings
     sysctls:
         net.ipv6.conf.all.disable_ipv6: 1
     security_opt:
-        - &no-privilege no-new-privileges: true
+        - &no-privilege no-new-privileges=true
     restart: always
     environment: &common-env
         TZ: *TIMEZONE
@@ -173,7 +173,7 @@ services:
         image: *JELLYFIN
         security_opt:
             - *no-privilege
-            - label: disable
+            - label=disable
         networks:
             shared:
                 ipv4_address: *JELLYFIN_IP

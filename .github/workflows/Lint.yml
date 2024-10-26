@@ -13,7 +13,7 @@ jobs:
             # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
             - run: |
                   set -e # exits immediately if any command fails
-                  for f in $(find . -type f -name 'docker-compose.yml' -o -name 'docker-compose.yaml'); do
+                  for f in $(find . -type f -name 'compose.yml' -o -name 'compose.yaml'); do
                       docker compose -f "$f" config;
                   done
             - name: Format caddy file
