@@ -143,7 +143,7 @@ firewall-cmd --zone=public --permanent --add-port=51821/tcp # wireguard-ui
 firewall-cmd --reload
 
 echo 'do not forget to check that everything is good by running
-    > podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi
+    > podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda nvidia-smi
 on your next boot'
 
 # sometimes git repo gets owned by root
