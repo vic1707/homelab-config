@@ -1,6 +1,4 @@
 # TODO: fix volumes z options
-# TODO: rm privileged transmission?
-# TODO: execution capabilities on transmission config dir instead of just the script
 
 networks:
     shared:
@@ -32,25 +30,25 @@ secrets:
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
+x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.16
+x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.2
+##
 x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
-x-CADDY_IP: &CADDY_IP 10.99.0.2
+x-CADDY_IP: &CADDY_IP 10.99.0.3
 ##
 x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
-x-GICKUP_IP: &GICKUP_IP 10.99.0.3
-##
-x-TRANSMISSION: &TRANSMISSION docker.io/linuxserver/transmission:4.0.6
+x-GICKUP_IP: &GICKUP_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.11
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
-x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
-##
-x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.16
-x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.7
+x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ##
 x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
 x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
+##
+x-TRANSMISSION: &TRANSMISSION docker.io/linuxserver/transmission:4.0.6
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     AUTHELIA_IP: *AUTHELIA_IP
@@ -61,15 +59,15 @@ x-ips: &container-ips
     WIREGUARD_IP: *WIREGUARD_IP
 
 x-vpn: &VPN
-    network_mode: "service:gluetun"
+    network_mode: service:gluetun
     depends_on:
         - gluetun
 
 x-common-settings: &common-settings
     sysctls:
-        - net.ipv6.conf.all.disable_ipv6=1
+        net.ipv6.conf.all.disable_ipv6: 1
     security_opt:
-        - &no-privilege no-new-privileges=true
+        - &no-privilege no-new-privileges: true
     restart: always
     environment: &common-env
         TZ: *TIMEZONE
@@ -102,6 +100,7 @@ services:
             DOMAIN: ${DOMAIN}
         volumes:
             - /mnt/config/authelia:/config:z,rw
+
     ##############################
     ######     Gluetun      ######
     ##############################
@@ -124,6 +123,7 @@ services:
             - wireguard_private_key
             - wireguard_addresses
             - wireguard_preshared_key
+
     ##############################
     ######      Caddy       ######
     ##############################
@@ -173,7 +173,7 @@ services:
         image: *JELLYFIN
         security_opt:
             - *no-privilege
-            - label=disable
+            - label: disable
         networks:
             shared:
                 ipv4_address: *JELLYFIN_IP
@@ -188,7 +188,7 @@ services:
             - /mnt/config/jellyfin:/config:rw
             - /media/jellyfin:/media:ro
         devices:
-            - nvidia.com/gpu=all
+            nvidia.com/gpu: all
 
     ##############################
     ######   Transmission   ######
@@ -207,7 +207,9 @@ services:
             TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
         volumes:
             - /mnt/bhulk/transmission:/downloads:rw
-            - /mnt/config/transmission:/config:z
+            - /mnt/config/transmission:/config:z,rw
+            - /mnt/config/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh:z
+
     ##############################
     ######    Wireguard     ######
     ##############################
@@ -239,6 +241,6 @@ services:
         ports:
             - 51820:51820/udp
         sysctls:
-            - net.ipv4.conf.all.src_valid_mark=1
-            - net.ipv4.ip_forward=1
-            - net.ipv6.conf.all.disable_ipv6=1
+            net.ipv4.conf.all.src_valid_mark: 1
+            net.ipv4.ip_forward: 1
+            net.ipv6.conf.all.disable_ipv6: 1
