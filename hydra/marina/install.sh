@@ -36,10 +36,16 @@ echo "Updating repositories and installing packages..."
 echo "Installing Epel..."
 dnf install -y epel-release
 echo "Installing other packages..."
-dnf install -y podman podman-compose nfs-utils rsync
+dnf install -y podman nfs-utils rsync
 dnf copr enable -y atim/bottom
 dnf install bottom -y
 dnf upgrade -y
+################################ Podman compose ################################
+echo "Manually installing podman compose as dnf version is too old"
+# TODO: watch https://github.com/containers/podman-compose/issues/1024
+dnf install -y python3-dotenv
+curl -o /usr/bin/podman-compose https://raw.githubusercontent.com/containers/podman-compose/main/podman_compose.py
+chmod +x /usr/bin/podman-compose
 ################################ NVIDIA Podman ################################
 # ATM it is 560.28.03
 echo "Installing NVIDIA Driver..."
