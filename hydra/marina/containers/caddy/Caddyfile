@@ -12,6 +12,17 @@
 	admin :2019
 }
 
+# https://www.authelia.com/integration/proxies/caddy/
+# https://caddyserver.com/docs/caddyfile/directives/forward_auth#authelia
+# https://caddy.community/t/securing-web-apps-with-caddy-and-authelia-in-docker-compose-an-opinionated-practical-and-minimal-production-ready-login-portal-guide/20465
+(secure) {
+	# forward_auth {args.0} https://auth.{$DOMAIN} {
+	forward_auth {args.0} {$AUTHELIA_IP}:9091 {
+		uri /api/authz/forward-auth
+		copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+	}
+}
+
 {$DOMAIN} {
 	redir https://github.com/vic1707
 }
@@ -21,5 +32,15 @@ jellyfin.{$DOMAIN} {
 }
 
 transmission.{$DOMAIN} {
+	import secure *
 	reverse_proxy {$GLUETUN}:9091
+}
+
+wg.{$DOMAIN} {
+	import secure *
+	reverse_proxy {$WIREGUARD_IP}:51821
+}
+
+auth.{$DOMAIN} {
+	reverse_proxy {$AUTHELIA_IP}:9091
 }

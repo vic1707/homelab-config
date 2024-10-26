@@ -98,10 +98,6 @@ sudoer_required
 # shellcheck disable=SC1091
 source .env
 
-# ensure secrets have the right permissions
-sudo chown marina:marina -R secrets/
-chmod 700 -R secrets/
-
 # Default services if no specific services are provided
 mapfile -t DEFAULT_SERVICES < <(podman run --rm -i docker.io/mikefarah/yq '.services | to_entries | .[] | .key' < docker-compose.yml)
 
@@ -180,6 +176,15 @@ for service in "${services[@]}"; do
             check_env_vars DOMAIN WGUI_PASSWORD_HASH
             wireguard_setup
             echo "Wireguard OK."
+            ;;
+        authelia)
+            check_env_vars DOMAIN
+            declare -A files=(
+                ["$PWD/authelia/configuration.yml"]="/mnt/config/authelia"
+                ["$PWD/authelia/users_database.yml"]="/mnt/config/authelia"
+            )
+            copy_files_with_check files
+            echo "Authelia OK."
             ;;
         gluetun)
             echo "No checks required for $service."

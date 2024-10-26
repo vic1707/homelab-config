@@ -1,0 +1,16 @@
+# podman run \
+#       --rm -it authelia/authelia:latest \
+#       authelia crypto hash generate argon2 \
+#       --memory 262144 --iterations 5 --parallelism 4
+
+users:
+    vic1707:
+        disabled: false
+        password: $argon2id$v=19$m=262144,t=4,p=4$YQuVkR0oUmD2IR/7GOT2WQ$OhUUQaTUztjh1gmvq2kxe14PHSDK+q4pByqo++uODzQ
+        displayname: vic1707
+        email: contact@vic1707.xyz
+        groups:
+            - admin
+            - app-tranmsission
+            - dev
+            - media

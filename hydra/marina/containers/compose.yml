@@ -21,6 +21,13 @@ secrets:
         external: true
     wireguard_preshared_key:
         external: true
+    ## AUTHELIA
+    authelia_storage_encryption_key:
+        external: true
+    authelia_jwt_secret:
+        external: true
+    authelia_smtp_password:
+        external: true
 
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
@@ -39,14 +46,19 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.6
 ##
+x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.16
+x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.7
+##
 x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
 x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
+    AUTHELIA_IP: *AUTHELIA_IP
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     GLUETUN_IP: *GLUETUN_IP
+    WIREGUARD_IP: *WIREGUARD_IP
 
 x-vpn: &VPN
     network_mode: "service:gluetun"
@@ -64,6 +76,32 @@ x-common-settings: &common-settings
 #############################################
 
 services:
+    ##############################
+    ######    Authelia      ######
+    ##############################
+    authelia:
+        container_name: authelia
+        <<: *common-settings
+        image: *AUTHELIA
+        networks:
+            shared:
+                ipv4_address: *AUTHELIA_IP
+        secrets:
+            - authelia_storage_encryption_key
+            - authelia_jwt_secret
+            - authelia_smtp_password
+        environment:
+            <<: *common-env
+            X_AUTHELIA_CONFIG_FILTERS: template # Allows env var interpolation
+            AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /run/secrets/authelia_storage_encryption_key
+            AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: /run/secrets/authelia_jwt_secret
+            AUTHELIA_NOTIFIER_SMTP_PASSWORD_FILE: /run/secrets/authelia_smtp_password
+            ##############
+            ##   .env   ##
+            ##############
+            DOMAIN: ${DOMAIN}
+        volumes:
+            - /mnt/config/authelia:/config:z,rw
     ##############################
     ######     Gluetun      ######
     ##############################
@@ -191,7 +229,7 @@ services:
             <<: *common-env
             WG_HOST: wg.${DOMAIN}
             PASSWORD_HASH: ${WGUI_PASSWORD_HASH}
-            WEBUI_HOST: *WIREGUARD_IP # for setup : 0.0.0.0
+            WEBUI_HOST: *WIREGUARD_IP
             UI_TRAFFIC_STATS: true
             UI_ENABLE_SORT_CLIENTS: true
             UI_SHOW_LINKS: true
@@ -200,7 +238,6 @@ services:
             - /mnt/config/wireguard:/etc/wireguard:z,rw
         ports:
             - 51820:51820/udp
-            # for setup - 51821:51821/tcp
         sysctls:
             - net.ipv4.conf.all.src_valid_mark=1
             - net.ipv4.ip_forward=1

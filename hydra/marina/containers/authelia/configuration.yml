@@ -1,0 +1,79 @@
+log_level: debug
+theme: dark
+
+# Is the authz mode for caddy
+server:
+    endpoints:
+        authz:
+            forward-auth:
+                implementation: ForwardAuth
+
+access_control:
+    default_policy: deny
+    rules:
+        - domain: transmission.{{ mustEnv "DOMAIN" }}
+          policy: one_factor
+          subject:
+              - group:app-tranmsission
+              - group:admin
+        - domain: wg.{{ mustEnv "DOMAIN" }}
+          policy: two_factor
+          subject:
+              - group:admin
+
+identity_validation:
+    elevated_session:
+        require_second_factor: true
+    reset_password:
+        # secret handled via podman secrets
+        jwt_algorithm: HS512
+
+password_policy:
+    standard:
+        enabled: true
+        min_length: 20
+        require_uppercase: true
+        require_lowercase: true
+        require_number: true
+        require_special: true
+
+storage:
+    local:
+        path: /config/db.sqlite3
+
+session:
+    name: authelia_session_{{ mustEnv "DOMAIN" }}
+    # secret handled via podman secrets
+    cookies:
+        - domain: '{{ mustEnv "DOMAIN" }}'
+          authelia_url: https://auth.{{ mustEnv "DOMAIN" }}
+
+notifier:
+    smtp:
+        address: smtp://smtp.eu.mailgun.org:587
+        sender: 'auth@mg.{{ mustEnv "DOMAIN" }}'
+        username: 'postmaster@mg.{{ mustEnv "DOMAIN" }}'
+        # password is a secret
+        subject: '[Authelia - {{ mustEnv "DOMAIN" }}] {title}'
+
+#####################
+## Auth strategies ##
+#####################
+# First factor
+authentication_backend:
+    file:
+        path: /config/users_database.yml
+# 2nd factors
+totp:
+    disable: false
+    issuer: Authelia - {{ mustEnv "DOMAIN" }}
+    digits: 8
+    secret_size: 64
+    allowed_algorithms: [sha256, sha512]
+
+webauthn:
+    disable: false
+    display_name: Authelia - {{ mustEnv "DOMAIN" }}
+    attestation_conveyance_preference: none
+    user_verification: preferred
+    timeout: 60s
