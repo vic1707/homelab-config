@@ -108,7 +108,7 @@ services:
             ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
         volumes:
             - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
-            - /mnt/config/caddy/data:/data:z,rw
+            - /mnt/config/caddy:/data/caddy:z,rw
 
     ##############################
     ######      Gickup      ######
