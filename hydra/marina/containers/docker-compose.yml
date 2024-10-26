@@ -161,6 +161,9 @@ services:
         image: *TRANSMISSION
         environment:
             <<: *common-env
+            # TODO: I HATE THIS, these are the IDs from vic1707 on bhulk
+            PGID: 3000
+            PUID: 3000
             DOCKER_MODS: linuxserver/mods:transmission-floodui|linuxserver/mods:transmission-env-var-settings
             TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED: true
             TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
