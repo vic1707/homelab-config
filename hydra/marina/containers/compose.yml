@@ -15,6 +15,13 @@ secrets:
     ## GICKUP
     gickup_vic1707_github_token:
         external: true
+    ## Gluetun
+    wireguard_private_key:
+        external: true
+    wireguard_addresses:
+        external: true
+    wireguard_preshared_key:
+        external: true
     ## AUTHELIA
     authelia_storage_encryption_key:
         external: true
@@ -43,6 +50,9 @@ x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
 ##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
+##
+x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
+x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     AUTHELIA_IP: *AUTHELIA_IP
@@ -50,7 +60,13 @@ x-ips: &container-ips
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     TRANSMISSION_IP: *TRANSMISSION_IP
+    GLUETUN_IP: *GLUETUN_IP
     WIREGUARD_IP: *WIREGUARD_IP
+
+x-vpn: &VPN
+    network_mode: service:gluetun
+    depends_on:
+        - gluetun
 
 x-common-settings: &common-settings
     sysctls:
@@ -89,6 +105,29 @@ services:
             DOMAIN: ${DOMAIN}
         volumes:
             - /mnt/config/authelia:/config:z,rw
+
+    ##############################
+    ######     Gluetun      ######
+    ##############################
+    gluetun:
+        container_name: gluetun
+        # see https://github.com/qdm12/gluetun-wiki/blob/main/errors/tun.md#tun-device-is-not-available-open-devnettun-permission-denied
+        privileged: true
+        <<: *common-settings
+        image: *GLUETUN
+        networks:
+            shared:
+                ipv4_address: *GLUETUN_IP
+        cap_add:
+            - NET_ADMIN
+        environment:
+            <<: *common-env
+            VPN_TYPE: wireguard
+            VPN_SERVICE_PROVIDER: windscribe
+        secrets:
+            - wireguard_private_key
+            - wireguard_addresses
+            - wireguard_preshared_key
 
     ##############################
     ######      Caddy       ######
