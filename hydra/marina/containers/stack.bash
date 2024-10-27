@@ -50,6 +50,7 @@ copy_files_with_check() {
 ########################################
 NFS_OPTIONS="ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1"
 jellyfin_setup() {
+    RELOAD_FSTAB=0
     ## Check required NFS mounts ##
     local SHARES=("Animes" "Movies" "Music" "NSFW" "Scans" "Shows")
     for share in "${SHARES[@]}"; do
