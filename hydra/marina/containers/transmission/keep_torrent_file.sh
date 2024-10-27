@@ -3,7 +3,7 @@
 __log() {
     log="$(date +'%Y-%m-%d %H:%M:%S') - $1"
     echo "$log" >> "$PWD/keep_torrent_file.log"
-    # echo "$1" >> /proc/1/fd/1 # not available on linuxserver's images
+    echo "$1" >> /proc/1/fd/1 # not available on linuxserver's images
 }
 
 ################################ Pre-existing variables #################################

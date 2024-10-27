@@ -187,9 +187,6 @@ for service in "${services[@]}"; do
             copy_files_with_check files
             echo "Authelia OK."
             ;;
-        gluetun)
-            echo "No checks required for $service."
-            ;;
         *)
             exit_on_error "Unregistered service: $service."
             ;;
