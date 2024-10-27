@@ -188,7 +188,7 @@ services:
             - /mnt/config/jellyfin:/config:rw
             - /media/jellyfin:/media:ro
         devices:
-            nvidia.com/gpu: all
+            - nvidia.com/gpu=all
 
     ##############################
     ######   Transmission   ######
