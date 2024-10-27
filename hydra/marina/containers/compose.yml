@@ -229,7 +229,7 @@ services:
             - AUDIT_WRITE
         environment:
             <<: *common-env
-            WG_HOST: wg.${DOMAIN}
+            WG_HOST: vpn.${DOMAIN}
             PASSWORD_HASH: ${WGUI_PASSWORD_HASH}
             WEBUI_HOST: *WIREGUARD_IP
             UI_TRAFFIC_STATS: true

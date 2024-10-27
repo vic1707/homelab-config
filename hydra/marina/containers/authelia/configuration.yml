@@ -16,7 +16,7 @@ access_control:
           subject:
               - group:app-tranmsission
               - group:admin
-        - domain: wg.{{ mustEnv "DOMAIN" }}
+        - domain: wg-ui.{{ mustEnv "DOMAIN" }}
           policy: two_factor
           subject:
               - group:admin

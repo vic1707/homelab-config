@@ -36,7 +36,7 @@ transmission.{$DOMAIN} {
 	reverse_proxy {$GLUETUN}:9091
 }
 
-wg.{$DOMAIN} {
+wg-ui.{$DOMAIN} {
 	import secure *
 	reverse_proxy {$WIREGUARD_IP}:51821
 }
