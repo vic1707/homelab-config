@@ -48,6 +48,9 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
 ##
+x-PROMETHEUS: &PROMETHEUS docker.io/prom/prometheus:v2.55.0
+x-PROMETHEUS_IP: &PROMETHEUS_IP 10.99.0.59
+##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ##
@@ -262,3 +265,19 @@ services:
             net.ipv4.conf.all.src_valid_mark: 1
             net.ipv4.ip_forward: 1
             net.ipv6.conf.all.disable_ipv6: 1
+
+    ##############################
+    ######    Prometheus    ######
+    ##############################
+    prometheus:
+        container_name: prometheus
+        <<: *common-settings
+        image: *PROMETHEUS
+        networks:
+            shared:
+                ipv4_address: *PROMETHEUS_IP
+        command:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+        volumes:
+            - /mnt/config/prometheus:/etc/prometheus
+            - /mnt/data/prometheus:/prometheus

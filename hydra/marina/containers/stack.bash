@@ -187,6 +187,13 @@ for service in "${services[@]}"; do
             copy_files_with_check files
             echo "Authelia OK."
             ;;
+        prometheus)
+            declare -A files=(
+                ["$PWD/prometheus/prometheus.yml"]="/mnt/config/prometheus"
+            )
+            copy_files_with_check files
+            echo "Prometheus OK."
+            ;;
         gluetun)
             echo "No checks required for $service."
             ;;
