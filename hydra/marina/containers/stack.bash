@@ -158,13 +158,6 @@ for service in "${services[@]}"; do
             copy_files_with_check files
             echo "Gickup OK."
             ;;
-        transmission)
-            declare -A files=(
-                ["$PWD/transmission/keep_torrent_file.sh"]="/mnt/config/transmission"
-            )
-            copy_files_with_check files
-            echo "Transmission OK."
-            ;;
         caddy)
             check_env_vars DOMAIN ZEROSSL_EMAIL
             declare -A files=(
@@ -187,7 +180,7 @@ for service in "${services[@]}"; do
             copy_files_with_check files
             echo "Authelia OK."
             ;;
-        gluetun)
+        gluetun | transmission)
             echo "No checks required for $service."
             ;;
         *)
