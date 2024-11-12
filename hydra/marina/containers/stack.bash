@@ -149,6 +149,11 @@ for service in "${services[@]}"; do
             if [ "$?" -ne 0 ]; then
                 exit_on_error "Jellyfin checks didn't pass: $maybe_error_msg"
             fi
+            ### Check that containers can access devices
+            if getsebool container_use_devices | grep -q 'off'; then
+                sudo setsebool -P container_use_devices=1
+                echo "container_use_devices set to 1 (on)"
+            fi
             echo "Jellyfin OK."
             ;;
         gickup)

@@ -58,6 +58,8 @@ dnf install -y nvidia-container-toolkit
 # allow non root containers to access the GPU
 sed -i 's/^#no-cgroups = false/no-cgroups = true/;' /etc/nvidia-container-runtime/config.toml
 
+### Used later by jellyfin and nvidia cuda, installing the nvidia selinux policy didn't work properly with jellyfin
+setsebool -P container_use_devices=1
 ############################# NVIDIA CDI Service #############################
 echo "Creating systemd service for NVIDIA CDI configuration..."
 cat << EOF > /etc/systemd/system/nvidia-cdi-generator.service
@@ -142,8 +144,9 @@ firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
 firewall-cmd --zone=public --permanent --add-port=51821/tcp # wireguard-ui
 firewall-cmd --reload
 
+# shellcheck disable=SC2016 # expected
 echo 'do not forget to check that everything is good by running
-    > podman run --rm --device nvidia.com/gpu=all --security-opt=label=disable docker.io/nvidia/cuda nvidia-smi
+    > podman run --rm -u "$(id -u):$(id -g)" --cap-drop=ALL --device nvidia.com/gpu=all docker.io/nvidia/cuda:12.6.2-base-ubuntu24.04 nvidia-smi
 on your next boot'
 
 # sometimes git repo gets owned by root
