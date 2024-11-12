@@ -242,3 +242,45 @@ services:
             net.ipv4.conf.all.src_valid_mark: 1
             net.ipv4.ip_forward: 1
             net.ipv6.conf.all.disable_ipv6: 1
+
+    alpine_test:
+        container_name: alpine_test
+        image: alpine:latest
+        command: sleep infinity
+        volumes:
+            - type: volume
+              source: config_rw
+              target: /config
+              bind:
+                  selinux: z
+              volume:
+                  nocopy: true
+                  subpath: alpine
+            - type: volume
+              source: movies_ro
+              read_only: true
+              target: /media/movies
+              bind:
+                  selinux: z
+              volume:
+                  nocopy: true
+
+#############################################
+####             NFS VOLUMES             ####
+#############################################
+x-BHULK-RO: &NFS_BHULK_RO ro,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1
+x-BHULK-RW: &NFS_BHULK_RW rw,acl,hard,noatime,nodev,nodiratime,noexec,nosuid,vers=4,minorversion=1
+
+volumes:
+    config_rw:
+        driver: local
+        driver_opts:
+            type: nfs
+            o: *NFS_BHULK_RW
+            device: 10.0.0.2:/mnt/Fluffy/Marina
+    movies_ro:
+        driver: local
+        driver_opts:
+            type: nfs
+            o: *NFS_BHULK_RO
+            device: 10.0.0.2:/mnt/Bhulk/Medias/Movies
