@@ -106,8 +106,6 @@ services:
     ##############################
     gluetun:
         container_name: gluetun
-        # see https://github.com/qdm12/gluetun-wiki/blob/main/errors/tun.md#tun-device-is-not-available-open-devnettun-permission-denied
-        privileged: true
         <<: *common-settings
         image: *GLUETUN
         networks:
