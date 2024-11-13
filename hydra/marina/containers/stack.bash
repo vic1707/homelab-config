@@ -34,17 +34,6 @@ check_env_vars() {
         [ -n "${!var}" ] || exit_on_error "Environment variable $var is not set or empty."
     done
 }
-copy_files_with_check() {
-    declare -n pairs="$1"
-
-    for src in "${!pairs[@]}"; do
-        dest_dir="${pairs[$src]}"
-
-        [[ -f $src ]] || exit_on_error "Source file does not exist: $src"
-        mkdir -p "$dest_dir" || exit_on_error "Failed to create destination directory: $dest_dir"
-        cp "$src" "$dest_dir" || exit_on_error "Failed to copy $src to $dest_dir"
-    done
-}
 ########################################
 ####    Setup & checks functions    ####
 ########################################
@@ -154,44 +143,25 @@ for service in "${services[@]}"; do
                 sudo setsebool -P container_use_devices=1
                 echo "container_use_devices set to 1 (on)"
             fi
-            echo "Jellyfin OK."
-            ;;
-        gickup)
-            declare -A files=(
-                ["$PWD/gickup/conf.yml"]="/mnt/config/gickup"
-            )
-            copy_files_with_check files
-            echo "Gickup OK."
             ;;
         caddy)
             check_env_vars DOMAIN ZEROSSL_EMAIL
-            declare -A files=(
-                ["$PWD/caddy/Caddyfile"]="/mnt/config/caddy"
-            )
-            copy_files_with_check files
-            echo "Caddy OK."
             ;;
         wireguard)
             check_env_vars DOMAIN WGUI_PASSWORD_HASH
             wireguard_setup
-            echo "Wireguard OK."
             ;;
         authelia)
             check_env_vars DOMAIN
-            declare -A files=(
-                ["$PWD/authelia/configuration.yml"]="/mnt/config/authelia"
-                ["$PWD/authelia/users_database.yml"]="/mnt/config/authelia"
-            )
-            copy_files_with_check files
-            echo "Authelia OK."
             ;;
-        gluetun | transmission)
+        gickup | gluetun | transmission)
             echo "No checks required for $service."
             ;;
         *)
             exit_on_error "Unregistered service: $service."
             ;;
     esac
+    echo "$service OK."
 done
 
 podman compose "${args[@]}"

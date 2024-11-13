@@ -68,7 +68,10 @@ x-common-settings: &common-settings
         net.ipv6.conf.all.disable_ipv6: 1
     security_opt:
         - &no-privilege no-new-privileges=true
+    cap_drop:
+        - ALL
     restart: always
+    read_only: true
     environment: &common-env
         TZ: *TIMEZONE
 #############################################
@@ -77,13 +80,20 @@ services:
     ##############################
     ######    Authelia      ######
     ##############################
+    ## For readonly
+    # Container accesses: 
+    # - /app/.healthcheck.env
+    # others ?
     authelia:
         container_name: authelia
         <<: *common-settings
         image: *AUTHELIA
+        cap_add:
+            - SETGID # su-exec: setgroups(0): Operation not permitted
         networks:
             shared:
                 ipv4_address: *AUTHELIA_IP
+        read_only: false
         secrets:
             - authelia_storage_encryption_key
             - authelia_jwt_secret
@@ -99,11 +109,21 @@ services:
             ##############
             DOMAIN: ${DOMAIN}
         volumes:
-            - /mnt/config/authelia:/config:z,rw
+            - $PWD/authelia/configuration.yml:/config/configuration.yml:Z,ro
+            - $PWD/authelia/users_database.yml:/config/users_database.yml:Z,rw
+            # Doesn't like NFS storage I think
+            - /mnt/config/authelia:/data:Z,rw
 
     ##############################
     ######     Gluetun      ######
     ##############################
+    ## For readonly
+    # Container accesses: 
+    # - /gluetun/auth/config.toml
+    # - /gluetun/servers.json
+    # - /etc/passwd for user creation
+    # - /tmp/gluetun/ip (local ip?)
+    # others ?
     gluetun:
         container_name: gluetun
         # see https://github.com/qdm12/gluetun-wiki/blob/main/errors/tun.md#tun-device-is-not-available-open-devnettun-permission-denied
@@ -113,8 +133,9 @@ services:
         networks:
             shared:
                 ipv4_address: *GLUETUN_IP
-        cap_add:
-            - NET_ADMIN
+        # cap_add:
+        #     - NET_ADMIN
+        read_only: false
         environment:
             <<: *common-env
             VPN_TYPE: wireguard
@@ -131,6 +152,8 @@ services:
         container_name: caddy
         <<: *common-settings
         image: *CADDY
+        cap_add:
+            - NET_BIND_SERVICE # exec container process `/usr/bin/caddy`: Operation not permitted
         networks:
             shared:
                 ipv4_address: *CADDY_IP
@@ -145,8 +168,8 @@ services:
             DOMAIN: ${DOMAIN}
             ZEROSSL_EMAIL: ${ZEROSSL_EMAIL}
         volumes:
-            - /mnt/config/caddy/Caddyfile:/etc/caddy/Caddyfile:z,ro
-            - /mnt/config/caddy:/data/caddy:z,rw
+            - $PWD/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
+            - /mnt/config/caddy:/data/caddy:Z,rw
 
     ##############################
     ######      Gickup      ######
@@ -160,13 +183,15 @@ services:
                 ipv4_address: *GICKUP_IP
         volumes:
             - /mnt/bhulk/gickup:/data:rw
-            - /mnt/config/gickup/conf.yml:/gickup/conf.yml:z,ro
+            - $PWD/gickup/conf.yml:/gickup/conf.yml:Z,ro
         secrets:
             - gickup_vic1707_github_token
 
     ##############################
     ######     Jellyfin     ######
     ##############################
+    ## For readonly
+    # - error executing hook `/usr/bin/nvidia-cdi-hook` (exit code: 1)
     jellyfin:
         container_name: jellyfin
         <<: *common-settings
@@ -174,6 +199,7 @@ services:
         networks:
             shared:
                 ipv4_address: *JELLYFIN_IP
+        read_only: false
         environment:
             <<: *common-env
             # https://ffmpeg.org/ffmpeg-formats.html
@@ -194,6 +220,8 @@ services:
         container_name: transmission
         <<: [*common-settings, *VPN]
         image: *TRANSMISSION
+        tmpfs:
+            - /tmp/web-ui
         environment:
             <<: *common-env
             TRANSMISSION_RPC_HOST_WHITELIST_ENABLED: "false" # TODO: fix
@@ -202,8 +230,8 @@ services:
             TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
         volumes:
             - /mnt/bhulk/transmission:/data:rw
-            - /mnt/config/transmission:/config:z,rw
-            - $PWD/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh:z
+            - /mnt/config/transmission:/config:Z,rw
+            - $PWD/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh
 
     ##############################
     ######    Wireguard     ######
@@ -219,9 +247,6 @@ services:
             - NET_ADMIN
             - NET_RAW
             - SYS_MODULE
-        cap_drop:
-            - MKNOD
-            - AUDIT_WRITE
         environment:
             <<: *common-env
             WG_HOST: vpn.${DOMAIN}
@@ -232,7 +257,7 @@ services:
             UI_SHOW_LINKS: true
             UI_CHART_TYPE: 1
         volumes:
-            - /mnt/config/wireguard:/etc/wireguard:z,rw
+            - /mnt/config/wireguard:/etc/wireguard:Z,rw
         ports:
             - 51820:51820/udp
         sysctls:
