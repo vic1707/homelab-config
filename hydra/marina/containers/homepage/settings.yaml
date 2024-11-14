@@ -1,0 +1,9 @@
+title: vic1707's Homelab
+
+layout:
+    Machines:
+        style: row
+        columns: 1
+    Services:
+        style: row
+        columns: 4

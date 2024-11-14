@@ -137,3 +137,7 @@ System > Global settings > Email
 
 System > Alert Settings > Email
 [x] Authentication > Email: `homelab@v...`
+
+
+### [x] API Key for Homepage
+User Icon > Api key > New

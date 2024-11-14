@@ -154,7 +154,7 @@ for service in "${services[@]}"; do
         authelia)
             check_env_vars DOMAIN
             ;;
-        gickup | gluetun | transmission)
+        gickup | gluetun | transmission | homepage)
             echo "No checks required for $service."
             ;;
         *)

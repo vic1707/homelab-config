@@ -1,0 +1,39 @@
+- Machines:
+      - Bhulk:
+            description: NAS
+            widget:
+                type: truenas
+                url: "https://{{HOMEPAGE_VAR_BHULK_IP}}"
+                key: "{{HOMEPAGE_FILE_TRUENAS_API_KEY}}"
+                enablePools: true
+                nasType: scale
+
+- Services:
+      - Caddy:
+            description: Reverse-proxy
+            widget:
+                type: caddy
+                url: "http://{{HOMEPAGE_VAR_CADDY_IP}}:2019"
+      - Transmission:
+            description: Torrent client
+            widget:
+                type: transmission
+                url: "http://{{HOMEPAGE_VAR_TRANSMISSION_IP}}:9091"
+                rpcUrl: /transmission/ # Optional. Matches the value of "rpc-url" in your Transmission's settings.json file
+      - Jellyfin:
+            description: Media server
+            widget:
+                type: jellyfin
+                url: "http://{{HOMEPAGE_VAR_JELLYFIN_IP}}:8096"
+                key: "{{HOMEPAGE_FILE_JELLYFIN_API_KEY}}"
+                enableBlocks: true
+                enableNowPlaying: true
+                enableUser: true
+                showEpisodeNumber: true
+                expandOneStreamToTwoRows: true
+      - Wireguard:
+            description: VPN
+            widget:
+                type: wgeasy
+                url: "http://{{HOMEPAGE_VAR_WIREGUARD_IP}}:51821"
+                password: "{{HOMEPAGE_FILE_WIREGUARD_PASSWORD}}"

@@ -26,6 +26,13 @@ secrets:
         external: true
     authelia_smtp_password:
         external: true
+    ## HOMEPAGE
+    homepage_truenas_api_key:
+        external: true
+    homepage_jellyfin_api_key:
+        external: true
+    homepage_wgeasy_password:
+        external: true
 
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
@@ -42,6 +49,9 @@ x-GICKUP_IP: &GICKUP_IP 10.99.0.4
 x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.11
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
+x-HOMEPAGE: &HOMEPAGE ghcr.io/gethomepage/homepage:v0.9.12
+x-HOMEPAGE_IP: &HOMEPAGE_IP 10.99.0.7
+##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ##
@@ -55,6 +65,7 @@ x-ips: &container-ips
     CADDY_IP: *CADDY_IP
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
+    HOMEPAGE_IP: *HOMEPAGE_IP
     GLUETUN_IP: *GLUETUN_IP
     WIREGUARD_IP: *WIREGUARD_IP
 
@@ -170,6 +181,42 @@ services:
         volumes:
             - $PWD/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
             - /mnt/config/caddy:/data/caddy:Z,rw
+
+    ##############################
+    ######     Homepage     ######
+    ##############################
+    ## For readonly
+    # Container accesses:
+    # - /app/.next/server/pages/ # next render pages cache
+    homepage:
+        container_name: homepage
+        <<: *common-settings
+        image: *HOMEPAGE
+        networks:
+            shared:
+                ipv4_address: *HOMEPAGE_IP
+        read_only: false
+        environment:
+            <<: [*common-env]
+            ## IPs & addresses
+            HOMEPAGE_VAR_BHULK_IP: 10.0.0.2
+            HOMEPAGE_VAR_CADDY_IP: *CADDY_IP
+            HOMEPAGE_VAR_JELLYFIN_IP: *JELLYFIN_IP
+            HOMEPAGE_VAR_TRANSMISSION_IP: *GLUETUN_IP
+            HOMEPAGE_VAR_WIREGUARD_IP: *WIREGUARD_IP
+            ## Secrets
+            HOMEPAGE_FILE_TRUENAS_API_KEY: /run/secrets/homepage_truenas_api_key
+            HOMEPAGE_FILE_JELLYFIN_API_KEY: /run/secrets/homepage_jellyfin_api_key
+            HOMEPAGE_FILE_WIREGUARD_PASSWORD: /run/secrets/homepage_wgeasy_password
+        secrets:
+            - homepage_truenas_api_key
+            - homepage_jellyfin_api_key
+            - homepage_wgeasy_password
+        volumes:
+            - $PWD/homepage/bookmarks.yaml:/app/config/bookmarks.yaml:Z,ro
+            - $PWD/homepage/services.yaml:/app/config/services.yaml:Z,ro
+            - $PWD/homepage/settings.yaml:/app/config/settings.yaml:Z,ro
+            - $PWD/homepage/widgets.yaml:/app/config/widgets.yaml:Z,ro
 
     ##############################
     ######      Gickup      ######
