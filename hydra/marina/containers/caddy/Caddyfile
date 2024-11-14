@@ -16,8 +16,8 @@
 # https://caddyserver.com/docs/caddyfile/directives/forward_auth#authelia
 # https://caddy.community/t/securing-web-apps-with-caddy-and-authelia-in-docker-compose-an-opinionated-practical-and-minimal-production-ready-login-portal-guide/20465
 (secure) {
-	# forward_auth {args.0} https://auth.{$DOMAIN} {
-	forward_auth {args.0} {$AUTHELIA_IP}:9091 {
+	# forward_auth {args[0]} https://auth.{$DOMAIN} {
+	forward_auth {args[0]} {$AUTHELIA_IP}:9091 {
 		uri /api/authz/forward-auth
 		copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
 	}
