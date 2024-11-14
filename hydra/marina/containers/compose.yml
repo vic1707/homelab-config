@@ -151,6 +151,8 @@ services:
             <<: *common-env
             VPN_TYPE: wireguard
             VPN_SERVICE_PROVIDER: windscribe
+            SERVER_REGIONS: Denmark,Belgium,Luxembourg,Portugal
+            WIREGUARD_MTU: 1400
         secrets:
             - wireguard_private_key
             - wireguard_addresses
