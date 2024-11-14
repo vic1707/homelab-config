@@ -280,7 +280,7 @@ services:
         volumes:
             - /mnt/bhulk/transmission:/data:rw
             - /mnt/config/transmission:/config:Z,rw
-            - $PWD/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh
+            - $PWD/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh:Z
 
     ##############################
     ######    Wireguard     ######
