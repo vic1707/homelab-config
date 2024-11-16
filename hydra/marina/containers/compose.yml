@@ -52,6 +52,9 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-HOMEPAGE: &HOMEPAGE ghcr.io/gethomepage/homepage:v0.9.12
 x-HOMEPAGE_IP: &HOMEPAGE_IP 10.99.0.7
 ##
+x-MYSPEED: &MYSPEED docker.io/germannewsmaker/myspeed:1.0.9
+x-MYSPEED_IP: &MYSPEED_IP 10.99.0.59
+##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ##
@@ -92,7 +95,7 @@ services:
     ######    Authelia      ######
     ##############################
     ## For readonly
-    # Container accesses: 
+    # Container accesses:
     # - /app/.healthcheck.env
     # others ?
     authelia:
@@ -129,7 +132,7 @@ services:
     ######     Gluetun      ######
     ##############################
     ## For readonly
-    # Container accesses: 
+    # Container accesses:
     # - /gluetun/auth/config.toml
     # - /gluetun/servers.json
     # - /etc/passwd for user creation
@@ -204,6 +207,7 @@ services:
             HOMEPAGE_VAR_BHULK_IP: 10.0.0.2
             HOMEPAGE_VAR_CADDY_IP: *CADDY_IP
             HOMEPAGE_VAR_JELLYFIN_IP: *JELLYFIN_IP
+            HOMEPAGE_VAR_MYSPEED_IP: *MYSPEED_IP
             HOMEPAGE_VAR_TRANSMISSION_IP: *GLUETUN_IP
             HOMEPAGE_VAR_WIREGUARD_IP: *WIREGUARD_IP
             ## Secrets
@@ -313,3 +317,23 @@ services:
             net.ipv4.conf.all.src_valid_mark: 1
             net.ipv4.ip_forward: 1
             net.ipv6.conf.all.disable_ipv6: 1
+
+    ##############################
+    ######    Speed-test    ######
+    ##############################
+    myspeed:
+        container_name: myspeed
+        <<: *common-settings
+        image: *MYSPEED
+        networks:
+            shared:
+                ipv4_address: *MYSPEED_IP
+        tmpfs:
+            - /myspeed/data
+
+    myspeed_gluetun:
+        container_name: myspeed_gluetun
+        <<: [*common-settings, *VPN]
+        image: *MYSPEED
+        tmpfs:
+            - /myspeed/data

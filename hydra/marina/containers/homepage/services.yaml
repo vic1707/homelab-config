@@ -37,3 +37,15 @@
                 type: wgeasy
                 url: "http://{{HOMEPAGE_VAR_WIREGUARD_IP}}:51821"
                 password: "{{HOMEPAGE_FILE_WIREGUARD_PASSWORD}}"
+
+- Speed:
+      - Local:
+            description: Home speeds
+            widget:
+                type: myspeed
+                url: http://{{HOMEPAGE_VAR_MYSPEED_IP}}:5216
+      - Gluetun:
+            description: Torrent speeds
+            widget:
+                type: myspeed
+                url: http://{{HOMEPAGE_VAR_GLUETUN_IP}}:5216
