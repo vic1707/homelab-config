@@ -13,8 +13,11 @@
 ## 1. Install required packages         ##
 ##  a. podman                           ##
 ##  b. nfs client                       ##
-##  opt(prod). NVIDIA driver            ##
-## 2. Configure NFS volumes             ##
+##  c. rsync                            ##
+##  d. atim/bottom                      ##
+##  e. podman-compose                   ##
+## 2. NVIDIA driver                     ##
+## 3. Configure NFS volumes             ##
 ##########################################
 
 PWD=$(cd "$(dirname "$0")" && pwd && cd - > /dev/null || exit 1)

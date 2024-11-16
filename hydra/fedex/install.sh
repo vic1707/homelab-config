@@ -18,8 +18,8 @@ DNS_SERVERS=1.1.1.1,8.8.8.8
 BHULK_MAC=F6:3A:7B:43:B8:2C
 BHULK_IP=10.0.0.2
 #
-MARINA_PROD_MAC=0A:A8:F3:7E:9D:64
-MARINA_PROD_IP=10.0.0.3
+MARINA_MAC=0A:A8:F3:7E:9D:64
+MARINA_IP=10.0.0.3
 ###################################
 
 # Install packages
@@ -69,15 +69,15 @@ iptables -A FORWARD -i $LAN_INTERFACE -d "$ISP_NETWORK" -j REJECT        # preve
 iptables -A FORWARD -i $LAN_INTERFACE -o $WAN_INTERFACE -j ACCEPT        # allow LAN to access WAN (except ISP network due to previous rule)
 iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT # allow established connections
 ### Port forwarding ###
-# Router:8080 -> Maria_Prod:8080
-iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 8080 -j DNAT --to $MARINA_PROD_IP:8080
-iptables -A FORWARD -p tcp -d $MARINA_PROD_IP --dport 8080 -j ACCEPT
-# Router:4443 -> Maria_Prod:4443
-iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 4443 -j DNAT --to $MARINA_PROD_IP:4443
-iptables -A FORWARD -p tcp -d $MARINA_PROD_IP --dport 4443 -j ACCEPT
-# Router:51820 -> Maria_Prod:51820 => NO Cloudflare PROXY !!
-iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p udp --dport 51820 -j DNAT --to $MARINA_PROD_IP:51820
-iptables -A FORWARD -p udp -d $MARINA_PROD_IP --dport 51820 -j ACCEPT
+# Router:8080 -> Maria:8080
+iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 8080 -j DNAT --to $MARINA_IP:8080
+iptables -A FORWARD -p tcp -d $MARINA_IP --dport 8080 -j ACCEPT
+# Router:4443 -> Maria:4443
+iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p tcp --dport 4443 -j DNAT --to $MARINA_IP:4443
+iptables -A FORWARD -p tcp -d $MARINA_IP --dport 4443 -j ACCEPT
+# Router:51820 -> Maria:51820 => NO Cloudflare PROXY !!
+iptables -t nat -A PREROUTING -i $WAN_INTERFACE -p udp --dport 51820 -j DNAT --to $MARINA_IP:51820
+iptables -A FORWARD -p udp -d $MARINA_IP --dport 51820 -j ACCEPT
 #######################
 ### Deny everything ###
 #######################
@@ -99,7 +99,7 @@ dhcp-range=$DHCP_LEASE_START,$DHCP_LEASE_END,$LAN_MASK,$DHCP_LEASE_TIME
 dhcp-option=option:router,$LAN_IP
 dhcp-option=option:dns-server,$DNS_SERVERS
 dhcp-host=$BHULK_MAC,$BHULK_IP
-dhcp-host=$MARINA_PROD_MAC,$MARINA_PROD_IP
+dhcp-host=$MARINA_MAC,$MARINA_IP
 EOF
 rc-update add dnsmasq
 rc-service dnsmasq start
