@@ -138,8 +138,8 @@ echo "0 5 * * * root \
 systemctl restart crond.service
 
 ## Important reminder
-firewall-cmd --zone=public --permanent --add-port=8080/tcp # caddy
-firewall-cmd --zone=public --permanent --add-port=4443/tcp # caddy
+firewall-cmd --zone=public --permanent --add-port=8080/tcp  # caddy
+firewall-cmd --zone=public --permanent --add-port=4443/tcp  # caddy
 firewall-cmd --zone=public --permanent --add-port=51820/udp # wireguard
 firewall-cmd --zone=public --permanent --add-port=51821/tcp # wireguard-ui
 firewall-cmd --reload
