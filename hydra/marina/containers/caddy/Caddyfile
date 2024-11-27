@@ -33,7 +33,7 @@ jellyfin.{$DOMAIN} {
 
 transmission.{$DOMAIN} {
 	import secure *
-	reverse_proxy {$GLUETUN_IP}:9091
+	reverse_proxy {$TRANSMISSION_IP}:9091
 }
 
 wg-ui.{$DOMAIN} {

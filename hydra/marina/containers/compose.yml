@@ -9,15 +9,11 @@ networks:
                 - subnet: 10.99.0.0/26
 
 secrets:
+    ## TRANSMISSION
+    openvpn_creds:
+        file: "$PWD/secrets/transmission-ovpn-credentials"
     ## GICKUP
     gickup_vic1707_github_token:
-        external: true
-    ## Gluetun
-    wireguard_private_key:
-        external: true
-    wireguard_addresses:
-        external: true
-    wireguard_preshared_key:
         external: true
     ## AUTHELIA
     authelia_storage_encryption_key:
@@ -52,13 +48,11 @@ x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 x-HOMEPAGE: &HOMEPAGE ghcr.io/gethomepage/homepage:v0.9.12
 x-HOMEPAGE_IP: &HOMEPAGE_IP 10.99.0.7
 ##
+x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
+x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
+##
 x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
-##
-x-GLUETUN: &GLUETUN docker.io/qmcgaw/gluetun:v3.39.1
-x-GLUETUN_IP: &GLUETUN_IP 10.99.0.62
-##
-x-TRANSMISSION: &TRANSMISSION ghcr.io/vic1707/transmission-daemon:4.0.6
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
     AUTHELIA_IP: *AUTHELIA_IP
@@ -66,13 +60,8 @@ x-ips: &container-ips
     GICKUP_IP: *GICKUP_IP
     JELLYFIN_IP: *JELLYFIN_IP
     HOMEPAGE_IP: *HOMEPAGE_IP
-    GLUETUN_IP: *GLUETUN_IP
+    TRANSMISSION_IP: *TRANSMISSION_IP
     WIREGUARD_IP: *WIREGUARD_IP
-
-x-vpn: &VPN
-    network_mode: service:gluetun
-    depends_on:
-        - gluetun
 
 x-common-settings: &common-settings
     sysctls:
@@ -126,39 +115,6 @@ services:
             - /mnt/config/authelia:/data:Z,rw
 
     ##############################
-    ######     Gluetun      ######
-    ##############################
-    ## For readonly
-    # Container accesses: 
-    # - /gluetun/auth/config.toml
-    # - /gluetun/servers.json
-    # - /etc/passwd for user creation
-    # - /tmp/gluetun/ip (local ip?)
-    # others ?
-    gluetun:
-        container_name: gluetun
-        # see https://github.com/qdm12/gluetun-wiki/blob/main/errors/tun.md#tun-device-is-not-available-open-devnettun-permission-denied
-        privileged: true
-        <<: *common-settings
-        image: *GLUETUN
-        networks:
-            shared:
-                ipv4_address: *GLUETUN_IP
-        # cap_add:
-        #     - NET_ADMIN
-        read_only: false
-        environment:
-            <<: *common-env
-            VPN_TYPE: wireguard
-            VPN_SERVICE_PROVIDER: windscribe
-            SERVER_REGIONS: Denmark,Belgium,Luxembourg,Portugal
-            WIREGUARD_MTU: 1400
-        secrets:
-            - wireguard_private_key
-            - wireguard_addresses
-            - wireguard_preshared_key
-
-    ##############################
     ######      Caddy       ######
     ##############################
     caddy:
@@ -204,7 +160,7 @@ services:
             HOMEPAGE_VAR_BHULK_IP: 10.0.0.2
             HOMEPAGE_VAR_CADDY_IP: *CADDY_IP
             HOMEPAGE_VAR_JELLYFIN_IP: *JELLYFIN_IP
-            HOMEPAGE_VAR_TRANSMISSION_IP: *GLUETUN_IP
+            HOMEPAGE_VAR_TRANSMISSION_IP: *TRANSMISSION_IP
             HOMEPAGE_VAR_WIREGUARD_IP: *WIREGUARD_IP
             ## Secrets
             HOMEPAGE_FILE_TRUENAS_API_KEY: /run/secrets/homepage_truenas_api_key
@@ -267,20 +223,34 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: [*common-settings, *VPN]
+        <<: *common-settings
         image: *TRANSMISSION
-        tmpfs:
-            - /tmp/web-ui
+        privileged: true #  needed to acces /dev/net/tun
+        read_only: false
+        networks:
+            shared:
+                ipv4_address: *TRANSMISSION_IP
         environment:
             <<: *common-env
-            TRANSMISSION_RPC_HOST_WHITELIST_ENABLED: "false" # TODO: fix
-            TRANSMISSION_WEB_UI: flood
-            TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED: "true"
-            TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/keep_torrent_file.sh
+            GLOBAL_APPLY_PERMISSIONS: false
+            OPENVPN_CONFIG: netherlands
+            OPENVPN_PROVIDER: PIA
+            OPENVPN_OPTS: --inactive 3600 --ping 10 --ping-exit 60
+            TRANSMISSION_SCRIPT_TORRENT_DONE_ENABLED: true
+            TRANSMISSION_SCRIPT_TORRENT_DONE_FILENAME: /config/transmission-home/keep_torrent_file.sh
+            TRANSMISSION_WEB_UI: flood-for-transmission
+            WEBPROXY_ENABLED: false
+            ## Wish I could remove ##
+            CREATE_TUN_DEVICE: false
+            DISABLE_PORT_UPDATER: true
+        secrets:
+            - openvpn_creds
         volumes:
             - /mnt/bhulk/transmission:/data:rw
-            - /mnt/config/transmission:/config:Z,rw
+            - /mnt/config/transmission:/config/transmission-home:Z,rw
             - $PWD/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh:Z
+        devices: # wish I could remove
+            - /dev/net/tun
 
     ##############################
     ######    Wireguard     ######
