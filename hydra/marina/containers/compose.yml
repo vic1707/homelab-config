@@ -33,19 +33,19 @@ secrets:
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
-x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.16
+x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.18
 x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.2
 ##
-x-CADDY: &CADDY docker.io/library/caddy:2.8.4-alpine
+x-CADDY: &CADDY docker.io/library/caddy:2.9.1-alpine
 x-CADDY_IP: &CADDY_IP 10.99.0.3
 ##
 x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
 x-GICKUP_IP: &GICKUP_IP 10.99.0.4
 ##
-x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.9.11
+x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.10.5
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
-x-HOMEPAGE: &HOMEPAGE ghcr.io/gethomepage/homepage:v0.9.12
+x-HOMEPAGE: &HOMEPAGE ghcr.io/gethomepage/homepage:v0.10.9
 x-HOMEPAGE_IP: &HOMEPAGE_IP 10.99.0.7
 ##
 x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
@@ -81,7 +81,7 @@ services:
     ######    Authelia      ######
     ##############################
     ## For readonly
-    # Container accesses: 
+    # Container accesses:
     # - /app/.healthcheck.env
     # others ?
     authelia:
