@@ -248,7 +248,7 @@ services:
         volumes:
             - /mnt/bhulk/transmission:/data:rw
             - /mnt/config/transmission:/config/transmission-home:Z,rw
-            - $PWD/transmission/keep_torrent_file.sh:/config/keep_torrent_file.sh:Z
+            - $PWD/transmission/keep_torrent_file.sh:/config/transmission-home/keep_torrent_file.sh:Z
         devices: # wish I could remove
             - /dev/net/tun
 
