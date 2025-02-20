@@ -1,3 +1,5 @@
+%YAML 1.1
+---
 # TODO: fix volumes z options
 
 networks:
@@ -33,25 +35,32 @@ secrets:
 ############# GLOBAL VARIABLES ##############
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
-x-AUTHELIA: &AUTHELIA docker.io/authelia/authelia:4.38.18
+x-AUTHELIA: &AUTHELIA
+    image: docker.io/authelia/authelia:4.38.18
 x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.2
 ##
-x-CADDY: &CADDY docker.io/library/caddy:2.9.1-alpine
+x-CADDY: &CADDY
+    image: docker.io/library/caddy:2.9.1-alpine
 x-CADDY_IP: &CADDY_IP 10.99.0.3
 ##
-x-GICKUP: &GICKUP docker.io/buddyspencer/gickup:0.10.36
+x-GICKUP: &GICKUP
+    image: docker.io/buddyspencer/gickup:0.10.36
 x-GICKUP_IP: &GICKUP_IP 10.99.0.4
 ##
-x-JELLYFIN: &JELLYFIN docker.io/jellyfin/jellyfin:10.10.5
+x-JELLYFIN: &JELLYFIN
+    image: docker.io/jellyfin/jellyfin:10.10.5
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
-x-HOMEPAGE: &HOMEPAGE ghcr.io/gethomepage/homepage:v0.10.9
+x-HOMEPAGE: &HOMEPAGE
+    image: ghcr.io/gethomepage/homepage:v0.10.9
 x-HOMEPAGE_IP: &HOMEPAGE_IP 10.99.0.7
 ##
-x-TRANSMISSION: &TRANSMISSION docker.io/haugene/transmission-openvpn:5.3.1
+x-TRANSMISSION: &TRANSMISSION
+    image: docker.io/haugene/transmission-openvpn:5.3.1
 x-TRANSMISSION_IP: &TRANSMISSION_IP 10.99.0.6
 ##
-x-WIREGUARD: &WIREGUARD ghcr.io/wg-easy/wg-easy:14
+x-WIREGUARD: &WIREGUARD
+    image: ghcr.io/wg-easy/wg-easy:14
 x-WIREGUARD_IP: &WIREGUARD_IP 10.99.0.61
 ########### GLOBAL CONFIGURATIONS ###########
 x-ips: &container-ips
@@ -86,8 +95,7 @@ services:
     # others ?
     authelia:
         container_name: authelia
-        <<: *common-settings
-        image: *AUTHELIA
+        <<: [*common-settings, *AUTHELIA]
         cap_add:
             - SETGID # su-exec: setgroups(0): Operation not permitted
         networks:
@@ -119,8 +127,7 @@ services:
     ##############################
     caddy:
         container_name: caddy
-        <<: *common-settings
-        image: *CADDY
+        <<: [*common-settings, *CADDY]
         cap_add:
             - NET_BIND_SERVICE # exec container process `/usr/bin/caddy`: Operation not permitted
         networks:
@@ -148,14 +155,13 @@ services:
     # - /app/.next/server/pages/ # next render pages cache
     homepage:
         container_name: homepage
-        <<: *common-settings
-        image: *HOMEPAGE
+        <<: [*common-settings, *HOMEPAGE]
         networks:
             shared:
                 ipv4_address: *HOMEPAGE_IP
         read_only: false
         environment:
-            <<: [*common-env]
+            <<: *common-env
             ## IPs & addresses
             HOMEPAGE_VAR_BHULK_IP: 10.0.0.2
             HOMEPAGE_VAR_CADDY_IP: *CADDY_IP
@@ -181,8 +187,7 @@ services:
     ##############################
     gickup:
         container_name: gickup
-        <<: *common-settings
-        image: *GICKUP
+        <<: [*common-settings, *GICKUP]
         networks:
             shared:
                 ipv4_address: *GICKUP_IP
@@ -199,8 +204,7 @@ services:
     # - error executing hook `/usr/bin/nvidia-cdi-hook` (exit code: 1)
     jellyfin:
         container_name: jellyfin
-        <<: *common-settings
-        image: *JELLYFIN
+        <<: [*common-settings, *JELLYFIN]
         networks:
             shared:
                 ipv4_address: *JELLYFIN_IP
@@ -223,8 +227,7 @@ services:
     ##############################
     transmission:
         container_name: transmission
-        <<: *common-settings
-        image: *TRANSMISSION
+        <<: [*common-settings, *TRANSMISSION]
         privileged: true #  needed to acces /dev/net/tun
         read_only: false
         networks:
@@ -257,8 +260,7 @@ services:
     ##############################
     wireguard:
         container_name: wireguard
-        <<: *common-settings
-        image: *WIREGUARD
+        <<: [*common-settings, *WIREGUARD]
         networks:
             shared:
                 ipv4_address: *WIREGUARD_IP
