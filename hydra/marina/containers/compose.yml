@@ -48,7 +48,7 @@ x-GICKUP: &GICKUP
 x-GICKUP_IP: &GICKUP_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN
-    image: docker.io/jellyfin/jellyfin:10.10.5
+    image: docker.io/jellyfin/jellyfin:10.10.6
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-HOMEPAGE: &HOMEPAGE
