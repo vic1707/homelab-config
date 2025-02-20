@@ -3,7 +3,7 @@
     "extends": [
         "config:recommended"
     ],
-    "schedule": ["0 4 * * 1"],
+    "schedule": ["* * * * 1"],
     "packageRules": [
         {
             "matchManagers": ["docker-compose"],
