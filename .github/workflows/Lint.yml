@@ -8,7 +8,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: mfinelli/setup-shfmt@v3.0.1
+            - uses: mfinelli/setup-shfmt@v3.0.2
             - run: shfmt -f -d -i 4 -s -ci -bn -sr .
             # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
             - run: |
