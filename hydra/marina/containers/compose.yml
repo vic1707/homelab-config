@@ -36,7 +36,7 @@ secrets:
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
 x-AUTHELIA: &AUTHELIA
-    image: docker.io/authelia/authelia:4.38.18
+    image: docker.io/authelia/authelia:4.38.19
 x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.2
 ##
 x-CADDY: &CADDY
