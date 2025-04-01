@@ -1,0 +1,11 @@
+[tools]
+ripgrep = "14.1.1"
+shellcheck = "0.10.0"
+shfmt = "3.11.0"
+typos-cli = "1.31.1"
+zizmor = "1.5.2"
+
+[alias]
+ripgrep = "asdf:vic1707/asdf-any-cargo-quickinstall"
+typos-cli = "asdf:vic1707/asdf-any-cargo-quickinstall"
+zizmor = "asdf:vic1707/asdf-any-cargo-quickinstall"

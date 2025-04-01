@@ -1,0 +1,10 @@
+## Allow opening any 'source'd file, even if not specified as input
+external-sources=true
+
+## Additional warnings
+enable=add-default-case
+enable=avoid-nullary-conditions
+enable=check-extra-masked-returns
+enable=check-set-e-suppressed
+enable=deprecate-which
+enable=require-double-brackets

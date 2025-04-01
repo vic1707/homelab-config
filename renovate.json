@@ -1,0 +1,19 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:recommended"],
+    "schedule": ["weekly"],
+    "packageRules": [
+        {
+            "matchManagers": ["docker-compose"],
+            "groupName": "Docker Compose Updates"
+        },
+        {
+            "matchManagers": ["github-actions"],
+            "groupName": "GitHub Actions Updates"
+        },
+        {
+            "matchManagers": ["mise"],
+            "groupName": "Mise tools Updates"
+        }
+    ]
+}

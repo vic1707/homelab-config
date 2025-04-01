@@ -1,0 +1,42 @@
+name: Lint & Format
+
+on: [push, pull_request]
+
+permissions: {}
+
+jobs:
+    formatters:
+        name: formatters
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4.2.2
+              with:
+                  persist-credentials: false
+            - uses: jdx/mise-action@v2.1.11
+
+            - name: shfmt
+              # fix command `shfmt -w -i 4 -s -ci -bn -sr .`
+              run: shfmt -f -d -i 4 -s -ci -bn -sr .
+
+    linters:
+        name: linters
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4.2.2
+              with:
+                  persist-credentials: false
+            - uses: jdx/mise-action@v2.1.11
+
+            - name: Shellcheck
+              run: |
+                  SUPPORTED_SHELLS="sh|bash"
+                  rg -l "^#!(.*/|.*env +)($SUPPORTED_SHELLS)" . \
+                      | xargs -r -t shellcheck
+
+            - name: Zizmor
+              run: zizmor .
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Typos
+              run: typos
