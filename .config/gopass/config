@@ -1,0 +1,14 @@
+[recipients]
+	hash = 924f728ac7d4242e99ee811593ad63e4c0f9fa00e689bbd90f10805cf9899712
+
+[mounts]
+	path = ./.password-store
+
+[updater]
+	check = false
+
+[generate]
+	autoclip = true
+	length = 50
+	strict = true
+	symbols = true
