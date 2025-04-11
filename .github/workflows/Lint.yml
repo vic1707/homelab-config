@@ -40,3 +40,6 @@ jobs:
 
             - name: Typos
               run: typos
+
+            - name: Ansible-lint
+              run: ansible-lint
