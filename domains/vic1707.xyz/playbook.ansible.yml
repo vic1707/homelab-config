@@ -1,0 +1,41 @@
+---
+- name: Manage {{ domain }}
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    domain: "vic1707.xyz"
+    cloudflare:
+      zone_id: "{{ lookup('community.general.passwordstore', 'cloudflare/zone-id/vic1707.xyz') }}"
+      token: "{{ lookup('community.general.passwordstore', 'cloudflare/api-tokens/DNS-Edit/vic1707.xyz') }}"
+
+  vars_files:
+    - dns-records/protonmail.ansible.yml
+
+  tasks:
+    - name: DNS records
+      community.general.cloudflare_dns:
+        ## General cloudlfare settings
+        api_token: "{{ cloudflare.token }}"
+        zone: "{{ domain }}"
+        ## Record
+        type: "{{ item.0.key }}"
+        name: "{{ item.1.name }}"
+        content: "{{ item.1.content }}"
+        ttl: "{{ item.1.ttl | default(1) }}" ## 1 == default
+        proxied: "{{ item.1.proxied | default(false) }}"
+        priority: "{{ item.1.priority | default(omit) }}"
+        state: present
+
+      with_subelements:
+        - "{{ protonmail_dns_records_map | dict2items }}"
+        - value
+      loop_control:
+        label: >-
+          {{
+            (
+              '%8s - %s → %s'
+              | format('[' ~ item.0.key ~ ']', item.1.name, item.1.content)
+            ) | truncate(80, True)
+          }}
