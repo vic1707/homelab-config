@@ -3,6 +3,7 @@ ANSIBLE_HOME="{{ config_root }}/.ansible"
 GOPASS_HOMEDIR="{{ config_root }}"
 
 [tools]
+actionlint = "1.7.7"
 ansible = "11.4.0"
 ansible-lint = "25.2.1"
 pipx = "1.7.1" ## For installing ansible
