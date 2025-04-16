@@ -48,6 +48,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Actionlint
+        run: actionlint
+
       - name: Typos
         run: typos
 
