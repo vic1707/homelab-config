@@ -1,0 +1,33 @@
+name: Ensure mise tools can be installed
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ensure-mise-tools:
+    name: ensure-mise-tools
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.21.3
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install asdf prerequisites
+        run: apk add --no-cache curl git bash
+
+        ## TODO: replace with jdx's <https://github.com/jdx/mise-action/pull/189>
+      - uses: vic1707/mise-action@v2.3.0
+
