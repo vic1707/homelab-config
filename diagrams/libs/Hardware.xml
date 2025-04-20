@@ -89,5 +89,12 @@
     "h": 145.39999999999998,
     "aspect": "fixed",
     "title": "ICX 6450-48P"
+  },
+  {
+    "xml": "&lt;mxGraphModel&gt;&lt;root&gt;&lt;mxCell id=\"0\"/&gt;&lt;mxCell id=\"1\" parent=\"0\"/&gt;&lt;mxCell id=\"2\" value=\"\" style=\"strokeColor=#666666;html=1;labelPosition=right;align=left;spacingLeft=15;shadow=0;dashed=0;fillColor=#ffffff;outlineConnect=0;shape=stencil(fZBRDsIgDIZP09cFqZrsUVFv4AHIZM4MwbAZ9fZ27XyYQxsS/n7lB1pA0zX25kCrYK8OcAdaL46Ubr0NLSUkmxEvi3Il5DGStSpKHBDuQW2oMCw0dUzunOI9nCaFT7nrU2xdFX1MBGTn+0Cj4mB9yJrri/d5q+b4Y02u6kk9xSGPqNckmzWW6f73v6Sx7xNoiMxGwlRmz+AN);aspect=fixed;\" vertex=\"1\" parent=\"1\"&gt;&lt;mxGeometry width=\"1491\" height=\"139.78\" as=\"geometry\"/&gt;&lt;/mxCell&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;",
+    "w": 1491,
+    "h": 139.78,
+    "aspect": "fixed",
+    "title": "1U template"
   }
 ]</mxlibrary>
