@@ -29,5 +29,7 @@ storage:
 passwd:
   users:
     - name: vic1707
+      groups: [wheel, sudo]
+      password_hash: $y$j9T$9J99TSC.8QWyI1e01ajzx1$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
       ssh_authorized_keys_local:
         - vic1707-telstar.pub
