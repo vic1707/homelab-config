@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
+variant: fcos
+version: 1.6.0
+
+storage:
+  links:
+    - path: /etc/localtime
+      target: ../usr/share/zoneinfo/Europe/Paris
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: |
+          telstar
+    - path: /etc/ssh/sshd_config.d/hardening.conf
+      mode: 0644
+      contents:
+        # TODO: change SSH Port
+        inline: |
+          PermitRootLogin no
+          PasswordAuthentication no
+          AddressFamily inet
+          MaxAuthTries 3
+          MaxSessions 2
+          MaxStartups 3:50:3
+          LoginGraceTime 0
+          LogLevel VERBOSE
+
+passwd:
+  users:
+    - name: vic1707
+      ssh_authorized_keys_local:
+        - vic1707-telstar.pub
