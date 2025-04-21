@@ -25,6 +25,11 @@ storage:
           MaxStartups 3:50:3
           LoginGraceTime 0
           LogLevel VERBOSE
+    - path: /etc/sudoers.d/00-wheel-require-password
+      mode: 0440
+      contents:
+        inline: |
+          %wheel ALL=(ALL) ALL
 
 passwd:
   users:
