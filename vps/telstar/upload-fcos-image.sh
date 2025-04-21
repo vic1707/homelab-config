@@ -59,31 +59,35 @@ else
     echo "❌ No matching image found. Proceeding with creation..."
 
     echo "⬇️  Downloading Fedora CoreOS raw image..."
+    TMP_DIR=$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)
     RAW_IMG_PATH=$(coreos_installer download \
         --stream stable \
         --platform metal \
         --format iso \
         --architecture "$IMG_ARCH" \
-        --decompress)
+        --decompress \
+        --directory "$TMP_DIR")
 
     echo "🧬 Embedding Ignition config into image..."
     butane \
         --files-dir "$PWD" \
         "$BUTANE_FILE" \
         | coreos_installer iso ignition embed \
-            --output "$IMAGE_NAME.iso" \
+            --output "$TMP_DIR/$IMAGE_NAME.iso" \
             "$RAW_IMG_PATH"
 
     ## ☁️ Upload to Hetzner
     echo "🚀 Uploading image to Hetzner Cloud..."
     hcloud-upload-image upload \
-        --image-path "$IMAGE_NAME.iso" \
+        --image-path "$TMP_DIR/$IMAGE_NAME.iso" \
         --architecture "$ARCH" \
         --description "Fedora CoreOS custom image for $NAME" \
         --labels "$IMG_TAGS"
 
     echo "🗑️ Cleaning up remains of image upload"
     hcloud-upload-image cleanup
+
+    rm -rf "$TMP_DIR"
 
     echo "✅ Upload complete."
 fi
