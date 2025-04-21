@@ -87,3 +87,26 @@ else
 
     echo "✅ Upload complete."
 fi
+
+# Server config
+IMAGE_ID="$(hcloud image list --type snapshot --architecture "$ARCH" --selector "$IMG_TAGS" --output json | jq -e '.[0].id')"
+SERVER_NAME="$NAME"
+SERVER_TYPE="cax11"
+SERVER_LOCATION="fsn1" # fsn1 = EU-Central (Germany)
+
+if hcloud server list --selector "$IMG_TAGS" --output json \
+    | jq -e 'length == 1' > /dev/null; then
+    echo "✅ Server '$SERVER_NAME' already exists on Hetzner."
+    exit 0
+fi
+
+echo "🚀 Creating VPS '$SERVER_NAME' with image ID '$IMAGE_ID'..."
+
+hcloud server create \
+    --name "$SERVER_NAME" \
+    --type "$SERVER_TYPE" \
+    --image "$IMAGE_ID" \
+    --location "$SERVER_LOCATION" \
+    --label "$IMG_TAGS"
+
+echo "✅ VPS '$SERVER_NAME' created successfully."
