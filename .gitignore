@@ -2,3 +2,6 @@
 .cache/gopass
 .venv/
 .vscode/
+
+## VPS FCOS
+*.iso
