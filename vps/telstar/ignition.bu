@@ -8,12 +8,12 @@ storage:
       target: ../usr/share/zoneinfo/Europe/Paris
   files:
     - path: /etc/hostname
-      mode: 0644
+      mode: 0440
       contents:
         inline: |
           telstar
-    - path: /etc/ssh/sshd_config.d/hardening.conf
-      mode: 0644
+    - path: /etc/ssh/sshd_config.d/00-hardening.conf
+      mode: 0440
       contents:
         # TODO: change SSH Port
         inline: |
