@@ -63,9 +63,8 @@ jobs:
 
       - name: Butane
         run: |
-          find . -type f -name "*.bu" -execdir bash -c '
-            echo "Testing: $PWD/{}"
-            butane --strict --files-dir $PWD --check {}
-          ' \;
-
-
+          find . \
+            -type f -name "*.bu" \
+            -print \
+            -execdir \
+              butane --strict --files-dir . --check {} +
