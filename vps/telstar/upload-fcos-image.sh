@@ -7,7 +7,8 @@ if [[ $# -lt 1 ]] || [[ ! -f $1 ]]; then
     echo "<butane-file> must be a valid path"
     exit 1
 fi
-BUTANE_FILE="$1"
+echo "🧬 Embedding Ignition config into image..."
+IGNITION_FILE=$(butane --files-dir "$PWD" "$1")
 
 ## 🛠️ coreos-installer wrapper (tool cannot be installed on macOS)
 ## https://github.com/coreos/coreos-installer/issues/1191
@@ -25,8 +26,8 @@ export HCLOUD_TOKEN
 ARCH=arm # or x64
 NAME="telstar"
 IMAGE_NAME="fcos-${NAME}"
-BUTANE_HASH=$(md5sum "$BUTANE_FILE" | cut -d' ' -f1)
-IMG_TAGS="os=fedora-coreos,name=$NAME,butane_hash=$BUTANE_HASH"
+IGNITION_HASH=$(echo "$IGNITION_FILE" | md5sum | cut -d' ' -f1)
+IMG_TAGS="os=fedora-coreos,name=$NAME,ignition_hash=$IGNITION_HASH"
 
 case "$ARCH" in
     arm) IMG_ARCH="aarch64" ;;
@@ -68,10 +69,7 @@ else
         --decompress \
         --directory "$TMP_DIR")
 
-    echo "🧬 Embedding Ignition config into image..."
-    butane \
-        --files-dir "$PWD" \
-        "$BUTANE_FILE" \
+    echo "$IGNITION_FILE" \
         | coreos_installer iso ignition embed \
             --output "$TMP_DIR/$IMAGE_NAME.iso" \
             "$RAW_IMG_PATH"
