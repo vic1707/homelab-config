@@ -8,7 +8,7 @@ if [[ $# -lt 1 ]] || [[ ! -f $1 ]]; then
     exit 1
 fi
 echo "🧬 Embedding Ignition config into image..."
-IGNITION_FILE=$(butane --files-dir "$PWD" "$1")
+IGNITION_FILE=$(butane --files-dir "$(dirname "$1")" "$1")
 
 ## 🛠️ coreos-installer wrapper (tool cannot be installed on macOS)
 ## https://github.com/coreos/coreos-installer/issues/1191
