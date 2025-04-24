@@ -31,6 +31,11 @@ storage:
         inline: |
           %wheel ALL=(ALL) ALL
 
+systemd:
+  units:
+    - name: docker.service
+      mask: true
+
 passwd:
   users:
     - name: vic1707
