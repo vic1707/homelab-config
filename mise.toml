@@ -4,14 +4,15 @@ GOPASS_HOMEDIR="{{ config_root }}"
 
 [tools]
 actionlint = "1.7.7"
-ansible = "11.4.0"
+ansible = "11.5.0"
 ansible-lint = "25.2.1"
+gopass = "1.15.16"
 pipx = "1.7.1" ## For installing ansible
 ripgrep = "14.1.1"
 shellcheck = "0.10.0"
 shfmt = "3.11.0"
 typos-cli = "1.31.1"
-zizmor = "1.5.2"
+zizmor = "1.6.0"
 
 [alias]
 ansible-lint = "pipx:ansible-lint"
