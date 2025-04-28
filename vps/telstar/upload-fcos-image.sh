@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -o errtrace
+trap 'echo "❌ Error occurred on line $LINENO"' ERR
 
 #############################################
 # Imported Variables
@@ -15,14 +17,6 @@ IMAGE_NAME="fcos-${NAME}"
 SERVER_TYPE="cax11"
 SERVER_LOCATION="fsn1" # fsn1 = EU-Central (Germany)
 
-IMG_ARCH=$(
-    case "$ARCH" in
-        arm) echo "aarch64" ;;
-        x64) echo "x86_64" ;;
-        *) echo -e "❌ Invalid arch: $ARCH" >&2; exit 1 ;;
-    esac
-)
-
 #############################################
 # Mode Flags
 #############################################
@@ -35,7 +29,7 @@ CLEANUP=true
 # Usage Help
 #############################################
 usage() {
-    cat <<EOF
+    cat << EOF
 	Usage: $(basename "$0") [OPTIONS] <butane-file>
 
 	Options:
@@ -65,21 +59,24 @@ fi
 BUTANE_FILE=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --embed-iso)    EMBED_ISO=true ;;
+        --embed-iso) EMBED_ISO=true ;;
         --upload-image) UPLOAD_IMAGE=true ;;
         --create-server) CREATE_SERVER=true ;;
-        --no-cleanup)   CLEANUP=false ;;
-        -h|--help)      usage; exit 0 ;;
+        --no-cleanup) CLEANUP=false ;;
+        -h | --help)
+            usage
+            exit 0
+            ;;
         -*)
-            echo -e "❌ Unknown option: $1" >&2
+            echo "❌ Unknown option: $1" >&2
             usage
             exit 1
             ;;
         *)
-            if [[ -z "$BUTANE_FILE" ]]; then
+            if [[ -z $BUTANE_FILE ]]; then
                 BUTANE_FILE="$1"
             else
-                echo -e "❌ Unexpected argument: $1" >&2
+                echo "❌ Unexpected argument: $1" >&2
                 usage
                 exit 1
             fi
@@ -88,13 +85,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ ! -f "$BUTANE_FILE" ]]; then
-    echo -e "❌ Error: Butane file '$BUTANE_FILE' not found." >&2
+if [[ ! -f $BUTANE_FILE ]]; then
+    echo "❌ Error: Butane file '$BUTANE_FILE' not found." >&2
     exit 1
 fi
 
 if ! $EMBED_ISO && ! $UPLOAD_IMAGE && ! $CREATE_SERVER; then
-    echo -e "❌ No action specified. Use --embed-iso, --upload-image, or --create-server." >&2
+    echo "❌ No action specified. Use --embed-iso, --upload-image, or --create-server." >&2
     usage
     exit 1
 fi
@@ -114,29 +111,40 @@ coreos_installer() {
 #############################################
 # Pull/Update CoreOS Installer Image
 #############################################
-echo -e "🔍 Checking coreos-installer image..."
+echo "🔍 Checking coreos-installer image..."
 if ! podman image exists "$COREOS_IMAGE" || ! (
-    LOCAL_SHA=$(podman image inspect "$COREOS_IMAGE" --format '{{.Digest}}' 2>/dev/null || echo "")
+    LOCAL_SHA=$(podman image inspect "$COREOS_IMAGE" --format '{{.Digest}}' 2> /dev/null || echo "")
     podman manifest inspect "$COREOS_IMAGE" \
         | jq -e --arg sha "$LOCAL_SHA" '.manifests[] | select(.digest == $sha)' > /dev/null
 ); then
-    echo -e "📦 Pulling latest coreos-installer..."
+    echo "📦 Pulling latest coreos-installer..."
     podman pull "$COREOS_IMAGE" > /dev/null
 else
-    echo -e "✅ coreos-installer is up-to-date."
+    echo "✅ coreos-installer is up-to-date."
 fi
+
+#############################################
+# Computed variables
+#############################################
+IGNITION_FILE=$(butane --files-dir "$(dirname "$BUTANE_FILE")" "$BUTANE_FILE")
+IGNITION_HASH=$(echo "$IGNITION_FILE" | md5sum | cut -d' ' -f1)
+IMG_TAGS="os=fedora-coreos,name=$NAME,ignition_hash=$IGNITION_HASH"
+case "$ARCH" in
+    arm) IMG_ARCH="aarch64" ;;
+    x64) IMG_ARCH="x86_64" ;;
+    *)
+        echo "❌ Invalid arch: $ARCH" >&2
+        exit 1
+        ;;
+esac
 
 #############################################
 # Embed Ignition Config into ISO
 #############################################
 if $EMBED_ISO; then
-    echo -e "🧬 Embedding Ignition config..."
+    echo "🧬 Embedding Ignition config..."
 
-    TMP_DIR=$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)
-
-    IGNITION_FILE=$(butane --files-dir "$(dirname "$BUTANE_FILE")" "$BUTANE_FILE")
-    IGNITION_HASH=$(echo "$IGNITION_FILE" | md5sum | cut -d' ' -f1)
-    IMG_TAGS="os=fedora-coreos,name=$NAME,ignition_hash=$IGNITION_HASH"
+    TMP_DIR="$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)"
 
     RAW_IMG_PATH=$(coreos_installer download \
         --stream stable \
@@ -150,43 +158,54 @@ if $EMBED_ISO; then
         --output "$TMP_DIR/$IMAGE_NAME.iso" \
         "$RAW_IMG_PATH"
 
-    echo -e "✅ Embedded ISO created at '$TMP_DIR/$IMAGE_NAME.iso'."
+    echo "✅ Embedded ISO created at '$TMP_DIR/$IMAGE_NAME.iso'."
 fi
 
 #############################################
 # Upload Image to Hetzner
 #############################################
 if $UPLOAD_IMAGE; then
-    if [[ -z "${TMP_DIR:-}" ]] || [[ ! -f "$TMP_DIR/$IMAGE_NAME.iso" ]]; then
-        echo -e "❌ ISO not found. Run with --embed-iso." >&2
+    if [[ -z ${TMP_DIR:-} ]] || [[ ! -f "$TMP_DIR/$IMAGE_NAME.iso" ]]; then
+        echo "❌ ISO not found. Run with --embed-iso." >&2
         exit 1
     fi
 
-    echo -e "🚀 Uploading image to Hetzner..."
+    if hcloud image list --type snapshot --architecture "$ARCH" --selector "$IMG_TAGS" --output json \
+        | jq -e 'length == 1' > /dev/null; then
+        echo "✅ Image matching '$IMG_TAGS' already exists on Hetzner."
 
-    hcloud-upload-image upload \
-        --image-path "$TMP_DIR/$IMAGE_NAME.iso" \
-        --architecture "$ARCH" \
-        --description "Fedora CoreOS custom image for $NAME" \
-        --labels "$IMG_TAGS"
+    else
+        echo "🚀 Uploading image to Hetzner..."
 
-    echo -e "✅ Image uploaded successfully."
+        hcloud-upload-image upload \
+            --image-path "$TMP_DIR/$IMAGE_NAME.iso" \
+            --architecture "$ARCH" \
+            --description "Fedora CoreOS custom image for $NAME" \
+            --labels "$IMG_TAGS"
 
-    hcloud-upload-image cleanup
+        echo "✅ Image uploaded successfully."
+
+        hcloud-upload-image cleanup
+    fi
 fi
 
 #############################################
 # Create Server
 #############################################
 if $CREATE_SERVER; then
-    echo -e "🔍 Searching for uploaded image..."
+    echo "🔍 Searching for uploaded image..."
 
-    IMAGE_ID="$(hcloud image list --type snapshot --architecture "$ARCH" --selector "$IMG_TAGS" --output json | jq -re '.[0].id')"
+    IMAGE_ID="$(hcloud image list --type snapshot --architecture "$ARCH" --selector "$IMG_TAGS" --output json | jq -re '.[0].id' 2> /dev/null || true)"
+	if [[ -z "$IMAGE_ID" || "$IMAGE_ID" == "null" ]]; then
+        echo "❌ No matching image found on Hetzner! Run with --upload-image." >&2
+        exit 1
+    fi
+    echo "✅ Image ID found: '$IMAGE_ID'"
 
     if hcloud server list --selector "$IMG_TAGS" --output json | jq -e 'length == 1' > /dev/null; then
-        echo -e "✅ Server already exists with image."
+        echo "✅ Server already exists with image."
     else
-        echo -e "🚀 Creating server '$NAME'..."
+        echo "🚀 Creating server '$NAME'..."
 
         hcloud server create \
             --name "$NAME" \
@@ -195,15 +214,15 @@ if $CREATE_SERVER; then
             --location "$SERVER_LOCATION" \
             --label "$IMG_TAGS"
 
-        echo -e "✅ Server '$NAME' created successfully."
+        echo "✅ Server '$NAME' created successfully."
     fi
 fi
 
 #############################################
 # Cleanup
 #############################################
-if $CLEANUP && [[ -n "${TMP_DIR:-}" ]]; then
-    echo -e "🗑️ Cleaning up temporary files..."
+if $CLEANUP && [[ -n ${TMP_DIR:-} ]]; then
+    echo "🗑️ Cleaning up temporary files..."
     rm -rf "$TMP_DIR"
-    echo -e "✅ Cleanup done."
+    echo "✅ Cleanup done."
 fi
