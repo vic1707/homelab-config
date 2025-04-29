@@ -8,6 +8,8 @@ trap 'echo "❌ Error occurred on line $LINENO"' ERR
 #############################################
 HCLOUD_TOKEN=$(gopass show -o hetzner/homelab/rw-api-token)
 export HCLOUD_TOKEN
+SSH_PORT=$(gopass show -o hetzner/homelab/telstar/ssh-port)
+export SSH_PORT
 #############################################
 # Configuration Variables
 #############################################
@@ -136,7 +138,7 @@ fi
 #############################################
 # Computed variables
 #############################################
-IGNITION_FILE=$(butane --files-dir "$(dirname "$BUTANE_FILE")" "$BUTANE_FILE")
+IGNITION_FILE=$(envsubst -no-unset -no-empty -i "$BUTANE_FILE" | butane --files-dir "$(dirname "$BUTANE_FILE")")
 IGNITION_HASH=$(echo "$IGNITION_FILE" | md5sum | cut -d' ' -f1)
 IMG_TAGS="os=fedora-coreos,name=$NAME,ignition_hash=$IGNITION_HASH"
 case "$ARCH" in
@@ -248,7 +250,7 @@ if $BOOT_VM; then
         -nographic \
         -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
         -drive if=virtio,file="$ISO_PATH",media=cdrom \
-        -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+        -netdev user,id=net0,hostfwd=tcp::2222-:"${SSH_PORT}" \
         -device virtio-net-device,netdev=net0 \
         -serial mon:stdio
 fi

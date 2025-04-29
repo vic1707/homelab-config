@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
+# yaml-language-server: $$schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
 version: 1.6.0
 
@@ -15,8 +15,8 @@ storage:
     - path: /etc/ssh/sshd_config.d/00-hardening.conf
       mode: 0440
       contents:
-        # TODO: change SSH Port
         inline: |
+          Port ${SSH_PORT}
           PermitRootLogin no
           PasswordAuthentication no
           AddressFamily inet
@@ -40,12 +40,18 @@ systemd:
       mask: true
     - name: sssd.service
       mask: true
+    - name: sshd.socket
+      dropins:
+        - name: 10-sshd-port.conf
+          contents: |
+            [Socket]
+            ListenStream=${SSH_PORT}
 
 passwd:
   users:
     - name: vic1707
       groups: [wheel]
-      password_hash: $y$j9T$9J99TSC.8QWyI1e01ajzx1$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
+      password_hash: $$y$$j9T$$9J99TSC.8QWyI1e01ajzx1$$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
       ssh_authorized_keys_local:
         - vic1707-telstar.pub
     # disables `core` default user
