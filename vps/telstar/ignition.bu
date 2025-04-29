@@ -35,6 +35,10 @@ systemd:
   units:
     - name: docker.service
       mask: true
+    - name: sssd.socket
+      mask: true
+    - name: sssd.service
+      mask: true
 
 passwd:
   users:
@@ -43,3 +47,6 @@ passwd:
       password_hash: $y$j9T$9J99TSC.8QWyI1e01ajzx1$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
       ssh_authorized_keys_local:
         - vic1707-telstar.pub
+    # disables `core` default user
+    - name: core
+      shell: /sbin/nologin
