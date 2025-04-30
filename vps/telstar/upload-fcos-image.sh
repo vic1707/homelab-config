@@ -8,8 +8,6 @@ trap 'echo "❌ Error occurred on line $LINENO"' ERR
 #############################################
 HCLOUD_TOKEN=$(gopass show -o hetzner/homelab/rw-api-token)
 export HCLOUD_TOKEN
-SSH_PORT=$(gopass show -o hetzner/homelab/telstar/ssh-port)
-export SSH_PORT
 #############################################
 # Configuration Variables
 #############################################
@@ -138,7 +136,7 @@ fi
 #############################################
 # Computed variables
 #############################################
-IGNITION_FILE=$(gomplate -f "$BUTANE_FILE" | butane --files-dir "$(dirname "$BUTANE_FILE")")
+IGNITION_FILE=$(gomplate -f "$BUTANE_FILE" --plugin gopass=gopass | butane --files-dir "$(dirname "$BUTANE_FILE")")
 IGNITION_HASH=$(echo "$IGNITION_FILE" | md5sum | cut -d' ' -f1)
 IMG_TAGS="os=fedora-coreos,name=$NAME,ignition_hash=$IGNITION_HASH"
 case "$ARCH" in
