@@ -1,4 +1,6 @@
-# yaml-language-server: $$schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
+{{ $SSH_PORT := required .Env.SSH_PORT }}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
 version: 1.6.0
 
@@ -16,7 +18,7 @@ storage:
       mode: 0440
       contents:
         inline: |
-          Port ${SSH_PORT}
+          Port {{ print $SSH_PORT }}
           PermitRootLogin no
           PasswordAuthentication no
           AddressFamily inet
@@ -45,13 +47,13 @@ systemd:
         - name: 10-sshd-port.conf
           contents: |
             [Socket]
-            ListenStream=${SSH_PORT}
+            ListenStream={{ print $SSH_PORT }}
 
 passwd:
   users:
     - name: vic1707
       groups: [wheel]
-      password_hash: $$y$$j9T$$9J99TSC.8QWyI1e01ajzx1$$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
+      password_hash: $y$j9T$9J99TSC.8QWyI1e01ajzx1$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
       ssh_authorized_keys_local:
         - vic1707-telstar.pub
     # disables `core` default user

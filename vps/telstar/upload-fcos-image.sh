@@ -138,7 +138,7 @@ fi
 #############################################
 # Computed variables
 #############################################
-IGNITION_FILE=$(envsubst -no-unset -no-empty -i "$BUTANE_FILE" | butane --files-dir "$(dirname "$BUTANE_FILE")")
+IGNITION_FILE=$(gomplate -f "$BUTANE_FILE" | butane --files-dir "$(dirname "$BUTANE_FILE")")
 IGNITION_HASH=$(echo "$IGNITION_FILE" | md5sum | cut -d' ' -f1)
 IMG_TAGS="os=fedora-coreos,name=$NAME,ignition_hash=$IGNITION_HASH"
 case "$ARCH" in
