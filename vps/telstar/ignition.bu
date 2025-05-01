@@ -48,6 +48,11 @@ systemd:
   units:
     - name: docker.service
       mask: true
+
+    # Enable the Linux Audit Daemon
+    - name: auditd.service
+      enabled: true
+
     - name: sssd.socket
       mask: true
     - name: sssd.service
