@@ -100,8 +100,8 @@ if [[ ! -f $BUTANE_FILE ]]; then
     exit 1
 fi
 
-if ! $EMBED_ISO && ! $UPLOAD_IMAGE && ! $CREATE_SERVER; then
-    echo "❌ No action specified. Use --embed-iso, --upload-image, or --create-server." >&2
+if ! $EMBED_ISO && ! $UPLOAD_IMAGE && ! $CREATE_SERVER && ! $BOOT_VM; then
+    echo "❌ No action specified. Use --embed-iso, --upload-image, --create-server or --boot-vm." >&2
     usage
     exit 1
 fi
