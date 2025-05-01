@@ -6,46 +6,60 @@ version: 1.6.0
 
 storage:
   links:
+    # Timezone config
     - path: /etc/localtime
       target: ../usr/share/zoneinfo/Europe/Paris
+
   files:
+    # Hostname
     - path: /etc/hostname
-      mode: 0440
+      mode: 0400
       contents:
         inline: |
           telstar
+
+    # SSH daemon hardening
     - path: /etc/ssh/sshd_config.d/99-hardening.conf
-      mode: 0440
+      mode: 0400
       contents:
         inline: |
           Port {{ print $SSH_PORT }}
-          PermitRootLogin no
-          PasswordAuthentication no
-          AddressFamily inet
-          MaxAuthTries 3
-          MaxSessions 2
-          MaxStartups 3:50:3
-          LoginGraceTime 0
+          PermitRootLogin no              # Disallow root SSH logins
+          PasswordAuthentication no       # Force key-based auth
+          AddressFamily inet              # Binds SSH to IPv4 only
+          MaxAuthTries 6                  # Inludes ssh-key tries
+          MaxSessions 2                   # Max connections per IP
+          MaxStartups 2                   # Maximum incoming connection attempts
           LogLevel VERBOSE
+
+    # Require password for sudo (wheel and sudo groups)
     - path: /etc/sudoers.d/99-wheel-sudo-require-password
-      mode: 0440
+      mode: 0400
       contents:
         inline: |
           %wheel ALL=(ALL) ALL
           %sudo ALL=(ALL) ALL
+
+    # Disable unnecessary DNS listeners (like LLMNR, mDNS, and stub listener)
     - path: /etc/systemd/resolved.conf.d/99-custom-dns-disable-llmnr-mdns-stublistener.conf
       mode: 0444
       contents:
         inline: |
           [Resolve]
-          DNS=1.1.1.1 1.0.0.1 # Cloudflare
-          FallbackDNS=9.9.9.9 8.8.8.8 # Quad 9 - Google
+          # Cloudflare
+          DNS=1.1.1.1 1.0.0.1
+          # Quad9 & Google DNS
+          FallbackDNS=9.9.9.9 8.8.8.8
+          # Disables Link-Local Multicast Name Resolution
           LLMNR=no
+          # Disables mDNS
           MulticastDNS=no
+          # Prevents systemd-resolved from opening port 53 on localhost
           DNSStubListener=no
 
 systemd:
   units:
+    # Remove docker starting at boot
     - name: docker.service
       mask: true
 
@@ -53,10 +67,13 @@ systemd:
     - name: auditd.service
       enabled: true
 
+    # Disable system security services daemon (~only used in enterprise setting)
     - name: sssd.socket
       mask: true
     - name: sssd.service
       mask: true
+
+    # SSH port redirection
     - name: sshd.socket
       dropins:
         - name: 99-sshd-port.conf
@@ -64,10 +81,11 @@ systemd:
             [Socket]
             ListenStream={{ print $SSH_PORT }}
 
+    # Replace chronyd with systemd-timesyncd to avoid open UDP port 323
     - name: chronyd.service
       mask: true
     - name: systemd-timesyncd.service
-      enabled: true
+      enabled: true # outbound-only time sync (no open ports)
 
 passwd:
   users:
@@ -76,6 +94,6 @@ passwd:
       password_hash: $y$j9T$9J99TSC.8QWyI1e01ajzx1$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
       ssh_authorized_keys_local:
         - vic1707-telstar.pub
-    # disables `core` default user
+    # Disable default "core" user
     - name: core
       shell: /sbin/nologin
