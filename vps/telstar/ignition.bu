@@ -14,7 +14,7 @@ storage:
       contents:
         inline: |
           telstar
-    - path: /etc/ssh/sshd_config.d/00-hardening.conf
+    - path: /etc/ssh/sshd_config.d/99-hardening.conf
       mode: 0440
       contents:
         inline: |
@@ -44,7 +44,7 @@ systemd:
       mask: true
     - name: sshd.socket
       dropins:
-        - name: 10-sshd-port.conf
+        - name: 99-sshd-port.conf
           contents: |
             [Socket]
             ListenStream={{ print $SSH_PORT }}
