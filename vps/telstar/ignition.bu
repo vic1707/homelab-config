@@ -57,8 +57,53 @@ storage:
           # Prevents systemd-resolved from opening port 53 on localhost
           DNSStubListener=no
 
+    # Close all ports
+    - path: /etc/sysconfig/nftables.conf
+      overwrite: true
+      mode: 0400
+      contents:
+        inline: |
+          table inet filter {
+            chain input {
+              ## hook into the kernel's INPUT path to filter packets
+              type filter hook input priority 0;
+
+              ## DROP everything by default
+              policy drop;
+
+              ## Allow loopback (localhost) traffic
+              iif lo accept;
+
+              ## Allow established or related connections
+              ct state established, related accept;
+
+              ## Allow SSH
+              tcp dport {{ print $SSH_PORT }} accept;
+            }
+
+            chain forward {
+              ## hook into the kernel's FORWARD path to filter packets
+              type filter hook forward priority 0;
+
+              ## DROP everything by default
+              policy drop;
+            }
+
+            chain output {
+              ## hook into the kernel's OUTPUT path to filter packets
+              type filter hook output priority 0;
+
+              ## ALLOW everything by default
+              policy accept;
+            }
+          }
+
 systemd:
   units:
+    # Enable firewall rules
+    - name: nftables.service
+      enabled: true
+
     # Remove docker starting at boot
     - name: docker.service
       mask: true
