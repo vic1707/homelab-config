@@ -15,8 +15,7 @@ storage:
     - path: /etc/hostname
       mode: 0400
       contents:
-        inline: |
-          telstar
+        inline: telstar
 
     # SSH daemon hardening
     - path: /etc/ssh/sshd_config.d/99-hardening.conf
@@ -57,7 +56,7 @@ storage:
           # Prevents systemd-resolved from opening port 53 on localhost
           DNSStubListener=no
 
-    # Close all ports
+    # Close all ports (firewall rules)
     - path: /etc/sysconfig/nftables.conf
       overwrite: true
       mode: 0400
@@ -97,6 +96,31 @@ storage:
               policy accept;
             }
           }
+
+    # Audit rules
+    - path: /etc/audit/rules.d/99-custom.rules
+      mode: 0400
+      contents:
+        inline: |
+          # Watch /etc/passwd for write (w) and attribute (a) changes.
+          -w /etc/passwd -p wa -k passwd_changes
+
+          # Watch /etc/shadow for write (w) and attribute (a) changes.
+          -w /etc/shadow -p wa -k shadow_changes
+
+          # Watch SSH daemon config for changes.
+          -w /etc/ssh/sshd_config -p wa -k ssh_config_changes
+
+    # Sysctl hardening
+    - path: /etc/sysctl.d/99-hardening.conf
+      mode: 0400
+      contents:
+        inline: |
+          # Enable reverse path filtering (prevents IP spoofing).
+          net.ipv4.conf.all.rp_filter = 1
+
+          # Restrict access to kernel pointers in /proc (helps mitigate kernel info leaks).
+          kernel.kptr_restrict = 2
 
 systemd:
   units:
@@ -139,6 +163,7 @@ passwd:
       password_hash: $y$j9T$9J99TSC.8QWyI1e01ajzx1$DznvK845Uck6Dcj3XZYy2PZpbIPn2hZf8K/NJPz.c.A
       ssh_authorized_keys_local:
         - vic1707-telstar.pub
+
     # Disable default "core" user
     - name: core
       shell: /sbin/nologin
