@@ -1,4 +1,4 @@
-{{ $SSH_PORT := gopass "hetzner/homelab/telstar/ssh-port" | required }}
+{{ $SSH_PORT := gopass "hetzner/homelab/telstar/ssh-port" | strings.TrimSpace | required }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
