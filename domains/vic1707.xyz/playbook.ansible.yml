@@ -12,6 +12,7 @@
 
   vars_files:
     - dns-records/protonmail.ansible.yml
+    - dns-records/brevo.ansible.yml
 
   tasks:
     - name: DNS records
@@ -29,7 +30,12 @@
         state: present
 
       with_subelements:
-        - "{{ protonmail_dns_records_map | dict2items }}"
+        - >-
+          {{
+              protonmail_dns_records_map
+              | ansible.builtin.combine(brevo_dns_records_map, list_merge='append')
+              | dict2items
+            }}
         - value
       loop_control:
         label: >-
