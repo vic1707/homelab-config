@@ -1,0 +1,81 @@
+ICX6450-48P Router>show version
+  Copyright (c) 1996-2016 Brocade Communications Systems, Inc. All rights reserved.
+    UNIT 1: compiled on Apr 23 2020 at 10:57:06 labeled as ICX64R08030u
+                (9871112 bytes) from Primary ICX64R08030u.bin
+        SW: Version 08.0.30uT313
+  Boot-Monitor Image size = 786944, Version:10.1.05T310 (kxz10105)
+  HW: Stackable ICX6450-48-HPOE
+==========================================================================
+UNIT 1: SL 1: ICX6450-48P POE 48-port Management Module
+         Serial  #: 2ax5o2jk68e
+         License: ICX6450_PREM_ROUTER_SOFT_PACKAGE   (LID: H4CKTH3PLN8)
+         P-ENGINE  0: type DEF0, rev 01
+         P-ENGINE  1: type DEF0, rev 01
+==========================================================================
+UNIT 1: SL 2: ICX6450-SFP-Plus 4port 40G Module
+==========================================================================
+  800 MHz ARM processor ARMv5TE, 400 MHz bus
+65536 KB flash memory
+  512 MB DRAM
+STACKID 1  system uptime is 53 second(s)
+The system started at 00:00:38 GMT+00 Thu Jan 01 1970
+
+ The system : started=warm start         reloaded=by "reload"
+
+ICX6450-48P Router>show inline power detail
+
+
+Power Supply Data On stack 1:
+++++++++++++++++++
+
+
+
+Power Supply Data:
+++++++++++++++++++
+
+Power Supply #1:
+        Max Curr:       13.7 Amps
+        Voltage:        54.0 Volts
+        Capacity:       740 Watts
+power supply 2 is not present
+power supply 3 is not present
+
+
+POE Details Info. On Stack 1 :
+
+
+General PoE Data:
++++++++++++++++++
+
+Firmware
+Version
+----------------
+02.1.0 Build 004
+
+
+
+Cumulative Port State Data:
++++++++++++++++++++++++++++
+
+#Ports    #Ports     #Ports   #Ports    #Ports       #Ports     #Ports
+Admin-On  Admin-Off  Oper-On  Oper-Off  Off-Denied   Off-No-PD  Off-Fault
+-------------------------------------------------------------------------
+0         48         0        48        0            0          0
+
+
+
+Cumulative Port Power Data:
++++++++++++++++++++++++++++
+
+#Ports  #Ports  #Ports        Power       Power
+Pri: 1  Pri: 2  Pri: 3  Consumption  Allocation
+-----------------------------------------------
+0       0       0           0.0   W     0.0   W
+
+
+ICX6450-48P Router>show license
+Index    Lic Mode        Lic Name               Lid/Serial No  Lic Type    Status     Lic Period    Lic Capacity
+Stack unit 1:
+1        Node Lock       ICX6450-PREM-LIC-SW    H4CKTH3PLN8    Normal      Active     Unlimited         1
+2        Node Lock       ICX6450-10G-LIC-POD    H4CKTH3PLN8    Normal      Active     Unlimited         2
+ICX6450-48P Router>
