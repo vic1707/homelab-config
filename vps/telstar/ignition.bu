@@ -14,7 +14,54 @@ storage:
 
   # Base container storage path
   directories:
-    - path: /mnt/containers
+    - path: /home/vic1707/containers
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    # Path for vic1707's systemd units
+    - path: /home/vic1707/.config
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/systemd
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/systemd/user
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+
+    # Path to manually enable vic1707's systemd units - these are links back to the unit file
+    - path: /home/vic1707/.config/systemd/user/default.target.wants
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+
+    # Path for vic1707's podman quadlets
+    - path: /home/vic1707/.config/containers/systemd
       mode: 0755
       user:
         name: vic1707
@@ -22,6 +69,9 @@ storage:
         name: vic1707
 
   files:
+    # enable lingering
+    - path: /var/lib/systemd/linger/vic1707
+
     # Hostname
     - path: /etc/hostname
       mode: 0400
@@ -145,26 +195,20 @@ storage:
     ######################
     ## Containers stuff ##
     ######################
-    - path: /etc/containers/systemd/tunnel.network
+    - path: /home/vic1707/.config/containers/systemd/tunnel.network
       mode: 0644
       contents:
         # Options=isolate=true
         inline: |
           [Network]
+          NetworkName=tunnel
           Driver=bridge
+          IPv6=false
           Subnet=10.89.0.0/26
           Gateway=10.89.0.1
-          NetworkName=tunnel
-          IPv6=false
-
-          # [Service]
-          # User=vic1707
-          # Group=vic1707
-          [Install]
-          WantedBy=multi-user.target
 
     ## Caddy
-    - path: /mnt/containers/caddy/Caddyfile
+    - path: /home/vic1707/.config/containers/caddy/Caddyfile
       mode: 0444
       contents:
         local: ./Caddyfile
@@ -172,7 +216,7 @@ storage:
         name: vic1707
       group:
         name: vic1707
-    - path: /etc/containers/systemd/caddy.container
+    - path: /home/vic1707/.config/containers/systemd/caddy.container
       mode: 0644
       contents:
         inline: |
@@ -192,20 +236,17 @@ storage:
           Environment="CLOUDFLARE_ZONE_TOKEN={{ print $CLOUDFLARE_ZONE_TOKEN }}"
           PublishPort=80:80
           PublishPort=443:443
-          Volume=/mnt/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-          Volume=/mnt/containers/caddy:/data/caddy:Z,rw
-          # User=vic1707
+          Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
+          Volume=/home/vic1707/containers/caddy:/data/caddy:Z,rw
           UserNS=keep-id
-
-          # [Service]
           # User=vic1707
-          # Group=vic1707
-          # Restart=always
-          # TimeoutStartSec=900
+
+          [Service]
+          TimeoutStartSec=300
+          Restart=always
 
           [Install]
-          #  default.target
-          WantedBy=multi-user.target
+          WantedBy=default.target
 
 systemd:
   units:
