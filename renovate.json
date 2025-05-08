@@ -19,6 +19,10 @@
 		{
 			"matchManagers": ["ansible-galaxy"],
 			"groupName": "Ansible galaxy Updates"
+		},
+		{
+			"matchManagers": ["python"],
+			"groupName": "Python packages Updates"
 		}
 	]
 }
