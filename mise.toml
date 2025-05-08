@@ -1,13 +1,15 @@
 [env]
+_.python.venv = { path = "{{ config_root }}/.venv", create = true }
 ANSIBLE_HOME="{{ config_root }}/.ansible"
 GOPASS_HOMEDIR="{{ config_root }}"
 
+[hooks]
+postinstall = "pip install -r {{ config_root }}/requirements.txt"
+
 [tools]
 actionlint = "1.7.7"
-ansible = "11.5.0"
-ansible-lint = "25.2.1"
 gopass = "1.15.16"
-pipx = "1.7.1" ## For installing ansible
+python = "3.13.3"
 ripgrep = "14.1.1"
 shellcheck = "0.10.0"
 shfmt = "3.11.0"
@@ -15,7 +17,12 @@ typos-cli = "1.31.1"
 zizmor = "1.5.2"
 
 [alias]
-ansible-lint = "pipx:ansible-lint"
 ripgrep = "asdf:vic1707/asdf-any-cargo-quickinstall"
 typos-cli = "asdf:vic1707/asdf-any-cargo-quickinstall"
 zizmor = "asdf:vic1707/asdf-any-cargo-quickinstall"
+
+[settings]
+experimental = true ## Enables hooks
+
+[settings.python]
+compile = false ## Forces download of precompiled bin
