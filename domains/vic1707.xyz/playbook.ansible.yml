@@ -13,6 +13,7 @@
   vars_files:
     - dns-records/protonmail.ansible.yml
     - dns-records/brevo.ansible.yml
+    - dns-records/homelab.ansible.yml
 
   tasks:
     - name: DNS records
@@ -34,6 +35,7 @@
           {{
               protonmail_dns_records_map
               | ansible.builtin.combine(brevo_dns_records_map, list_merge='append')
+              | ansible.builtin.combine(homelab_dns_records_map, list_merge='append')
               | dict2items
             }}
         - value
