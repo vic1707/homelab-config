@@ -1,0 +1,16 @@
+## Do not run in vscode, it seems to give false unreachable for ssh
+---
+- name: Verify connectivity to Brocade ICX 6450 switch
+  hosts: brocade_icx_sw
+  gather_facts: false
+  connection: ansible.netcommon.network_cli
+
+  tasks:
+    - name: Run 'show running-config' on ICX switch to verify connectivity
+      commscope.icx.icx_command:
+        commands: show running-config
+      register: config_output
+
+    - name: Display the switch running-config output
+      debug:
+        msg: "{{ config_output.stdout }}"
