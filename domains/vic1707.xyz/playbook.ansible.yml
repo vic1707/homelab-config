@@ -1,3 +1,5 @@
+## TODO:
+# Find a way for ansible to set the SSL/TLS Encryption mode to full
 ---
 - name: Manage {{ domain }}
   hosts: localhost
