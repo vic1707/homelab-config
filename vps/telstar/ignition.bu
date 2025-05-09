@@ -1,4 +1,5 @@
 # {{ $SSH_PORT := gopass "hetzner/homelab/telstar/ssh-port" | strings.TrimSpace | required }}
+# {{ $IPV6 := gopass "hetzner/homelab/telstar/ipv6" | strings.TrimSpace | required }}
 # {{ $CLOUDFLARE_API_TOKEN := gopass "cloudflare/api-tokens/DNS-Edit/vic1707.xyz" | strings.TrimSpace | required }}
 # {{ $CLOUDFLARE_ZONE_TOKEN := gopass "cloudflare/api-tokens/Zone-Read/vic1707.xyz" | strings.TrimSpace | required }}
 ---
@@ -191,6 +192,17 @@ storage:
       contents:
         inline: |
           net.ipv4.ip_unprivileged_port_start = 80
+
+    ## Configure IPV6
+    - path: /etc/systemd/network/10-enp1s0.network
+      contents:
+        inline: |
+          [Match]
+          Name=enp1s0
+
+          [Network]
+          Address={{ print $IPV6 }}/64
+          Gateway=fe80::1
 
     ######################
     ## Containers stuff ##
