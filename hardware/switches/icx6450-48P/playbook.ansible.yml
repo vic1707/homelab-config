@@ -96,3 +96,19 @@
       commscope.icx.icx_vlan:
         aggregate: "{{ vlans }}"
         purge: true
+
+    - name: Enable and power on PoE for IoT and Homelab ports
+      loop: >-
+        {{
+          vlans
+          | selectattr('name', 'in', ['iot', 'homelab'])
+          | map(attribute='interfaces.name')
+          | list
+          | flatten
+          | reject('match', '^ethernet 1/2/')
+          | list
+        }}
+      commscope.icx.icx_interface:
+        name: "{{ item }}"
+        power:
+          enabled: true
