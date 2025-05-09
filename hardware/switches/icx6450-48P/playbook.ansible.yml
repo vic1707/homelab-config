@@ -1,16 +1,98 @@
 ## Do not run in vscode, it seems to give false unreachable for ssh
+## Requires patch from <https://github.com/commscope-ruckus/RUCKUS_ICX_Ansible/pull/62>
+## TODO: uplink_port
 ---
-- name: Verify connectivity to Brocade ICX 6450 switch
-  hosts: brocade_icx_sw
+- name: Setup Mycelium switch
+  hosts: mycelium
   gather_facts: false
   connection: ansible.netcommon.network_cli
 
-  tasks:
-    - name: Run 'show running-config' on ICX switch to verify connectivity
-      commscope.icx.icx_command:
-        commands: show running-config
-      register: config_output
+  vars:
+    mgmt_if: management 1
+    uplink_port: ethernet 1/2/3 # SFP+ n°3
 
-    - name: Display the switch running-config output
-      debug:
-        msg: "{{ config_output.stdout }}"
+    vlans:
+      - name: iot
+        state: present
+        vlan_id: 10
+        # tagged:
+        #   name: ["{{ uplink_port }}"]
+        ## RJ45 even ports 38 -> 48
+        interfaces:
+          name: >-
+            {{
+              range(38, 49, 2)
+              | map('regex_replace', '^', 'ethernet 1/1/')
+              | list
+            }}
+
+      - name: lan
+        state: present
+        vlan_id: 20
+        # tagged:
+        #   name: ["{{ uplink_port }}"]
+        ## RJ45 even ports 14 -> 36
+        ## + SFP+ port n°4
+        interfaces:
+          name: >-
+            {{
+              (
+                range(14, 37, 2)
+                | map('regex_replace', '^', 'ethernet 1/1/')
+                | list
+              )
+              + [ 'ethernet 1/2/4' ]
+            }}
+
+      - name: management
+        state: present
+        vlan_id: 30
+        # tagged:
+        #   name: ["{{ uplink_port }}"]
+        ## RJ45 even ports 2, 4... -> 12
+        interfaces:
+          name: >-
+            {{
+              range(2, 13, 2)
+              | map('regex_replace', '^', 'ethernet 1/1/')
+              | list
+            }}
+
+      - name: homelab
+        state: present
+        vlan_id: 40
+        # tagged:
+        #   name: ["{{ uplink_port }}"]
+        ## RJ45 odd ports 1, 3... -> 47
+        ## + SFP+ ports n°1, 3
+        interfaces:
+          name: >-
+            {{
+              (
+                range(1, 48, 2)
+                | map('regex_replace', '^', 'ethernet 1/1/')
+                | list
+              )
+              + [ 'ethernet 1/2/1', 'ethernet 1/2/3' ]
+            }}
+
+  tasks:
+    # - name: Debug VLANs declaration
+    #   ansible.builtin.debug:
+    #     var: vlans
+
+    - name: Collect all facts from the device
+      commscope.icx.icx_facts:
+        gather_subset: all
+
+    - name: Set system hostname & domain
+      commscope.icx.icx_system:
+        state: present
+        hostname: Mycelium
+        domain_search:
+          - lan
+
+    - name: Setup VLANs
+      commscope.icx.icx_vlan:
+        aggregate: "{{ vlans }}"
+        purge: true
