@@ -5,3 +5,8 @@
 
 ## VPS FCOS
 __TMP__*/
+
+## SSH keys
+.ssh/**/*
+!.ssh/**/
+!.ssh/**/*.pub
