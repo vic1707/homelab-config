@@ -12,7 +12,7 @@ homelab_dns_records_map:
     - name: "vic1707.xyz"
       content: "{{ telstar_ipv4 }}"
       proxied: true
-  # AAAA:
-  #   - name: "vic1707.xyz"
-  #     content: "{{ telstar_ipv6 }}"
-  #     proxied: true
+  AAAA:
+    - name: "vic1707.xyz"
+      content: "{{ telstar_ipv6 }}"
+      proxied: true
