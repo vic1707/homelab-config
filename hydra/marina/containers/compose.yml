@@ -36,19 +36,19 @@ secrets:
 x-TIMEZONE: &TIMEZONE Europe/Paris
 ##
 x-AUTHELIA: &AUTHELIA
-    image: docker.io/authelia/authelia:4.38.18
+    image: docker.io/authelia/authelia:4.39.2
 x-AUTHELIA_IP: &AUTHELIA_IP 10.99.0.2
 ##
 x-CADDY: &CADDY
-    image: docker.io/library/caddy:2.9.1-alpine
+    image: docker.io/library/caddy:2.10.0-alpine
 x-CADDY_IP: &CADDY_IP 10.99.0.3
 ##
 x-GICKUP: &GICKUP
-    image: docker.io/buddyspencer/gickup:0.10.36
+    image: docker.io/buddyspencer/gickup:0.10.38
 x-GICKUP_IP: &GICKUP_IP 10.99.0.4
 ##
 x-JELLYFIN: &JELLYFIN
-    image: docker.io/jellyfin/jellyfin:10.10.5
+    image: docker.io/jellyfin/jellyfin:10.10.7
 x-JELLYFIN_IP: &JELLYFIN_IP 10.99.0.5
 ##
 x-HOMEPAGE: &HOMEPAGE
