@@ -88,7 +88,7 @@ storage:
           PermitRootLogin no              # Disallow root SSH logins
           PasswordAuthentication no       # Force key-based auth
           AddressFamily inet              # Binds SSH to IPv4 only
-          MaxAuthTries 6                  # Inludes ssh-key tries
+          MaxAuthTries 6                  # Includes ssh-key tries
           MaxSessions 2                   # Max connections per IP
           MaxStartups 2                   # Maximum incoming connection attempts
           LogLevel VERBOSE
@@ -133,6 +133,7 @@ storage:
               policy drop;
 
               ## Allow loopback (localhost) traffic
+              # @typos-ignore
               iif lo accept;
 
               ## Allow established or related connections
