@@ -21,7 +21,7 @@
 			"groupName": "Ansible galaxy Updates"
 		},
 		{
-			"matchManagers": ["python"],
+			"matchManagers": ["pip_requirements"],
 			"groupName": "Python packages Updates"
 		}
 	]
