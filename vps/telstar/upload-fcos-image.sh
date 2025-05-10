@@ -221,6 +221,9 @@ if $CREATE_SERVER; then
             --name "$NAME" \
             --type "$SERVER_TYPE" \
             --image "$IMAGE_ID" \
+            `# TODO: IP handling sucks` \
+            --primary-ipv4 "telstar-v4" \
+            --primary-ipv6 "telstar-v6" \
             --location "$SERVER_LOCATION" \
             --label "$IMG_TAGS"
 
