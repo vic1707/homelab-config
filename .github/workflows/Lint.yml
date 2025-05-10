@@ -60,3 +60,11 @@ jobs:
 
       - name: Ansible-lint
         run: ansible-lint
+
+      - name: Butane
+        run: |
+          find . \
+            -type f -name "*.bu" \
+            -print \
+            -execdir \
+              butane --strict --files-dir . --check {} +
