@@ -226,7 +226,7 @@ storage:
           Description=Caddy Quadlet
 
           [Container]
-          Image=ghcr.io/caddybuilds/caddy-cloudflare
+          Image=ghcr.io/caddybuilds/caddy-cloudflare:2.10.0-alpine
           ContainerName=caddy
           Network=tunnel.network
           ReadOnly=true
