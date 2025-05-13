@@ -1,7 +1,5 @@
-# {{ $SSH_PORT := gopass "hetzner/homelab/telstar/ssh-port" | strings.TrimSpace | required }}
-# {{ $IPV6 := gopass "hetzner/homelab/telstar/ipv6" | strings.TrimSpace | required }}
-# {{ $CLOUDFLARE_API_TOKEN := gopass "cloudflare/api-tokens/DNS-Edit/vic1707.xyz" | strings.TrimSpace | required }}
-# {{ $CLOUDFLARE_ZONE_TOKEN := gopass "cloudflare/api-tokens/Zone-Read/vic1707.xyz" | strings.TrimSpace | required }}
+# {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
+# {{ $CLOUDFLARE_API_TOKEN := gopass "domains/vic1707.xyz/api-key.cloudflare" "key" | strings.TrimSpace | required }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -235,7 +233,6 @@ storage:
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
           Environment="CLOUDFLARE_API_TOKEN={{ print $CLOUDFLARE_API_TOKEN }}"
-          Environment="CLOUDFLARE_ZONE_TOKEN={{ print $CLOUDFLARE_ZONE_TOKEN }}"
           PublishPort=80:80
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro

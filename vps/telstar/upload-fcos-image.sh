@@ -6,7 +6,7 @@ trap 'echo "❌ Error occurred on line $LINENO"' ERR
 #############################################
 # Imported Variables
 #############################################
-HCLOUD_TOKEN=$(gopass show -o hetzner/homelab/rw-api-token)
+HCLOUD_TOKEN=$(gopass show -o api-token.hetzner key)
 export HCLOUD_TOKEN
 #############################################
 # Configuration Variables
@@ -251,7 +251,7 @@ if $BOOT_VM; then
         -nographic \
         -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
         -drive if=virtio,file="$ISO_PATH",media=cdrom \
-        -netdev user,id=net0,hostfwd=tcp::2222-:"$(gopass hetzner/homelab/telstar/ssh-port || true)",hostfwd=tcp::8080-:80,hostfwd=tcp::4443-:443 \
+        -netdev user,id=net0,hostfwd=tcp::2222-:"$(gopass show -o telstar/ssh-port || true)",hostfwd=tcp::8080-:80,hostfwd=tcp::4443-:443 \
         -device virtio-net-device,netdev=net0 \
         -serial mon:stdio
 fi

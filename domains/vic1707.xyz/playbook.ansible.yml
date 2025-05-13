@@ -9,8 +9,8 @@
   vars:
     domain: "vic1707.xyz"
     cloudflare:
-      zone_id: "{{ lookup('community.general.passwordstore', 'cloudflare/zone-id/vic1707.xyz') }}"
-      token: "{{ lookup('community.general.passwordstore', 'cloudflare/api-tokens/DNS-Edit/vic1707.xyz') }}"
+      zone_id: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/zone-id.cloudflare') }}"
+      token: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/api-key.cloudflare', subkey='key') }}"
 
   vars_files:
     - dns-records/protonmail.ansible.yml

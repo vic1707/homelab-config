@@ -1,5 +1,5 @@
 ---
-brevo_code: "{{ lookup('community.general.passwordstore', 'brevo/vic1707.xyz/txt-code') }}"
+brevo_code: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/txt-code.brevo') }}"
 
 brevo_dns_records_map:
   CNAME:
