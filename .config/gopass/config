@@ -7,6 +7,10 @@
 [updater]
 	check = false
 
+[core]
+	autosync = false
+	autopush = false
+
 [generate]
 	autoclip = true
 	length = 50

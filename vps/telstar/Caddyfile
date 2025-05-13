@@ -9,10 +9,7 @@
 
 	tls {
 		resolvers 1.1.1.1
-		dns cloudflare {
-			zone_token {env.CLOUDFLARE_ZONE_TOKEN}
-			api_token {env.CLOUDFLARE_API_TOKEN}
-		}
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 }
 

@@ -1,5 +1,5 @@
 ---
-proton_verification_key: "{{ lookup('community.general.passwordstore', 'proton_mail/vic1707.xyz/verification-key') }}"
+proton_verification_key: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/verification-key.protonmail') }}"
 proton_dkim_key: "dr6bmrr34l3w25eog2gnwamluano3yubluipogzk7dsw6b6kmsm2a" # gitleaks:allow
 
 protonmail_dns_records_map:

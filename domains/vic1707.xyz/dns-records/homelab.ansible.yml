@@ -1,6 +1,6 @@
 ---
-telstar_ipv4: "{{ lookup('community.general.passwordstore', 'hetzner/homelab/telstar/ipv4') }}"
-telstar_ipv6: "{{ lookup('community.general.passwordstore', 'hetzner/homelab/telstar/ipv6') }}"
+telstar_ipv4: "{{ lookup('community.general.passwordstore', 'telstar/ipv4') }}"
+telstar_ipv6: "{{ lookup('community.general.passwordstore', 'telstar/ipv6') }}"
 
 homelab_dns_records_map:
   CNAME:
