@@ -1,0 +1,9 @@
+---
+all:
+  hosts:
+    mycelium:
+      ansible_host: 192.168.8.240
+      ansible_user: root
+      ansible_ssh_pass: "{{ lookup('community.general.passwordstore', 'hardware/switches/icx-6450-48p/root-pass') }}"
+      ansible_network_os: commscope.icx.icx
+      # ansible_ssh_common_args: "-o KexAlgorithms=diffie-hellman-group1-sha1 -o HostKeyAlgorithms=ssh-rsa"
