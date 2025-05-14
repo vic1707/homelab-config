@@ -4,38 +4,38 @@ proton_dkim_key: "dr6bmrr34l3w25eog2gnwamluano3yubluipogzk7dsw6b6kmsm2a" # gitle
 
 protonmail_dns_records_map:
   CNAME:
-    - name: "protonmail._domainkey.vic1707.xyz"
-      content: "protonmail.domainkey.{{ proton_dkim_key }}.domains.proton.ch"
+    - record: "protonmail._domainkey.vic1707.xyz"
+      value: "protonmail.domainkey.{{ proton_dkim_key }}.domains.proton.ch"
       proxied: false
 
-    - name: "protonmail2._domainkey.vic1707.xyz"
-      content: "protonmail2.domainkey.{{ proton_dkim_key }}.domains.proton.ch"
+    - record: "protonmail2._domainkey.vic1707.xyz"
+      value: "protonmail2.domainkey.{{ proton_dkim_key }}.domains.proton.ch"
       proxied: false
 
-    - name: "protonmail3._domainkey.vic1707.xyz"
-      content: "protonmail3.domainkey.{{ proton_dkim_key }}.domains.proton.ch"
+    - record: "protonmail3._domainkey.vic1707.xyz"
+      value: "protonmail3.domainkey.{{ proton_dkim_key }}.domains.proton.ch"
       proxied: false
 
   MX:
-    - name: "vic1707.xyz"
-      content: "mail.protonmail.ch"
+    - record: "vic1707.xyz"
+      value: "mail.protonmail.ch"
       priority: 10
       proxied: false
 
-    - name: "vic1707.xyz"
-      content: "mailsec.protonmail.ch"
+    - record: "vic1707.xyz"
+      value: "mailsec.protonmail.ch"
       priority: 20
       proxied: false
 
   TXT:
-    - name: "vic1707.xyz"
-      content: '"v=spf1 include:_spf.protonmail.ch mx ~all"'
+    - record: "vic1707.xyz"
+      value: '"v=spf1 include:_spf.protonmail.ch mx ~all"'
       proxied: false
 
-    - name: "vic1707.xyz"
-      content: '"protonmail-verification={{ proton_verification_key }}"'
+    - record: "vic1707.xyz"
+      value: '"protonmail-verification={{ proton_verification_key }}"'
       proxied: false
 
-    - name: "_dmarc.vic1707.xyz"
-      content: '"v=DMARC1; p=quarantine"'
+    - record: "_dmarc.vic1707.xyz"
+      value: '"v=DMARC1; p=quarantine"'
       proxied: false

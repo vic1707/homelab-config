@@ -3,18 +3,18 @@ brevo_code: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/t
 
 brevo_dns_records_map:
   CNAME:
-    - name: "brevo1._domainkey"
-      content: "b1.vic1707-xyz.dkim.brevo.com"
+    - record: "brevo1._domainkey"
+      value: "b1.vic1707-xyz.dkim.brevo.com"
       proxied: false
       ttl: 3600 ## 1H
 
-    - name: "brevo2._domainkey"
-      content: "b2.vic1707-xyz.dkim.brevo.com"
+    - record: "brevo2._domainkey"
+      value: "b2.vic1707-xyz.dkim.brevo.com"
       proxied: false
       ttl: 3600 ## 1H
 
   TXT:
-    - name: "vic1707.xyz"
-      content: '"brevo-code:{{ brevo_code }}"'
+    - record: "vic1707.xyz"
+      value: '"brevo-code:{{ brevo_code }}"'
       proxied: false
       ttl: 3600 ## 1H

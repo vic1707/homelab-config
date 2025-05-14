@@ -7,10 +7,9 @@
   gather_facts: false
 
   vars:
-    domain: "vic1707.xyz"
-    cloudflare:
-      zone_id: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/zone-id.cloudflare') }}"
-      token: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/api-key.cloudflare', subkey='key') }}"
+    domain: vic1707.xyz
+    cf_auth_token: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/api-key.cloudflare', subkey='key') }}"
+    cf_account_name: vic1707
 
   vars_files:
     - dns-records/protonmail.ansible.yml
@@ -19,33 +18,14 @@
 
   tasks:
     - name: DNS records
-      community.general.cloudflare_dns:
-        ## General cloudlfare settings
-        api_token: "{{ cloudflare.token }}"
-        zone: "{{ domain }}"
-        ## Record
-        type: "{{ item.0.key }}"
-        name: "{{ item.1.name }}"
-        content: "{{ item.1.content }}"
-        ttl: "{{ item.1.ttl | default(1) }}" ## 1 == default
-        proxied: "{{ item.1.proxied | default(false) }}"
-        priority: "{{ item.1.priority | default(omit) }}"
-        state: present
-
-      with_subelements:
-        - >-
-          {{
-              protonmail_dns_records_map
-              | ansible.builtin.combine(brevo_dns_records_map, list_merge='append')
-              | ansible.builtin.combine(homelab_dns_records_map, list_merge='append')
-              | dict2items
-            }}
-        - value
-      loop_control:
-        label: >-
-          {{
-            (
-              '%8s - %s → %s'
-              | format('[' ~ item.0.key ~ ']', item.1.name, item.1.content)
-            ) | truncate(80, True)
-          }}
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.dns
+      vars:
+        cf_dns:
+          - zone: "{{ domain }}"
+            records: "{{
+                protonmail_dns_records_map
+                | combine(brevo_dns_records_map, list_merge='append')
+                | combine(homelab_dns_records_map, list_merge='append')
+                | moreati.jq.jq('to_entries | map(.value[] + { type: .key })')
+              }}"
