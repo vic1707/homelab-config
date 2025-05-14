@@ -37,6 +37,16 @@
             challenge_ttl: 900 # 15min
             browser_check: true
 
+    - name: Zone scrape shield
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.scrape_shield
+      vars:
+        cf_scrape_shield:
+          - zone_id: "{{ _cf_zone_id[domain] }}"
+            email_obfuscation: true
+            server_side_exclude: true
+            hotlink_protection: true
+
     - name: DNS records
       ansible.builtin.include_role:
         name: linuxhq.cloudflare.dns
