@@ -53,9 +53,10 @@
       vars:
         cf_dns:
           - zone: "{{ domain }}"
-            records: "{{
+            records: >-
+              {{
                 protonmail_dns_records_map
                 | combine(brevo_dns_records_map, list_merge='append')
                 | combine(homelab_dns_records_map, list_merge='append')
                 | moreati.jq.jq('to_entries | map(.value[] + { type: .key })')
-              }}"
+              }}
