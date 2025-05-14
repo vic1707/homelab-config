@@ -27,6 +27,16 @@
             automatic_https_rewrites: true
             opportunistic_encryption: true
 
+    - name: Zone security
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.security
+      vars:
+        cf_security:
+          - zone_id: "{{ _cf_zone_id[domain] }}"
+            security_level: high
+            challenge_ttl: 900 # 15min
+            browser_check: true
+
     - name: DNS records
       ansible.builtin.include_role:
         name: linuxhq.cloudflare.dns
