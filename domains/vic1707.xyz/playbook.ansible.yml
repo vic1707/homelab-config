@@ -1,5 +1,3 @@
-## TODO:
-# Find a way for ansible to set the SSL/TLS Encryption mode to full
 ---
 - name: Manage {{ domain }}
   hosts: localhost
@@ -7,10 +5,55 @@
   gather_facts: false
 
   vars:
-    domain: "vic1707.xyz"
-    cloudflare:
-      zone_id: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/zone-id.cloudflare') }}"
-      token: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/api-key.cloudflare', subkey='key') }}"
+    domain: vic1707.xyz
+    cf_auth_token: "{{ lookup('community.general.passwordstore', 'domains/vic1707.xyz/api-key.cloudflare', subkey='key') }}"
+    cf_account_name: vic1707
+
+    waf:
+      block:
+        - description: Known Bots
+          expression: (cf.client.bot)
+
+        - description: "[Path] Hidden Files"
+          expression: (http.request.uri.path contains "/." and not http.request.uri.path contains "/.well-known/")
+
+        - description: "[Path] Traversal (..)"
+          expression: (http.request.uri.path contains "..")
+
+        - description: Encoded Dot (%2e)
+          expression: (http.request.uri.path contains "%2e")
+
+        - description: "[Path] Double Slash"
+          expression: (http.request.uri.path contains "//")
+
+        - description: Identified Threatening Sources
+          expression: (cf.threat_score gt 50)
+
+        - description: Potential SQL Injection Attempts
+          expression: >
+            (http.request.uri.query contains "'")
+            or (http.request.uri.query contains "--")
+            or (http.request.uri.query contains "/*")
+            or (http.request.uri.query contains "xp_")
+
+        - description: Dangerous or Unused HTTP Methods
+          expression: (http.request.method in {"TRACE" "CONNECT" "PRI" "TRACK" "DEBUG"})
+
+        - description: "[Paths] Sensitive"
+          expression: >
+            (http.request.uri.path contains "/.git")
+            or (http.request.uri.path contains "/wp-admin")
+            or (http.request.uri.path contains "/phpmyadmin")
+
+      challenge:
+        - description: HTTP/1.0 (and is not Lynx browser)
+          expression: (http.request.version eq "HTTP/1.0" and not http.user_agent contains "Lynx/")
+
+        - description: Empty User-Agent
+          expression: (http.user_agent eq "")
+
+        - description: Requests with No Referrer and No User-Agent
+          expression: (http.user_agent eq "" and http.referer eq "")
 
   vars_files:
     - dns-records/protonmail.ansible.yml
@@ -18,34 +61,59 @@
     - dns-records/homelab.ansible.yml
 
   tasks:
-    - name: DNS records
-      community.general.cloudflare_dns:
-        ## General cloudlfare settings
-        api_token: "{{ cloudflare.token }}"
-        zone: "{{ domain }}"
-        ## Record
-        type: "{{ item.0.key }}"
-        name: "{{ item.1.name }}"
-        content: "{{ item.1.content }}"
-        ttl: "{{ item.1.ttl | default(1) }}" ## 1 == default
-        proxied: "{{ item.1.proxied | default(false) }}"
-        priority: "{{ item.1.priority | default(omit) }}"
-        state: present
+    - name: Zone SSL security
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.ssl
+      vars:
+        cf_ssl:
+          - zone_id: "{{ _cf_zone_id[domain] }}"
+            mode: strict # TODO: origin_pull? currently returns a 400
+            always_use_https: true
+            min_tls_version: 1.3
+            automatic_https_rewrites: true
+            opportunistic_encryption: true
 
-      with_subelements:
-        - >-
+    - name: Zone security
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.security
+      vars:
+        cf_security:
+          - zone_id: "{{ _cf_zone_id[domain] }}"
+            security_level: high
+            challenge_ttl: 900 # 15min
+            browser_check: true
+
+    - name: Zone scrape shield
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.scrape_shield
+      vars:
+        cf_scrape_shield:
+          - zone_id: "{{ _cf_zone_id[domain] }}"
+            email_obfuscation: true
+            server_side_exclude: true
+            hotlink_protection: true
+
+    - name: Zone WAF
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.ruleset_entrypoint
+      vars:
+        cf_zone_id: "{{ _cf_zone_id[domain] }}"
+        cf_ruleset_rules: >-
           {{
-              protonmail_dns_records_map
-              | ansible.builtin.combine(brevo_dns_records_map, list_merge='append')
-              | ansible.builtin.combine(homelab_dns_records_map, list_merge='append')
-              | dict2items
-            }}
-        - value
-      loop_control:
-        label: >-
-          {{
-            (
-              '%8s - %s → %s'
-              | format('[' ~ item.0.key ~ ']', item.1.name, item.1.content)
-            ) | truncate(80, True)
+            waf
+            | moreati.jq.jq('to_entries | map({ action: .key, enabled: true, expression: (.value | map(.expression) | join(" or ")) })')
           }}
+
+    - name: DNS records
+      ansible.builtin.include_role:
+        name: linuxhq.cloudflare.dns
+      vars:
+        cf_dns:
+          - zone: "{{ domain }}"
+            records: >-
+              {{
+                protonmail_dns_records_map
+                | combine(brevo_dns_records_map, list_merge='append')
+                | combine(homelab_dns_records_map, list_merge='append')
+                | moreati.jq.jq('to_entries | map(.value[] + { type: .key })')
+              }}

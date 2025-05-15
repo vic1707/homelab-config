@@ -4,15 +4,15 @@ telstar_ipv6: "{{ lookup('community.general.passwordstore', 'telstar/ipv6') }}"
 
 homelab_dns_records_map:
   CNAME:
-    - name: "*.vic1707.xyz"
-      content: "vic1707.xyz"
+    - record: "*.vic1707.xyz"
+      value: "vic1707.xyz"
       proxied: true
 
   A:
-    - name: "vic1707.xyz"
-      content: "{{ telstar_ipv4 }}"
+    - record: "vic1707.xyz"
+      value: "{{ telstar_ipv4 }}"
       proxied: true
   AAAA:
-    - name: "vic1707.xyz"
-      content: "{{ telstar_ipv6 }}"
+    - record: "vic1707.xyz"
+      value: "{{ telstar_ipv6 }}"
       proxied: true
