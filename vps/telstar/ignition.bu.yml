@@ -67,6 +67,14 @@ storage:
       group:
         name: vic1707
 
+    # Path for vic1707's custom containerfiles
+    - path: /home/vic1707/.config/containers/containerfiles
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+
   files:
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
@@ -208,6 +216,14 @@ storage:
           Gateway=10.89.0.1
 
     ## Caddy
+    - path: /home/vic1707/.config/containers/containerfiles/caddy.Containerfile
+      mode: 0444
+      contents:
+        local: ./caddy.Containerfile
+      user:
+        name: vic1707
+      group:
+        name: vic1707
     - path: /home/vic1707/.config/containers/caddy/Caddyfile
       mode: 0444
       contents:
@@ -216,15 +232,23 @@ storage:
         name: vic1707
       group:
         name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/caddy.build
+      mode: 0444
+      contents:
+        inline: |
+          [Build]
+          SetWorkingDirectory=/home/vic1707/.config/containers/containerfiles/
+          File=caddy.Containerfile
+          ImageTag=localhost/caddy
     - path: /home/vic1707/.config/containers/systemd/caddy.container
-      mode: 0644
+      mode: 0444
       contents:
         inline: |
           [Unit]
           Description=Caddy Quadlet
 
           [Container]
-          Image=ghcr.io/caddybuilds/caddy-cloudflare:2.10.0-alpine
+          Image=caddy.build
           ContainerName=caddy
           Network=tunnel.network
           ReadOnly=true
