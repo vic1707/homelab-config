@@ -64,7 +64,7 @@ jobs:
       - name: Butane
         run: |
           find . \
-            -type f -name "*.bu" \
+            -type f -name "*.bu.yml" \
             -print \
             -execdir \
               butane --strict --files-dir . --check {} +
