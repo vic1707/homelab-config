@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 set -o errtrace
-trap 'echo "❌ Error occurred on line $LINENO"' ERR
+trap 'echo "❌ UNEXPECTED Error occurred on line $LINENO"' ERR
 
 #############################################
 # Imported Variables
@@ -24,8 +24,6 @@ EMBED_ISO=false
 UPLOAD_IMAGE=false
 CREATE_SERVER=false
 CLEANUP=true
-BOOT_VM=false
-BOOT_VM_PATH=""
 
 #############################################
 # Usage Help
@@ -35,7 +33,6 @@ usage() {
 	Usage: $(basename "$0") [OPTIONS] <butane-file>
 
 	Options:
-    --boot-vm [iso]          Boot a VM using the generated ISO or a provided one (arm64 QEMU)
 	--embed-iso              Generate the embedded ISO only
 	--upload-image           Upload the embedded ISO to Hetzner
 	--create-server          Create a server from the uploaded image
@@ -66,13 +63,6 @@ while [[ $# -gt 0 ]]; do
         --upload-image) UPLOAD_IMAGE=true ;;
         --create-server) CREATE_SERVER=true ;;
         --no-cleanup) CLEANUP=false ;;
-        --boot-vm)
-            BOOT_VM=true
-            if [[ $# -gt 1 && ! "$2" =~ ^--.* ]]; then
-                shift
-                BOOT_VM_PATH="$1"
-            fi
-            ;;
         -h | --help)
             usage
             exit 0
@@ -100,8 +90,8 @@ if [[ ! -f $BUTANE_FILE ]]; then
     exit 1
 fi
 
-if ! $EMBED_ISO && ! $UPLOAD_IMAGE && ! $CREATE_SERVER && ! $BOOT_VM; then
-    echo "❌ No action specified. Use --embed-iso, --upload-image, --create-server or --boot-vm." >&2
+if ! $EMBED_ISO && ! $UPLOAD_IMAGE && ! $CREATE_SERVER; then
+    echo "❌ No action specified. Use --embed-iso, --upload-image or --create-server." >&2
     usage
     exit 1
 fi
@@ -229,31 +219,6 @@ if $CREATE_SERVER; then
 
         echo "✅ Server '$NAME' created successfully."
     fi
-fi
-
-#############################################
-# Boot VM from ISO (Generated or Provided)
-#############################################
-if $BOOT_VM; then
-    ISO_PATH="${BOOT_VM_PATH:-$TMP_DIR/$IMAGE_NAME.iso}"
-    if [[ ! -f "$ISO_PATH" ]]; then
-        echo -e "❌ ISO not found at '$ISO_PATH'. Use --embed-iso or provide a path with --boot-vm <path>" >&2
-        exit 1
-    fi
-
-    echo -e "🚀 Booting Fedora CoreOS ISO in QEMU..."
-
-    qemu-system-aarch64 \
-        -machine virt,highmem=off \
-        -cpu cortex-a72 \
-        -smp 2 \
-        -m 2048 \
-        -nographic \
-        -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
-        -drive if=virtio,file="$ISO_PATH",media=cdrom \
-        -netdev user,id=net0,hostfwd=tcp::2222-:"$(gopass show -o telstar/ssh-port || true)",hostfwd=tcp::8080-:80,hostfwd=tcp::4443-:443 \
-        -device virtio-net-device,netdev=net0 \
-        -serial mon:stdio
 fi
 
 #############################################

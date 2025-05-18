@@ -25,3 +25,5 @@ exclude_paths:
   - "*.json"
   - "*.cfg"
   - "*.toml"
+  - "*.bu.yml"
+  - "*.bu.yaml"
