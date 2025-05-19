@@ -204,7 +204,7 @@ storage:
     ## Containers stuff ##
     ######################
     - path: /home/vic1707/.config/containers/systemd/tunnel.network
-      mode: 0644
+      mode: 0444
       contents:
         # Options=isolate=true
         inline: |
