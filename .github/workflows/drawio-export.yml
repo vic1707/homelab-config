@@ -19,7 +19,7 @@ jobs:
           persist-credentials: false
 
       - name: Use Draw.io CLI to export diagram
-        uses: rlespinasse/drawio-export-action@v2.29.0
+        uses: rlespinasse/drawio-export-action@v2.31.0
         with:
           format: svg
           output: drawio-assets
