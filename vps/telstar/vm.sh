@@ -86,10 +86,10 @@ echo "✅ FCOS image downloaded created at '$RAW_IMG_PATH'."
 echo "🚀 Booting Fedora CoreOS in QEMU..."
 
 qemu-system-aarch64 \
-    -machine virt,highmem=off \
+    -machine virt \
     -cpu cortex-a72 \
-    -smp 2 \
-    -m 2048 \
+    -smp 4 \
+    -m 4096 \
     -nographic \
     -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
     -fw_cfg name=opt/com.coreos/config,file="${IGNITION_PATH}" \

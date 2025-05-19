@@ -23,6 +23,10 @@
 		{
 			"matchManagers": ["pip_requirements"],
 			"groupName": "Python packages Updates"
+		},
+		{
+			"matchManagers": ["dockerfile"],
+			"groupName": "Containerfiles Updates"
 		}
 	]
 }
