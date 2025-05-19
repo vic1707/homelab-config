@@ -1,5 +1,4 @@
 # {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
-# {{ $CLOUDFLARE_API_TOKEN := gopass "domains/vic1707.xyz/api-key.cloudflare" "key" | strings.TrimSpace | required }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -256,7 +255,6 @@ storage:
           AddCapability=NET_BIND_SERVICE
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
-          Environment="CLOUDFLARE_API_TOKEN={{ print $CLOUDFLARE_API_TOKEN }}"
           PublishPort=80:80
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
