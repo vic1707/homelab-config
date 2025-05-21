@@ -13,14 +13,13 @@ export HCLOUD_TOKEN
 #############################################
 ARCH="arm" # Options: arm or x64
 NAME="telstar"
-IMAGE_NAME="fcos-${NAME}"
 SERVER_TYPE="cax11"
 SERVER_LOCATION="fsn1" # fsn1 = EU-Central (Germany)
 
 #############################################
 # Mode Flags
 #############################################
-EMBED_ISO=false
+DOWNLOAD_IMAGE=false
 UPLOAD_IMAGE=false
 CREATE_SERVER=false
 CLEANUP=true
@@ -33,7 +32,7 @@ usage() {
 	Usage: $(basename "$0") [OPTIONS] <butane-file>
 
 	Options:
-	--embed-iso              Generate the embedded ISO only
+	--download-image         Download FCOS Hetzner image
 	--upload-image           Upload the embedded ISO to Hetzner
 	--create-server          Create a server from the uploaded image
 	--no-cleanup             Do not delete temporary ISO after upload
@@ -59,7 +58,7 @@ fi
 BUTANE_FILE=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --embed-iso) EMBED_ISO=true ;;
+        --download-image) DOWNLOAD_IMAGE=true ;;
         --upload-image) UPLOAD_IMAGE=true ;;
         --create-server) CREATE_SERVER=true ;;
         --no-cleanup) CLEANUP=false ;;
@@ -90,8 +89,8 @@ if [[ ! -f $BUTANE_FILE ]]; then
     exit 1
 fi
 
-if ! $EMBED_ISO && ! $UPLOAD_IMAGE && ! $CREATE_SERVER; then
-    echo "❌ No action specified. Use --embed-iso, --upload-image or --create-server." >&2
+if ! $DOWNLOAD_IMAGE && ! $UPLOAD_IMAGE && ! $CREATE_SERVER; then
+    echo "❌ No action specified. Use --download-image, --upload-image or --create-server." >&2
     usage
     exit 1
 fi
@@ -141,32 +140,25 @@ esac
 #############################################
 # Embed Ignition Config into ISO
 #############################################
-if $EMBED_ISO; then
-    echo "🧬 Embedding Ignition config..."
-
+if $DOWNLOAD_IMAGE; then
     TMP_DIR="$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)"
 
     RAW_IMG_PATH=$(coreos_installer download \
         --stream stable \
-        --platform metal \
-        --format iso \
+        --platform hetzner \
+        --format raw.xz \
         --architecture "$IMG_ARCH" \
-        --decompress \
         --directory "$TMP_DIR")
 
-    echo "$IGNITION_FILE" | coreos_installer iso ignition embed \
-        --output "$TMP_DIR/$IMAGE_NAME.iso" \
-        "$RAW_IMG_PATH"
-
-    echo "✅ Embedded ISO created at '$TMP_DIR/$IMAGE_NAME.iso'."
+    echo "✅ Fedora raw.xz downloaded at '$RAW_IMG_PATH'."
 fi
 
 #############################################
 # Upload Image to Hetzner
 #############################################
 if $UPLOAD_IMAGE; then
-    if [[ -z ${TMP_DIR:-} ]] || [[ ! -f "$TMP_DIR/$IMAGE_NAME.iso" ]]; then
-        echo "❌ ISO not found. Run with --embed-iso." >&2
+    if [[ -z ${TMP_DIR:-} ]] || [[ ! -f "$RAW_IMG_PATH" ]]; then
+        echo "❌ ISO not found. Run with --download-image." >&2
         exit 1
     fi
 
@@ -178,8 +170,9 @@ if $UPLOAD_IMAGE; then
         echo "🚀 Uploading image to Hetzner..."
 
         hcloud-upload-image upload \
-            --image-path "$TMP_DIR/$IMAGE_NAME.iso" \
+            --image-path "$RAW_IMG_PATH" \
             --architecture "$ARCH" \
+            --compression xz \
             --description "Fedora CoreOS custom image for $NAME" \
             --labels "$IMG_TAGS"
 
@@ -207,7 +200,7 @@ if $CREATE_SERVER; then
     else
         echo "🚀 Creating server '$NAME'..."
 
-        hcloud server create \
+        echo "$IGNITION_FILE" | hcloud server create \
             --name "$NAME" \
             --type "$SERVER_TYPE" \
             --image "$IMAGE_ID" \
@@ -215,7 +208,8 @@ if $CREATE_SERVER; then
             --primary-ipv4 "telstar-v4" \
             --primary-ipv6 "telstar-v6" \
             --location "$SERVER_LOCATION" \
-            --label "$IMG_TAGS"
+            --label "$IMG_TAGS" \
+            --user-data-from-file -
 
         echo "✅ Server '$NAME' created successfully."
     fi
