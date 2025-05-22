@@ -112,7 +112,7 @@ case "$COMMAND" in
 
         ;;
     hetzner)
-        get_fcos_release_infos stable aarch64 qemu qcow2.xz HETZNER_INFOS
+        get_fcos_release_infos stable aarch64 hetzner raw.xz HETZNER_INFOS
         IMG_TAGS="version=${HETZNER_INFOS[0]}"
         SERVER_TAGS="os=fedora-coreos,$IMG_TAGS,name=$NAME,ignition_hash=$IGNITION_HASH"
 
