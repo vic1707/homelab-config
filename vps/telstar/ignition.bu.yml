@@ -78,12 +78,6 @@ storage:
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
 
-    # Hostname
-    - path: /etc/hostname
-      mode: 0400
-      contents:
-        inline: telstar
-
     # SSH daemon hardening
     - path: /etc/ssh/sshd_config.d/99-hardening.conf
       mode: 0400
