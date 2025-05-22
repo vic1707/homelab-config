@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -o errtrace
+trap 'echo "❌ UNEXPECTED Error occurred on line $LINENO"' ERR
+
+## Script is made for aarch64
+
+#############################################
+# Config Variables
+#############################################
+## VMs
+CORE_COUNT=4
+RAM_MB=4096
+## Hetzner
+NAME=telstar
+SERVER_TYPE=cax11
+SERVER_LOCATION=fsn1 # fsn1 = EU-Central (Germany)
+
+#############################################
+# Imported Variables
+#############################################
+HCLOUD_TOKEN=$(gopass show -o api-token.hetzner key)
+export HCLOUD_TOKEN
+
+#############################################
+# Utility functions
+#############################################
+get_fcos_release_infos() {
+    local stream="$1" arch="$2" platform="$3" format="$4"
+    local -n RET=$5
+
+    local releases release_infos
+    releases=$(curl --silent "https://builds.coreos.fedoraproject.org/streams/$stream.json")
+    release_infos=$(echo "$releases" | jq -e ".architectures.$arch.artifacts.$platform")
+
+    local release_version release_link
+    release_version=$(echo "$release_infos" | jq -r ".release")
+    release_link=$(echo "$release_infos" | jq -r ".formats.\"$format\".disk.location")
+
+    # shellcheck disable=SC2034 # variable is used by nameref
+    RET=("$release_version" "$release_link")
+}
+
+#############################################
+# Usage Help
+#############################################
+usage() {
+    cat << EOF
+	Usage: $(basename "$0") <butane-file> [command] [command_options]
+
+    Commands:
+        help                    Show this help message
+        vm                      Starts a local VM
+        hetzner                 Manages hetzner ressources
+
+    Command Options:
+        hetzner:
+            --upload-image      Fetches and upload the latest FCOS image (if necessary)
+            --create-server     Fetches and upload the latest FCOS image (if necessary)
+            --remove-image      Removes existing FCOS image
+
+	Arguments:
+	    <butane-file>           Path to the Butane configuration file (required)
+EOF
+}
+
+#############################################
+# Arguments parsing
+#############################################
+if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+fi
+
+BUTANE_FILE=$1
+[[ ! -f $BUTANE_FILE ]] && echo "❌ Butane file not found." && exit 1
+shift
+
+#############################################
+# Actual work
+#############################################
+echo "⚙️ Generating Ignition file..."
+IGNITION_PATH="$(mktemp)"
+gomplate -f "$BUTANE_FILE" --plugin gopass=gopass | butane --files-dir "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
+IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
+
+COMMAND=$1
+shift
+case "$COMMAND" in
+    vm)
+        get_fcos_release_infos stable aarch64 qemu qcow2.xz QEMU_INFOS
+        TMP_DIR="$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)"
+        IMG_PATH="$TMP_DIR/fcos.qcow2.xz"
+
+        echo "📦 Downloading FCOS ${QEMU_INFOS[0]}..."
+        curl -L "${QEMU_INFOS[1]}" -o "$IMG_PATH"
+
+        echo "⚙️ Uncompressing image file..."
+        unxz "$IMG_PATH"
+
+        echo "💻 Starting VM..."
+        qemu-system-aarch64 \
+            -machine virt -cpu cortex-a72 \
+            -smp $CORE_COUNT -m $RAM_MB \
+            -nographic \
+            -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
+            -fw_cfg name=opt/com.coreos/config,file="$IGNITION_PATH" \
+            -drive if=virtio,file="${IMG_PATH%%.xz}",format=qcow2,media=disk \
+            -netdev user,id=net0,hostfwd=tcp::2222-:22 \
+            -device virtio-net-device,netdev=net0 \
+            -serial mon:stdio
+
+        ;;
+    hetzner)
+        get_fcos_release_infos stable aarch64 qemu qcow2.xz HETZNER_INFOS
+        IMG_TAGS="version=${HETZNER_INFOS[0]}"
+        SERVER_TAGS="os=fedora-coreos,$IMG_TAGS,name=$NAME,ignition_hash=$IGNITION_HASH"
+
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                --upload-image)
+                    if hcloud image list --type snapshot --architecture arm --selector "$IMG_TAGS" --output json \
+                        | jq -e 'length == 1' > /dev/null; then
+                        echo "✅ Image matching '$IMG_TAGS' already exists on Hetzner."
+                    else
+                        echo "🚀 Uploading image to Hetzner..."
+
+                        hcloud-upload-image upload \
+                            --image-url "${HETZNER_INFOS[1]}" \
+                            --architecture arm \
+                            --compression xz \
+                            --description "Fedora CoreOS v${HETZNER_INFOS[0]}" \
+                            --labels "$IMG_TAGS"
+
+                        echo "✅ Image uploaded successfully."
+                        hcloud-upload-image cleanup
+                    fi
+                    ;;
+                --create-server)
+                    if hcloud server list --selector "$IMG_TAGS" --output json | jq -e 'length == 1' > /dev/null; then
+                        echo "✅ Server already exists."
+                    else
+                        IMAGE_ID="$(hcloud image list --type snapshot --architecture arm --selector "$IMG_TAGS" --output json | jq -re '.[0].id' 2> /dev/null || true)"
+                        if [[ -z $IMAGE_ID || $IMAGE_ID == "null" ]]; then
+                            echo "❌ No matching image found on Hetzner! Run with --upload-image first." >&2
+                            exit 1
+                        fi
+                        echo "✅ Image ID found: '$IMAGE_ID'"
+
+                        hcloud server create \
+                            --name "$NAME" \
+                            --type "$SERVER_TYPE" \
+                            --image "$IMAGE_ID" \
+                            `# TODO: IP handling sucks` \
+                            --primary-ipv4 "telstar-v4" \
+                            --primary-ipv6 "telstar-v6" \
+                            --location "$SERVER_LOCATION" \
+                            --label "$SERVER_TAGS" \
+                            --user-data-from-file "$IGNITION_PATH"
+                    fi
+                    ;;
+                --remove-image)
+                    IMAGE_ID="$(hcloud image list --type snapshot --architecture arm --selector "$IMG_TAGS" --output json | jq -re '.[0].id' 2> /dev/null || true)"
+                    if ! [[ -z $IMAGE_ID || $IMAGE_ID == "null" ]]; then
+                        hcloud image delete "$IMAGE_ID"
+                        echo "✅ $IMAGE_ID successfully deleted"
+                    else
+                        echo "✅ Nothing to remove"
+                    fi
+                    ;;
+                *)
+                    usage
+                    ;;
+            esac
+            shift
+        done
+        ;;
+    help | *)
+        usage
+        ;;
+esac
+
+echo "🗑️ Cleaning up temporary files..."
+rm -rf "${TMP_DIR:-}" "$IGNITION_PATH"
+echo "✅ Cleanup done."
