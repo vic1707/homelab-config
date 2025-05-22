@@ -51,7 +51,7 @@ usage() {
     Commands:
         help                    Show this help message
         vm                      Starts a local VM
-        hetzner                 Manages hetzner ressources
+        hetzner                 Manages hetzner resources
 
     Command Options:
         hetzner:
