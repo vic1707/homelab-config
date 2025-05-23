@@ -4,16 +4,6 @@
 	# admin :2019
 }
 
-(common) {
-	encode zstd gzip
-
-	tls {
-		resolvers 1.1.1.1
-		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-	}
-}
-
 https://vic1707.xyz {
-	import common
 	redir https://github.com/vic1707
 }
