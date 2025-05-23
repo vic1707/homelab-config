@@ -137,7 +137,7 @@ case "$COMMAND" in
                     fi
                     ;;
                 --create-server)
-                    if hcloud server list --selector "$IMG_TAGS" --output json | jq -e 'length == 1' > /dev/null; then
+                    if hcloud server list --selector "$SERVER_TAGS" --output json | jq -e 'length == 1' > /dev/null; then
                         echo "✅ Server already exists."
                     else
                         IMAGE_ID="$(hcloud image list --type snapshot --architecture arm --selector "$IMG_TAGS" --output json | jq -re '.[0].id' 2> /dev/null || true)"
@@ -163,13 +163,24 @@ case "$COMMAND" in
                     IMAGE_ID="$(hcloud image list --type snapshot --architecture arm --selector "$IMG_TAGS" --output json | jq -re '.[0].id' 2> /dev/null || true)"
                     if ! [[ -z $IMAGE_ID || $IMAGE_ID == "null" ]]; then
                         hcloud image delete "$IMAGE_ID"
-                        echo "✅ $IMAGE_ID successfully deleted"
+                        echo "✅ Image $IMAGE_ID successfully deleted"
                     else
-                        echo "✅ Nothing to remove"
+                        echo "✅ No Image to remove"
+                    fi
+                    ;;
+                --remove-server)
+                    ## We omit the hash when trying to remove the server as we probably want to update the conf
+                    SERVER_ID="$(hcloud server list --selector "${SERVER_TAGS%%,ignition_hash=*}" --output json | jq -re '.[0].id' 2> /dev/null || true)"
+                    if ! [[ -z $SERVER_ID || $SERVER_ID == "null" ]]; then
+                        hcloud server delete "$SERVER_ID"
+                        echo "✅ Server $SERVER_ID successfully deleted"
+                    else
+                        echo "✅ No Server to remove"
                     fi
                     ;;
                 *)
                     usage
+                    exit 1
                     ;;
             esac
             shift
@@ -177,6 +188,7 @@ case "$COMMAND" in
         ;;
     help | *)
         usage
+        exit 1
         ;;
 esac
 
