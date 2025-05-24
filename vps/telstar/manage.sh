@@ -16,6 +16,9 @@ NAME=telstar
 SERVER_TYPE=cax11
 SERVER_LOCATION=fsn1 # fsn1 = EU-Central (Germany)
 
+## FCOS
+STREAM=stable
+
 #############################################
 # Imported Variables
 #############################################
@@ -88,7 +91,7 @@ COMMAND=$1
 shift
 case "$COMMAND" in
     vm)
-        get_fcos_release_infos stable aarch64 qemu qcow2.xz QEMU_INFOS
+        get_fcos_release_infos "$STREAM" aarch64 qemu qcow2.xz QEMU_INFOS
         TMP_DIR="$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)"
         IMG_PATH="$TMP_DIR/fcos.qcow2.xz"
 
@@ -112,8 +115,8 @@ case "$COMMAND" in
 
         ;;
     hetzner)
-        get_fcos_release_infos stable aarch64 hetzner raw.xz HETZNER_INFOS
-        IMG_TAGS="version=${HETZNER_INFOS[0]}"
+        get_fcos_release_infos "$STREAM" aarch64 hetzner raw.xz HETZNER_INFOS
+        IMG_TAGS="version=${HETZNER_INFOS[0]},stream=$STREAM"
         SERVER_TAGS="os=fedora-coreos,$IMG_TAGS,name=$NAME,ignition_hash=$IGNITION_HASH"
 
         while [[ $# -gt 0 ]]; do
