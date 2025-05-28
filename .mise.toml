@@ -8,6 +8,7 @@ postinstall = "pip install -r {{ config_root }}/requirements.txt"
 
 [tools]
 actionlint = "1.7.7"
+bat = "0.25.0"
 gopass = "1.15.16"
 python = "3.13.3"
 butane = "0.23.0"
