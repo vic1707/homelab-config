@@ -11,23 +11,21 @@ actionlint = "1.7.7"
 bat = "0.25.0"
 gopass = "1.15.16"
 python = "3.13.3"
-butane = "0.23.0"
+butane = "0.24.0"
 gomplate = "4.3.2"
-hcloud = "1.50.0"
+hcloud = "1.51.0"
 hcloud-upload-image = "1.1.0"
-jq = "1.7.1"
+jq = "1.8.0"
 ripgrep = "14.1.1"
 shellcheck = "0.10.0"
 shfmt = "3.11.0"
-typos-cli = "1.31.1"
+typos = "1.33.1"
 zizmor = "1.5.2" # https://github.com/cargo-bins/cargo-quickinstall/issues/367
 
 [alias]
 butane = "asdf:Okeanos/asdf-butane"
 gomplate = "asdf:tapih/asdf-gomplate"
 hcloud-upload-image = "asdf:vic1707/asdf-hcloud-upload-image"
-ripgrep = "asdf:vic1707/asdf-any-cargo-quickinstall"
-typos-cli = "asdf:vic1707/asdf-any-cargo-quickinstall"
 zizmor = "asdf:vic1707/asdf-any-cargo-quickinstall"
 
 [settings]
