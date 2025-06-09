@@ -83,7 +83,7 @@ storage:
       mode: 0400
       contents:
         inline: |
-          Port {{ print $SSH_PORT }}
+          Port {{ $SSH_PORT }}
           PermitRootLogin no              # Disallow root SSH logins
           PasswordAuthentication no       # Force key-based auth
           AddressFamily inet              # Binds SSH to IPv4 only
@@ -139,7 +139,7 @@ storage:
               ct state established, related accept;
 
               ## Allow SSH
-              tcp dport {{ print $SSH_PORT }} accept;
+              tcp dport {{ $SSH_PORT }} accept;
               ## Caddy ports
               tcp dport 80 accept;
               tcp dport 443 accept;
@@ -289,7 +289,7 @@ systemd:
         - name: 99-sshd-port.conf
           contents: |
             [Socket]
-            ListenStream={{ print $SSH_PORT }}
+            ListenStream={{ $SSH_PORT }}
 
     # Replace chronyd with systemd-timesyncd to avoid open UDP port 323
     - name: chronyd.service
