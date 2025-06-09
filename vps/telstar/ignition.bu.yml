@@ -213,10 +213,6 @@ storage:
       mode: 0444
       contents:
         local: ./caddy.Containerfile
-      user:
-        name: vic1707
-      group:
-        name: vic1707
     - path: /home/vic1707/.config/containers/caddy/Caddyfile
       mode: 0444
       contents:
