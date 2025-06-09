@@ -1,0 +1,104 @@
+---
+- name: Manage backupiter
+  hosts: localhost
+  gather_facts: false
+  vars:
+    storagebox_name: backupiter
+    backupiter_id: "{{ lookup('community.general.passwordstore', 'backups/backupiter/id') }}"
+    hrobot_user: "{{ lookup('community.general.passwordstore', 'api-account.hrobot', subkey='user') }}"
+    hrobot_password: "{{ lookup('community.general.passwordstore', 'api-account.hrobot', subkey='pass') }}"
+
+    backupiter_root_user: "{{ lookup('community.general.passwordstore', 'backups/backupiter/root.account', subkey='user') }}"
+    backupiter_root_password: "{{ lookup('community.general.passwordstore', 'backups/backupiter/root.account', subkey='pass') }}"
+    backupiter_root_ssh_pub_path: .ssh/root.pub
+
+    subaccounts:
+      - username: "{{ lookup('community.general.passwordstore', 'backups/backupiter/telstar.account', subkey='user') }}"
+        password: "{{ lookup('community.general.passwordstore', 'backups/backupiter/telstar.account', subkey='pass') }}"
+        ssh_pub_path: .ssh/telstar.pub
+        homedirectory: telstar
+        ssh: true
+        external_reachability: true
+        webdav: false
+        readonly: false
+        samba: false
+        comment: telstar
+
+  tasks:
+    - name: Settings
+      community.hrobot.storagebox:
+        hetzner_user: "{{ hrobot_user }}"
+        hetzner_password: "{{ hrobot_password }}"
+        id: "{{ backupiter_id }}"
+
+        name: "{{ storagebox_name }}"
+        external_reachability: true
+        samba: false
+        ssh: true
+        webdav: false
+        zfs: false
+
+    - name: Ensure password
+      community.hrobot.storagebox_set_password:
+        hetzner_user: "{{ hrobot_user }}"
+        hetzner_password: "{{ hrobot_password }}"
+        id: "{{ backupiter_id }}"
+
+        password: "{{ backupiter_root_password }}"
+
+    - name: Setup snapshot policy
+      community.hrobot.storagebox_snapshot_plan:
+        hetzner_user: "{{ hrobot_user }}"
+        hetzner_password: "{{ hrobot_password }}"
+        storagebox_id: "{{ backupiter_id }}"
+
+        plans:
+          - status: disabled
+
+    - name: Set Telstar Subaccount
+      community.hrobot.storagebox_subaccount:
+        hetzner_user: "{{ hrobot_user }}"
+        hetzner_password: "{{ hrobot_password }}"
+        storagebox_id: "{{ backupiter_id }}"
+        password_mode: ignore-if-exists
+
+        state: present
+        idempotence: comment
+
+        username: "{{ item.username }}"
+        password: "{{ item.password }}"
+        homedirectory: "{{ item.homedirectory }}"
+        ssh: "{{ item.ssh }}"
+        external_reachability: "{{ item.external_reachability }}"
+        webdav: "{{ item.webdav }}"
+        readonly: "{{ item.readonly }}"
+        samba: "{{ item.samba }}"
+        comment: "{{ item.comment }}"
+      loop: "{{ subaccounts }}"
+      loop_control:
+        label: "{{ item.username }} (${{ item.homedirectory }})"
+
+    - name: Upload SSH public key for root account
+      ansible.builtin.include_role:
+        name: rywillia.ssh-copy-id
+      vars:
+        hostname: "{{ backupiter_root_user }}.your-storagebox.de"
+        username: "{{ backupiter_root_user }}"
+        password: "{{ backupiter_root_password }}"
+        ssh_public_key: "{{ backupiter_root_ssh_pub_path }}"
+        hetzner_storagebox: true
+        ssh_port: 23
+
+    - name: Upload SSH public key to each subaccount
+      ansible.builtin.include_role:
+        name: rywillia.ssh-copy-id
+      vars:
+        hostname: "{{ backupiter_root_user }}.your-storagebox.de"
+        username: "{{ item.username }}"
+        password: "{{ item.password }}"
+        ssh_public_key: "{{ item.ssh_pub_path }}"
+        hetzner_storagebox: true
+        ssh_port: 23
+      loop: "{{ subaccounts }}"
+      loop_control:
+        label: "{{ item.username }} => {{ item.ssh_pub_path }}"
