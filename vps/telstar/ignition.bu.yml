@@ -1,4 +1,5 @@
 # {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
+# {{ $ARCH:= "arm64" }} # TODO: from env
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -77,6 +78,11 @@ storage:
   files:
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
+
+    # Install semanage
+    - path: /var/lib/extensions/semanage.raw
+      contents:
+        source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-{{$ARCH}}/semanage-3.8-1.fc42-42-{{$ARCH}}.raw
 
     # SSH daemon hardening
     - path: /etc/ssh/sshd_config.d/99-hardening.conf
@@ -213,10 +219,6 @@ storage:
       mode: 0444
       contents:
         local: ./caddy.Containerfile
-      user:
-        name: vic1707
-      group:
-        name: vic1707
     - path: /home/vic1707/.config/containers/caddy/Caddyfile
       mode: 0444
       contents:
@@ -265,6 +267,10 @@ storage:
 
 systemd:
   units:
+    # Enable systemd-sysext.service to merge the sysexts on boot
+    - name: systemd-sysext.service
+      enabled: true
+
     # Enable firewall rules
     - name: nftables.service
       enabled: true
@@ -296,6 +302,25 @@ systemd:
       mask: true
     - name: systemd-timesyncd.service
       enabled: true # outbound-only time sync (no open ports)
+
+    # Manage SELinux, waiting for a better solution
+    - name: set-se-state.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Configure SELinux
+        After=systemd-sysext.service
+        Requires=systemd-sysext.service
+        Before=sshd.service
+
+        [Service]
+        Type=oneshot 
+        ## Allows sshd to bind to custom port
+        ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
 
 passwd:
   users:
