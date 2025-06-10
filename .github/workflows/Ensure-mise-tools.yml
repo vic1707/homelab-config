@@ -19,7 +19,7 @@ jobs:
     name: ensure-mise-tools
     runs-on: ubuntu-latest
     container:
-      image: alpine:3.21.3
+      image: alpine:3.22.0
     steps:
       - uses: actions/checkout@v4.2.2
         with:
@@ -28,5 +28,5 @@ jobs:
       - name: Install asdf prerequisites
         run: apk add --no-cache curl git bash
 
-      - uses: jdx/mise-action@v2.2.2
+      - uses: jdx/mise-action@v2.2.3
 
