@@ -21,7 +21,7 @@
         external_reachability: true
         webdav: false
         readonly: false
-        samba: false
+        samba: true # CIFS
         comment: telstar
 
   tasks:

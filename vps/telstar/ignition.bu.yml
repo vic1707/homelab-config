@@ -1,5 +1,7 @@
 # {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
 # {{ $ARCH:= "arm64" }} # TODO: from env
+# {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
+# {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -278,6 +280,12 @@ storage:
       group:
         name: vic1707
 
+    - path: /etc/cifs-credentials
+      mode: 0400
+      contents:
+        inline: |
+          username={{ $STORAGEBOX_USER }}
+          password={{ $STORAGEBOX_PASS }}
 systemd:
   units:
     # Enable systemd-sysext.service to merge the sysexts on boot
@@ -325,14 +333,33 @@ systemd:
         [Unit]
         Description=Configure SELinux
         After=systemd-sysext.service
+        Wants=systemd-sysext.service
         Requires=systemd-sysext.service
-        Before=sshd.service
+        Before=sshd.service var-mnt-storagebox.mount
 
         [Service]
         Type=oneshot 
         ## Allows sshd to bind to custom port
         ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
         RemainAfterExit=yes
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: var-mnt-storagebox.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount CIFS Hetzner Storagebox
+        After=network-online.target set-se-state.service
+        Requires=network-online.target set-se-state.service
+
+        [Mount]
+        # https://docs.hetzner.com/storage/storage-box/access/access-samba-cifs/#sambacifs
+        What=//{{ $STORAGEBOX_USER }}.your-storagebox.de/{{ $STORAGEBOX_USER }}
+        Where=/var/mnt/storagebox
+        Type=cifs
+        Options=credentials=/etc/cifs-credentials,_netdev,vers=3.0
 
         [Install]
         WantedBy=multi-user.target
