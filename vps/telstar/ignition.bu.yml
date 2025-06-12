@@ -354,6 +354,9 @@ systemd:
         RemainAfterExit=yes
         ## Allows sshd to bind to custom port
         ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
+        ## Allows to backup stuff
+        ExecStart=setsebool use_samba_home_dirs on
+        ExecStart=setsebool rsync_export_all_ro on
 
         [Install]
         WantedBy=multi-user.target
@@ -378,6 +381,19 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
+    - name: sync-backup.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Periodic sync to mounted Hetzner Storage Box
+
+        [Timer]
+        OnUnitActiveSec=3min
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
     - name: var-mnt-storagebox.mount
       enabled: true
       contents: |
