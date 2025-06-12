@@ -15,13 +15,19 @@ storage:
 
   # Base container storage path
   directories:
-    - path: /home/vic1707/containers
+    - path: /srv/vic1707
       mode: 0755
       user:
         name: vic1707
       group:
         name: vic1707
-    - path: /home/vic1707/containers/caddy
+    - path: /srv/vic1707/containers
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/caddy
       mode: 0755
       user:
         name: vic1707
@@ -75,6 +81,12 @@ storage:
         name: vic1707
 
   files:
+    #### Backup
+    - path: /etc/sync/paths.txt
+      mode: 0400
+      contents:
+        inline: |
+          /var/srv/vic1707/
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
 
@@ -265,7 +277,7 @@ storage:
           PublishPort=80:80
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
-          Volume=/home/vic1707/containers/caddy:/data/caddy:Z,rw
+          Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
           UserNS=keep-id
           # User=vic1707
 
@@ -335,17 +347,37 @@ systemd:
         After=systemd-sysext.service
         Wants=systemd-sysext.service
         Requires=systemd-sysext.service
-        Before=sshd.service var-mnt-storagebox.mount
+        Before=sshd.service var-mnt-storagebox.mount sync-backup.service
 
         [Service]
         Type=oneshot 
+        RemainAfterExit=yes
         ## Allows sshd to bind to custom port
         ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
-        RemainAfterExit=yes
 
         [Install]
         WantedBy=multi-user.target
 
+    #### Backup
+    - name: sync-backup.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Sync paths to mounted Hetzner Storage Box
+        After=network-online.target set-se-state.service var-mnt-storagebox.mount
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/rsync --verbose \
+          --archive --recursive \
+          --delete \
+          --fake-super \
+          --log-file=/var/log/sync-to-storagebox.log \
+          --files-from=/etc/sync/paths.txt \
+          --relative / /var/mnt/storagebox
+
+        [Install]
+        WantedBy=multi-user.target
     - name: var-mnt-storagebox.mount
       enabled: true
       contents: |
