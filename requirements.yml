@@ -7,3 +7,7 @@ collections:
     version: 1.2.0
   - name: moreati.jq
     version: 0.2.1
+  - name: community.hrobot
+    version: 2.4.0
+roles:
+  - name: rywillia.ssh-copy-id
