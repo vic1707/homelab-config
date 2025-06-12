@@ -278,6 +278,8 @@ systemd:
     # Remove docker starting at boot
     - name: docker.service
       mask: true
+    - name: docker.socket
+      mask: true
 
     # Enable the Linux Audit Daemon
     - name: auditd.service
