@@ -3,3 +3,6 @@ extend-ignore-re = [
 	# Ignore line following `# @typos-ignore` or `// @typos-ignore`
 	"(?m)^\\s*(#|//) @typos-ignore$\n.*",
 ]
+
+[files]
+extend-exclude = ["*.xml", "*.drawio"]
