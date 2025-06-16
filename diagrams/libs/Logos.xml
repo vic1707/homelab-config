@@ -1,0 +1,176 @@
+<mxlibrary>[
+  {
+    "data": "https://www.hetzner.com/_resources/themes/hetzner/images/favicons/android-icon-192x192.png",
+    "w": 192,
+    "h": 192,
+    "title": "Hetzner"
+  },
+  {
+    "data": "https://www.hetzner.com/_resources/themes/hetzner/images/logo/hetzner-logo.svg?m=1743586675",
+    "w": 300,
+    "h": 37,
+    "title": "Hetzner - Full"
+  },
+  {
+    "data": "https://www.cloudflare.com/favicon.ico",
+    "w": 96,
+    "h": 96,
+    "title": "Cloudflare"
+  },
+  {
+    "data": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Cloudflare_Logo.svg",
+    "w": 300,
+    "h": 99,
+    "title": "Cloudflare - Full"
+  },
+  {
+    "data": "https://www.truenas.com/wp-content/uploads/2020/08/cropped-TN-favicon-250x250.png",
+    "w": 250,
+    "h": 250,
+    "title": "Truenas"
+  },
+  {
+    "data": "https://www.truenas.com/wp-content/uploads/2024/10/TrueNAS_Community_Edition.png",
+    "w": 384,
+    "h": 109,
+    "title": "Truenas - Full"
+  },
+  {
+    "data": "https://www.proxmox.com/images/proxmox/Proxmox_logo_standard_hex_400px.png#joomlaImage://local-images/proxmox/Proxmox_logo_standard_hex_400px.png",
+    "w": 400,
+    "h": 60,
+    "title": "Proxmox - Full"
+  },
+  {
+    "data": "https://www.proxmox.com/favicon.svg",
+    "w": 129,
+    "h": 129,
+    "title": "Proxmox"
+  },
+  {
+    "data": "https://forum.opnsense.org/Themes/Steyle-V4/images/OPNsense-logo.svg",
+    "w": 300,
+    "h": 89,
+    "title": "Opnsense - Full"
+  },
+  {
+    "data": "https://forum.opnsense.org/Themes/Steyle-V4/images/favicon/android-icon-192x192.png",
+    "w": 192,
+    "h": 192,
+    "title": "Opnsense"
+  },
+  {
+    "data": "https://docs.fedoraproject.org/en-US/fedora-coreos/_images/fedoracoreos-logo.svg",
+    "w": 520,
+    "h": 201,
+    "title": "Fedora CoreOS - Full"
+  },
+  {
+    "data": "https://avatars.githubusercontent.com/u/3730757",
+    "w": 460,
+    "h": 460,
+    "title": "Fedora CoreOS"
+  },
+  {
+    "data": "https://linuxcontainers.org/static/img/containers.png",
+    "w": 318,
+    "h": 293,
+    "title": "LinuxContainers"
+  },
+  {
+    "data": "https://avatars.githubusercontent.com/u/4510897",
+    "w": 460,
+    "h": 460,
+    "title": "ZFS"
+  },
+  {
+    "data": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Podman-logo-orig.png",
+    "w": 520,
+    "h": 172,
+    "title": "Podman - Full"
+  },
+  {
+    "data": "https://raw.githubusercontent.com/containers/podman.io/refs/heads/main/static/images/raw/podman-image-95w-90h.png",
+    "w": 95,
+    "h": 90,
+    "title": "Podman"
+  },
+  {
+    "data": "https://upload.wikimedia.org/wikipedia/fr/thumb/3/3b/Raspberry_Pi_logo.svg/1200px-Raspberry_Pi_logo.svg.png",
+    "w": 412,
+    "h": 520,
+    "title": "Raspberry pi"
+  },
+  {
+    "data": "https://www.home-assistant.io/images/favicon-192x192.png",
+    "w": 191,
+    "h": 192,
+    "title": "HomeAssistant"
+  },
+  {
+    "data": "https://www.home-assistant.io/images/home-assistant-logo-white.svg",
+    "w": 520,
+    "h": 74,
+    "title": "HomeAssistant - Full - White"
+  },
+  {
+    "data": "https://www.home-assistant.io/images/home-assistant-logo.svg",
+    "w": 520,
+    "h": 74,
+    "title": "HomeAssistant - Full - Black"
+  },
+  {
+    "data": "https://caddyserver.com/old/resources/images/caddy-logo.svg",
+    "w": 300,
+    "h": 90,
+    "title": "Caddy - Full"
+  },
+  {
+    "data": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Caddyserver_logo_-_no_wordmark.svg/2113px-Caddyserver_logo_-_no_wordmark.svg.png",
+    "w": 520,
+    "h": 504,
+    "title": "Caddy"
+  },
+  {
+    "data": "https://jellyfin.org/images/logo.svg",
+    "w": 252,
+    "h": 72,
+    "title": "Jellyfin - Full"
+  },
+  {
+    "data": "https://avatars.githubusercontent.com/u/45698031",
+    "w": 460,
+    "h": 460,
+    "title": "Jellyfin"
+  },
+  {
+    "data": "https://www.authelia.com/favicon.svg",
+    "w": 150,
+    "h": 150,
+    "title": "Authelia"
+  },
+  {
+    "data": "https://www.authelia.com/images/branding/title.png",
+    "w": 520,
+    "h": 260,
+    "title": "Authelia - Full"
+  },
+  {
+    "data": "https://windscribe.com/favicon-256x256.png",
+    "w": 256,
+    "h": 256,
+    "title": "Windscribe"
+  },
+  {
+    "data": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Transmission_icon.png",
+    "w": 512,
+    "h": 512,
+    "title": "Transmission"
+  },
+  {
+    "data": "https://raw.githubusercontent.com/qdm12/gluetun/refs/heads/master/doc/logo.svg",
+    "w": 170,
+    "h": 167,
+    "title": "Gluetun"
+  }
+]</mxlibrary>

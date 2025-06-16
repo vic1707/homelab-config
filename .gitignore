@@ -10,3 +10,6 @@ __TMP__*/
 .ssh/**/*
 !.ssh/**/
 !.ssh/**/*.pub
+
+## Draw.io
+*.drawio.bkp

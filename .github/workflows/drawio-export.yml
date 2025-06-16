@@ -1,0 +1,33 @@
+name: Draw.io-export
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.drawio"
+      - .github/workflows/drawio-export.yml
+
+permissions: {}
+
+jobs:
+  drawio-export:
+    name: drawio-export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Use Draw.io CLI to export diagram
+        uses: rlespinasse/drawio-export-action@v2.31.0
+        with:
+          format: svg
+          output: drawio-assets
+
+      - name: Push exported diagram to `diagrams` branch
+        uses: crazy-max/ghaction-github-pages@v4.2.0
+        with:
+          build_dir: .
+          target_branch: drawio-exports
+        env:
+          personal_token: ${{ secrets.GITHUB_TOKEN }}
