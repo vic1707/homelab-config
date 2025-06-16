@@ -2,12 +2,14 @@ name: Draw.io-export
 
 on:
   push:
-    branches: [main]
+    branches: [moving-out] # TODO: rename to main once we're done with big refacto
     paths:
       - "**.drawio"
       - .github/workflows/drawio-export.yml
+  workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: write # <https://github.com/peaceiris/actions-gh-pages?tab=readme-ov-file#%EF%B8%8F-first-deployment-with-github_token>
 
 jobs:
   drawio-export:
@@ -17,17 +19,23 @@ jobs:
       - uses: actions/checkout@v4.2.2
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Use Draw.io CLI to export diagram
-        uses: rlespinasse/drawio-export-action@v2.31.0
+        uses: rlespinasse/drawio-export-action@v2.34.0
         with:
           format: svg
-          output: drawio-assets
+          remove-page-suffix: true
+
+      - name: centralize exports
+        run: |
+          sudo mkdir exports
+          sudo mv ./**/export/*.svg exports/
 
       - name: Push exported diagram to `diagrams` branch
-        uses: crazy-max/ghaction-github-pages@v4.2.0
+        uses: peaceiris/actions-gh-pages@v4.0.0
         with:
-          build_dir: .
-          target_branch: drawio-exports
-        env:
-          personal_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./exports
+          publish_branch: diagrams
+          force_orphan: true
