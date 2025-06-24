@@ -382,17 +382,29 @@ systemd:
         RemainAfterExit=yes
         ## Allows sshd to bind to custom port
         ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
-        ## Allows to backup stuff
-        ExecStart=setsebool use_samba_home_dirs on
-        ExecStart=setsebool rsync_export_all_ro on
-        ExecStart=setsebool rsync_full_access on
-        ExecStart=/bin/bash -c 'checkmodule -M -m -o /tmp/rsync_cifs.mod /etc/selinux/custom-policies/rsync-cifs.te && semodule_package -o /tmp/rsync_cifs.pp -m /tmp/rsync_cifs.mod && semodule -i /tmp/rsync_cifs.pp && rm -f /tmp/rsync_cifs.*'
 
         [Install]
         WantedBy=multi-user.target
 
 ## {{ if $ENABLE_BACKUP }}
     #### Backup
+    - name: set-rsync-se-state.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Configure SELinux
+        After=systemd-sysext.service
+        Wants=systemd-sysext.service
+        Requires=systemd-sysext.service
+
+        [Service]
+        Type=oneshot 
+        RemainAfterExit=yes
+        ExecStart=setsebool rsync_full_access on
+        ExecStart=/bin/bash -c 'checkmodule -M -m -o /tmp/rsync_cifs.mod /etc/selinux/custom-policies/rsync-cifs.te && semodule_package -o /tmp/rsync_cifs.pp -m /tmp/rsync_cifs.mod && semodule -i /tmp/rsync_cifs.pp && rm -f /tmp/rsync_cifs.*'
+
+        [Install]
+        WantedBy=multi-user.target
     - name: sync-backup.service
       enabled: true
       contents: |
@@ -444,8 +456,8 @@ systemd:
       contents: |
         [Unit]
         Description=Mount CIFS Hetzner Storagebox
-        After=network-online.target set-se-state.service
-        Requires=network-online.target set-se-state.service
+        After=network-online.target set-rsync-se-state.service
+        Requires=network-online.target set-rsync-se-state.service
 
         [Mount]
         # https://docs.hetzner.com/storage/storage-box/access/access-samba-cifs/#sambacifs
