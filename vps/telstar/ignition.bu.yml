@@ -3,6 +3,7 @@
 # {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
 
+# {{ $ENABLE_BACKUP := conv.ToBool .Env.ENABLE_BACKUP }}
 ###### Debug SELinux
 # sudo ausearch -m avc -ts recent
 ### Print allow policy
@@ -88,6 +89,7 @@ storage:
 
   files:
     #### Backup
+    ## {{ if $ENABLE_BACKUP }}
     - path: /etc/sync/paths.txt
       mode: 0400
       contents:
@@ -97,7 +99,6 @@ storage:
       mode: 0500
       contents:
         local: ./restore.sh
-    # Custom SELinux policies
     - path: /etc/selinux/custom-policies/rsync-cifs.te
       mode: 0400
       contents:
@@ -111,6 +112,8 @@ storage:
 
           #============= rsync_t ==============
           allow rsync_t self:capability dac_override;
+    ## {{ end }} ## $ENABLE_BACKUP
+
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
 
@@ -388,6 +391,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+## {{ if $ENABLE_BACKUP }}
     #### Backup
     - name: sync-backup.service
       enabled: true
@@ -453,6 +457,20 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+## {{ else }}
+    - name: dummy-restore.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Dummy fake restore service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/touch /run/restore-complete
+
+        [Install]
+        WantedBy=multi-user.target
+## {{ end }} ## $ENABLE_BACKUP
 
 passwd:
   users:

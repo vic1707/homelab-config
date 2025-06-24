@@ -82,15 +82,18 @@ shift
 #############################################
 # Actual work
 #############################################
-echo "⚙️ Generating Ignition file..."
-IGNITION_PATH="$(mktemp)"
-gomplate -f "$BUTANE_FILE" --plugin gopass=gopass | butane --files-dir "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
-IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
+generate_ignition() {
+    echo "⚙️ Generating Ignition file..."
+    IGNITION_PATH="$(mktemp)"
+    gomplate -f "$BUTANE_FILE" --plugin gopass=gopass | butane --files-dir "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
+    IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
+}
 
 COMMAND=$1
 shift
 case "$COMMAND" in
     vm)
+        ENABLE_BACKUP=false generate_ignition
         get_fcos_release_infos "$STREAM" aarch64 qemu qcow2.xz QEMU_INFOS
         TMP_DIR="$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)"
         IMG_PATH="$TMP_DIR/fcos.qcow2.xz"
@@ -115,6 +118,7 @@ case "$COMMAND" in
 
         ;;
     hetzner)
+        ENABLE_BACKUP=true generate_ignition
         get_fcos_release_infos "$STREAM" aarch64 hetzner raw.xz HETZNER_INFOS
         IMG_TAGS="version=${HETZNER_INFOS[0]},stream=$STREAM"
         SERVER_TAGS="os=fedora-coreos,$IMG_TAGS,name=$NAME,ignition_hash=$IGNITION_HASH"
