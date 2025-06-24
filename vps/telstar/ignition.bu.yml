@@ -2,6 +2,11 @@
 # {{ $ARCH:= "arm64" }} # TODO: from env
 # {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
+
+###### Debug SELinux
+# sudo ausearch -m avc -ts recent
+### Print allow policy
+# sudo ausearch -m avc -ts recent | grep <thing> | audit2allow -m TMP
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
