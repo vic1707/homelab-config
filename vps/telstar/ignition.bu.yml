@@ -288,6 +288,7 @@ storage:
         inline: |
           [Unit]
           Description=Caddy Quadlet
+          ConditionPathExists=/run/restore-complete
 
           [Container]
           Image=caddy.build
@@ -430,6 +431,7 @@ systemd:
         [Service]
         Type=oneshot
         ExecStart=/etc/sync/restore.sh "/etc/sync/paths.txt" "/var/mnt/storagebox"
+        ExecStartPost=/usr/bin/touch /run/restore-complete
 
         [Install]
         WantedBy=multi-user.target
