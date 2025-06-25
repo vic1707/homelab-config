@@ -381,7 +381,7 @@ systemd:
         Type=oneshot 
         RemainAfterExit=yes
         ## Allows sshd to bind to custom port
-        ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
+        ExecStart=/usr/bin/semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
 
         [Install]
         WantedBy=multi-user.target
@@ -400,8 +400,8 @@ systemd:
         [Service]
         Type=oneshot 
         RemainAfterExit=yes
-        ExecStart=setsebool rsync_full_access on
-        ExecStart=/bin/bash -c 'checkmodule -M -m -o /tmp/rsync_cifs.mod /etc/selinux/custom-policies/rsync-cifs.te && semodule_package -o /tmp/rsync_cifs.pp -m /tmp/rsync_cifs.mod && semodule -i /tmp/rsync_cifs.pp && rm -f /tmp/rsync_cifs.*'
+        ExecStart=/usr/bin/setsebool rsync_full_access on
+        ExecStart=/bin/bash -c '/usr/bin/checkmodule -M -m -o /tmp/rsync_cifs.mod /etc/selinux/custom-policies/rsync-cifs.te && /usr/bin/semodule_package -o /tmp/rsync_cifs.pp -m /tmp/rsync_cifs.mod && /usr/bin/semodule -i /tmp/rsync_cifs.pp && /usr/bin/rm -f /tmp/rsync_cifs.*'
 
         [Install]
         WantedBy=multi-user.target
