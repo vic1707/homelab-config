@@ -393,9 +393,7 @@ systemd:
       contents: |
         [Unit]
         Description=Configure SELinux
-        After=systemd-sysext.service
-        Wants=systemd-sysext.service
-        Requires=systemd-sysext.service
+        After=set-se-state.service
 
         [Service]
         Type=oneshot 
