@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LOG="/var/log/restore-check.log"
+LOG="/var/log/sync-to-storagebox.log"
 
 SYNC_PATHS_FILE="$1"
 STORAGEBOX_ROOT="$2"
@@ -16,7 +16,8 @@ if [[ ! -r "${SYNC_PATHS_FILE}" ]]; then
 fi
 
 # Loop over each path using cat
-for path in $(cat "$SYNC_PATHS_FILE"); do
+while IFS= read -r path
+do
   [[ -z "$path" ]] && continue
 
   if [[ "${path:0:1}" != "/" ]]; then
@@ -36,8 +37,8 @@ for path in $(cat "$SYNC_PATHS_FILE"); do
     --archive --recursive \
     --delete \
     --fake-super -M--super \
-    --log-file=/var/log/sync-to-storagebox.log \
+    --log-file="$LOG" \
     "$SOURCE" "$path"
-done
+done < "$SYNC_PATHS_FILE"
 
 echo "[INFO] Restore complete."
