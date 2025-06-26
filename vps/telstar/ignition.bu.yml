@@ -2,6 +2,7 @@
 # {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
 # {{ $CLOUDFLARE_API_TOKEN := gopass "domains/vic1707.xyz/api-key.cloudflare" "key" | strings.TrimSpace | required }}
+# {{ $CROWDSEC_API_KEY := gopass "api-key.crowdsec" | strings.TrimSpace | required }}
 
 # {{ $ARCH:= "arm64" }} # TODO: from env
 # {{ $ENABLE_BACKUP := conv.ToBool .Env.ENABLE_BACKUP }}
