@@ -1,10 +1,11 @@
 # {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
-# {{ $ARCH:= "arm64" }} # TODO: from env
 # {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
 
+# {{ $ARCH:= "arm64" }} # TODO: from env
 # {{ $ENABLE_BACKUP := conv.ToBool .Env.ENABLE_BACKUP }}
 ###### Debug SELinux
+
 # sudo ausearch -m avc -ts recent
 ### Print allow policy
 # sudo ausearch -m avc -ts recent | grep <thing> | audit2allow -m TMP
@@ -316,7 +317,6 @@ storage:
           # User=vic1707
 
           [Service]
-          TimeoutStartSec=300
           Restart=always
 
           [Install]
