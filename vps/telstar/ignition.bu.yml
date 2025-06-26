@@ -112,8 +112,14 @@ storage:
 
           #============= rsync_t ==============
           allow rsync_t self:capability dac_override;
-    ## {{ end }} ## $ENABLE_BACKUP
 
+    - path: /etc/cifs-credentials
+      mode: 0400
+      contents:
+        inline: |
+          username={{ $STORAGEBOX_USER }}
+          password={{ $STORAGEBOX_PASS }}
+    ## {{ end }} ## $ENABLE_BACKUP
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
 
@@ -320,12 +326,6 @@ storage:
       group:
         name: vic1707
 
-    - path: /etc/cifs-credentials
-      mode: 0400
-      contents:
-        inline: |
-          username={{ $STORAGEBOX_USER }}
-          password={{ $STORAGEBOX_PASS }}
 systemd:
   units:
     # Enable systemd-sysext.service to merge the sysexts on boot
@@ -386,7 +386,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-## {{ if $ENABLE_BACKUP }}
+    ## {{ if $ENABLE_BACKUP }}
     #### Backup
     - name: set-rsync-se-state.service
       enabled: true
@@ -466,7 +466,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-## {{ else }}
+    ## {{ else }}
     - name: dummy-restore.service
       enabled: true
       contents: |
@@ -479,7 +479,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-## {{ end }} ## $ENABLE_BACKUP
+    ## {{ end }} ## $ENABLE_BACKUP
 
 passwd:
   users:
