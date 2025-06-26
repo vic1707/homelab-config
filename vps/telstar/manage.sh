@@ -49,7 +49,7 @@ get_fcos_release_infos() {
 #############################################
 usage() {
     cat << EOF
-	Usage: $(basename "$0") <butane-file> [command] [command_options]
+    Usage: $(basename "$0") <butane-file> [command] [command_options]
 
     Commands:
         help                    Show this help message
@@ -62,8 +62,8 @@ usage() {
             --create-server     Fetches and upload the latest FCOS image (if necessary)
             --remove-image      Removes existing FCOS image
 
-	Arguments:
-	    <butane-file>           Path to the Butane configuration file (required)
+    Arguments:
+        <butane-file>           Path to the Butane configuration file (required)
 EOF
 }
 
