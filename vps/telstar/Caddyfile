@@ -18,6 +18,13 @@
 			vic1707.xyz
 		}
 	}
+
+	# https://github.com/hslatman/caddy-crowdsec-bouncer
+	crowdsec {
+		api_url http://crowdsec:8080
+		api_key {env.CROWDSEC_CADDY_BOUNCER_API_KEY}
+		# enable_hard_fails
+	}
 }
 
 (https) {
@@ -29,5 +36,8 @@
 
 https://vic1707.xyz {
 	import https
-	redir https://github.com/vic1707
+	route {
+		crowdsec
+		redir https://github.com/vic1707
+	}
 }
