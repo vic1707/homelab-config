@@ -1,5 +1,13 @@
 # {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
 # {{ $ARCH:= "arm64" }} # TODO: from env
+# {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
+# {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
+
+# {{ $ENABLE_BACKUP := conv.ToBool .Env.ENABLE_BACKUP }}
+###### Debug SELinux
+# sudo ausearch -m avc -ts recent
+### Print allow policy
+# sudo ausearch -m avc -ts recent | grep <thing> | audit2allow -m TMP
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -13,13 +21,20 @@ storage:
 
   # Base container storage path
   directories:
-    - path: /home/vic1707/containers
+    - path: /etc/selinux/custom-policies
+    - path: /srv/vic1707
       mode: 0755
       user:
         name: vic1707
       group:
         name: vic1707
-    - path: /home/vic1707/containers/caddy
+    - path: /srv/vic1707/containers
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/caddy
       mode: 0755
       user:
         name: vic1707
@@ -73,6 +88,32 @@ storage:
         name: vic1707
 
   files:
+    #### Backup
+    ## {{ if $ENABLE_BACKUP }}
+    - path: /etc/sync/paths.txt
+      mode: 0400
+      contents:
+        inline: |
+          /var/srv/vic1707/
+    - path: /etc/sync/restore.sh
+      mode: 0500
+      contents:
+        local: ./restore.sh
+    - path: /etc/selinux/custom-policies/rsync-cifs.te
+      mode: 0400
+      contents:
+        inline: |
+          module rsync_cifs 1.0;
+
+          require {
+            type rsync_t;
+            class capability dac_override;
+          }
+
+          #============= rsync_t ==============
+          allow rsync_t self:capability dac_override;
+    ## {{ end }} ## $ENABLE_BACKUP
+
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
 
@@ -250,6 +291,7 @@ storage:
         inline: |
           [Unit]
           Description=Caddy Quadlet
+          ConditionPathExists=/run/restore-complete
 
           [Container]
           Image=caddy.build
@@ -263,7 +305,7 @@ storage:
           PublishPort=80:80
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
-          Volume=/home/vic1707/containers/caddy:/data/caddy:Z,rw
+          Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
           UserNS=keep-id
           # User=vic1707
 
@@ -278,6 +320,12 @@ storage:
       group:
         name: vic1707
 
+    - path: /etc/cifs-credentials
+      mode: 0400
+      contents:
+        inline: |
+          username={{ $STORAGEBOX_USER }}
+          password={{ $STORAGEBOX_PASS }}
 systemd:
   units:
     # Enable systemd-sysext.service to merge the sysexts on boot
@@ -325,17 +373,113 @@ systemd:
         [Unit]
         Description=Configure SELinux
         After=systemd-sysext.service
+        Wants=systemd-sysext.service
         Requires=systemd-sysext.service
         Before=sshd.service
 
         [Service]
         Type=oneshot 
-        ## Allows sshd to bind to custom port
-        ExecStart=semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
         RemainAfterExit=yes
+        ## Allows sshd to bind to custom port
+        ExecStart=/usr/bin/semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
 
         [Install]
         WantedBy=multi-user.target
+
+## {{ if $ENABLE_BACKUP }}
+    #### Backup
+    - name: set-rsync-se-state.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Configure SELinux
+        After=set-se-state.service
+
+        [Service]
+        Type=oneshot 
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/setsebool rsync_full_access on
+        ExecStart=/bin/bash -c '/usr/bin/checkmodule -M -m -o /tmp/rsync_cifs.mod /etc/selinux/custom-policies/rsync-cifs.te && /usr/bin/semodule_package -o /tmp/rsync_cifs.pp -m /tmp/rsync_cifs.mod && /usr/bin/semodule -i /tmp/rsync_cifs.pp && /usr/bin/rm -f /tmp/rsync_cifs.*'
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: sync-backup.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Sync paths to mounted Hetzner Storage Box
+        After=sync-restore.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/rsync --verbose \
+          --archive --recursive \
+          --delete \
+          --fake-super \
+          --log-file=/var/log/sync-to-storagebox.log \
+          --files-from=/etc/sync/paths.txt \
+          --relative / /var/mnt/storagebox
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: sync-backup.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Periodic sync to mounted Hetzner Storage Box
+
+        [Timer]
+        OnUnitActiveSec=3min
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+    - name: sync-restore.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Restore system from CIFS backup on boot
+        After=var-mnt-storagebox.mount
+
+        [Service]
+        Type=oneshot
+        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.txt" "/var/mnt/storagebox"
+        ExecStartPost=/usr/bin/touch /run/restore-complete
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: var-mnt-storagebox.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount CIFS Hetzner Storagebox
+        After=network-online.target set-rsync-se-state.service
+        Requires=network-online.target set-rsync-se-state.service
+
+        [Mount]
+        # https://docs.hetzner.com/storage/storage-box/access/access-samba-cifs/#sambacifs
+        What=//{{ $STORAGEBOX_USER }}.your-storagebox.de/{{ $STORAGEBOX_USER }}
+        Where=/var/mnt/storagebox
+        Type=cifs
+        Options=credentials=/etc/cifs-credentials,_netdev,vers=3.0
+
+        [Install]
+        WantedBy=multi-user.target
+## {{ else }}
+    - name: dummy-restore.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Dummy fake restore service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/touch /run/restore-complete
+
+        [Install]
+        WantedBy=multi-user.target
+## {{ end }} ## $ENABLE_BACKUP
 
 passwd:
   users:
