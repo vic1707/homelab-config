@@ -4,28 +4,16 @@
 	"timezone": "Europe/Paris",
 	"packageRules": [
 		{
-			"matchManagers": ["docker-compose"],
-			"groupName": "Docker Compose Updates"
+			"matchManagers": ["docker-compose", "dockerfile"],
+			"groupName": "Container Updates"
 		},
 		{
 			"matchManagers": ["github-actions"],
 			"groupName": "GitHub Actions Updates"
 		},
 		{
-			"matchManagers": ["mise"],
-			"groupName": "Mise tools Updates"
-		},
-		{
-			"matchManagers": ["ansible-galaxy"],
-			"groupName": "Ansible galaxy Updates"
-		},
-		{
-			"matchManagers": ["pip_requirements"],
-			"groupName": "Python packages Updates"
-		},
-		{
-			"matchManagers": ["dockerfile"],
-			"groupName": "Containerfiles Updates"
+			"matchManagers": ["mise", "ansible-galaxy", "pip_requirements"],
+			"groupName": "Tools Updates"
 		}
 	]
 }
