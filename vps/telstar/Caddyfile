@@ -2,8 +2,17 @@
 	debug
 	# metrics { per_host }
 	# admin :2019
+
+	crowdsec {
+		api_url http://crowdsec:8080
+		api_key {env.CROWDSEC_CADDY_BOUNCER_API_KEY}
+		# enable_hard_fails
+	}
 }
 
 https://vic1707.xyz {
-	redir https://github.com/vic1707
+	route {
+		crowdsec
+		redir https://github.com/vic1707
+	}
 }
