@@ -45,7 +45,37 @@ storage:
         name: vic1707
       group:
         name: vic1707
+    - path: /srv/vic1707/containers/crowdsec
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/crowdsec/data
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/crowdsec/config
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
     - path: /home/vic1707/.config/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec/acquis.d
       mode: 0755
       user:
         name: vic1707
@@ -302,6 +332,42 @@ storage:
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/nginx,destination=/var/log/caddy
           UserNS=keep-id
           # User=vic1707
+
+          [Service]
+          Restart=always
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/crowdsec.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Crowdsec Quadlet
+          ConditionPathExists=/run/restore-complete
+          After=caddy.container CrowdsecLogs-init.container
+
+          [Container]
+          Image=docker.io/crowdsecurity/crowdsec:v1.6.9
+          ContainerName=crowdsec
+          Network=tunnel.network
+          NoNewPrivileges=true
+          DropCapability=ALL
+          Environment="TZ=Europe/Paris"
+          Environment="BOUNCER_KEY_caddy={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
+          Environment="ENROLL_KEY={{ $CROWDSEC_API_KEY }}"
+          Environment="USE_WAL=true"
+          Environment="ENROLL_INSTANCE_NAME=telstar"
+          # TODO: Dunno if needed, instance is stored in config
+          Volume=/srv/vic1707/containers/crowdsec/data:/var/lib/crowdsec/data:Z,rw
+          # TODO: Dunno if needed, custom config is enough?
+          Volume=/srv/vic1707/containers/crowdsec/config:/etc/crowdsec:Z,rw
+          Volume=/home/vic1707/.config/containers/crowdsec/acquis.d:/etc/crowdsec/acquis.d:rw
+          Volume=CrowdsecLogs.volume:/var/log:ro
 
           [Service]
           Restart=always
