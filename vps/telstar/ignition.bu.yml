@@ -283,6 +283,7 @@ storage:
           [Unit]
           Description=Caddy Quadlet
           ConditionPathExists=/run/restore-complete
+          After=CrowdsecLogs-init.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
@@ -298,11 +299,46 @@ storage:
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/nginx,destination=/var/log/caddy
           UserNS=keep-id
           # User=vic1707
 
           [Service]
           Restart=always
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/CrowdsecLogs.volume
+      mode: 0400
+      contents:
+        inline: |
+          [Volume]
+          VolumeName=CrowdsecLogs
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/CrowdsecLogs-init.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Init container to create file-tree in CrowdsecLogs volume
+          Before=caddy.container crowdsec.container
+
+          [Container]
+          Image=docker.io/library/alpine
+          NoNewPrivileges=true
+          DropCapability=ALL
+          ReadOnly=true
+
+          Entrypoint=/bin/mkdir
+          Exec=-p /mnt/nginx
+          Volume=CrowdsecLogs.volume:/mnt:rw
 
           [Install]
           WantedBy=default.target
