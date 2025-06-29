@@ -13,7 +13,10 @@ RUN xcaddy build \
 	`# Auto update cloudflare DNS records` \
     --with github.com/mholt/caddy-dynamicdns \
 	`# Crowdsec bouncer module` \
-	--with github.com/hslatman/caddy-crowdsec-bouncer/http `# /appsec and /layer4 are also available`
+	--with github.com/hslatman/caddy-crowdsec-bouncer/http \
+	--with github.com/hslatman/caddy-crowdsec-bouncer/appsec \
+	--with github.com/hslatman/caddy-crowdsec-bouncer/layer4 \
+	--with github.com/mholt/caddy-l4
 
 # Final image
 FROM ${CONTAINER_REGISTRY}/caddy:${CADDY_VERSION}-alpine
