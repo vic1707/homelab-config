@@ -313,7 +313,7 @@ storage:
           [Unit]
           Description=Caddy Quadlet
           ConditionPathExists=/run/restore-complete
-          After=CrowdsecLogs-init.container
+          After=crowdsec.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
@@ -349,7 +349,7 @@ storage:
           [Unit]
           Description=Crowdsec Quadlet
           ConditionPathExists=/run/restore-complete
-          After=caddy.container CrowdsecLogs-init.container
+          After=CrowdsecLogs-init.container
 
           [Container]
           Image=docker.io/crowdsecurity/crowdsec:v1.6.9
@@ -394,7 +394,6 @@ storage:
         inline: |
           [Unit]
           Description=Init container to create file-tree in CrowdsecLogs volume
-          Before=caddy.container crowdsec.container
 
           [Container]
           Image=docker.io/library/alpine
