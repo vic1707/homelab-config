@@ -1,10 +1,104 @@
-name: Dummy
+name: Build & Push Custom Container Images
 
 on:
-  workflow_dispatch: {}
+  push:
+    branches: [moving-out] # TODO: rename to main once we're done with big refacto
+    paths:
+      - '**/*.containerfile'
+  workflow_dispatch:
+    inputs:
+      containerfile:
+          description: The container to build
+          type: string
+
+permissions:
+  packages: write
+
+env:
+  SHA: ${{ github.sha }}
+  PLATFORMS: linux/amd64,linux/arm64,linux/arm
 
 jobs:
-  dummy:
+  detect-changes:
     runs-on: ubuntu-latest
+    outputs:
+      containerfiles: ${{ steps.set-containerfiles.outputs.containerfiles }}
     steps:
-      - run: echo toto
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Get changed containerfiles paths
+        if: ${{ github.event_name == 'push' }}
+        id: changed-containerfiles
+        uses: tj-actions/changed-files@v46.0.5
+        with:
+          files: '**/*.containerfile'
+          matrix: true
+      
+      - name: Workflow Dispatch
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        id: manual-containerfile
+        env: 
+          CONTAINER_FILE: ${{ inputs.containerfile }}
+        run: |
+          if [ ! -f "$CONTAINER_FILE" ]; then
+            echo "Containerfile '$CONTAINER_FILE' not found!"
+            exit 1
+          fi
+          echo "containerfiles=[\"$CONTAINER_FILE\"]" >> "$GITHUB_OUTPUT"
+
+      - name: Set containerfiles
+        id: set-containerfiles
+        env:
+          CHANGED_FILES: ${{ steps.changed-containerfiles.outputs.all_changed_files }}
+          MANUAL: ${{ steps.manual-containerfile.outputs.containerfiles }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "containerfiles=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+          else
+            echo "containerfiles=$MANUAL" >> "$GITHUB_OUTPUT"
+          fi
+      - run: echo ${{ steps.set-containerfiles.outputs.containerfiles }}
+
+  build:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file: ${{ fromJson(needs.detect-changes.outputs.containerfiles) }}
+      max-parallel: 4
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install QEMU
+        run: sudo apt install -y qemu-user-static
+
+      - name: Build Image
+        id: build_image
+        env:
+          FILE: ${{ matrix.file }}
+        run: |
+          file="$FILE"
+          service=$(basename "$file" .containerfile)
+          dir=$(dirname "$file")
+
+          echo "📦 Building $service from $file"
+          podman build --format oci --platform $PLATFORMS -f "$file" -t "$service:latest" -t "$service:$SHA" "$dir"
+
+          echo "image=$service" >> "$GITHUB_OUTPUT"
+
+      - name: Push to ghcr.io
+        uses: redhat-actions/push-to-registry@v2.8
+        with:
+          image: ${{ steps.build_image.outputs.image }}
+          tags: latest ${{ github.sha }}
+          registry: ghcr.io/${{ github.repository_owner }}/homelab
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}

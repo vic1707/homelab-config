@@ -264,30 +264,10 @@ storage:
         name: vic1707
 
     ## Caddy
-    - path: /home/vic1707/.config/containers/containerfiles/caddy.Containerfile
-      mode: 0400
-      contents:
-        local: ./caddy.Containerfile
-      user:
-        name: vic1707
-      group:
-        name: vic1707
     - path: /home/vic1707/.config/containers/caddy/Caddyfile
       mode: 0400
       contents:
         local: ./Caddyfile
-      user:
-        name: vic1707
-      group:
-        name: vic1707
-    - path: /home/vic1707/.config/containers/systemd/caddy.build
-      mode: 0400
-      contents:
-        inline: |
-          [Build]
-          SetWorkingDirectory=/home/vic1707/.config/containers/containerfiles/
-          File=caddy.Containerfile
-          ImageTag=localhost/caddy
       user:
         name: vic1707
       group:
@@ -301,7 +281,7 @@ storage:
           ConditionPathExists=/run/restore-complete
 
           [Container]
-          Image=caddy.build
+          Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
           ContainerName=caddy
           Network=tunnel.network
           ReadOnly=true
