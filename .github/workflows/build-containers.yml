@@ -97,17 +97,29 @@ jobs:
           service=$(basename "$file" .containerfile)
           dir=$(dirname "$file")
 
-          echo "📦 Building $service from $file"
-          podman build --format oci --platform "$PLATFORMS" -f "$file" -t "$service:latest" -t "$service:$SHA" "$dir"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            tags=pr-${{ github.event.pull_request.number }}
+          else
+            tags=latest $SHA
+          fi
+          echo "🏷️  Tags: ${tags[@]}"
 
+          echo "📦 Building $service from $file"
+          podman build --format oci --platform "$PLATFORMS" -f "$file" -t "$service" "$dir"
+
+          for tag in $tags; do
+            podman tag "$service" "$service:$tag"
+          done
+
+          ## Set step outputs
           echo "image=$service" >> "$GITHUB_OUTPUT"
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
 
       - name: Push to ghcr.io
-        if: ${{ github.event_name != 'pull_request' }}
         uses: redhat-actions/push-to-registry@v2.8
         with:
           image: ${{ steps.build_image.outputs.image }}
-          tags: latest ${{ github.sha }}
+          tags: ${{ steps.build_image.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}/homelab
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
