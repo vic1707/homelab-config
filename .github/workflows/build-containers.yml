@@ -96,19 +96,20 @@ jobs:
           file="$CONTAINER_FILE"
           service=$(basename "$file" .containerfile)
           dir=$(dirname "$file")
+          build_image="$service:build"
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             tags=pr-${{ github.event.pull_request.number }}
           else
             tags=latest $SHA
           fi
-          echo "🏷️  Tags: ${tags[@]}"
 
           echo "📦 Building $service from $file"
-          podman build --format oci --platform "$PLATFORMS" -f "$file" -t "$service" "$dir"
-
+          podman build --format oci --platform "$PLATFORMS" -f "$file" -t "$build_image" "$dir"
+          
           for tag in $tags; do
-            podman tag "$service" "$service:$tag"
+            echo "🏷️ Tagging $tag"
+            podman tag "$build_image" "$service:$tag"
           done
 
           ## Set step outputs
