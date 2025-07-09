@@ -83,14 +83,14 @@ jobs:
       - name: Build Image
         id: build_image
         env:
-          FILE: ${{ matrix.file }}
+          CONTAINER_FILE: ${{ matrix.file }}
         run: |
-          file="$FILE"
+          file="$CONTAINER_FILE"
           service=$(basename "$file" .containerfile)
           dir=$(dirname "$file")
 
           echo "📦 Building $service from $file"
-          podman build --format oci --platform $PLATFORMS -f "$file" -t "$service:latest" -t "$service:$SHA" "$dir"
+          podman build --format oci --platform "$PLATFORMS" -f "$file" -t "$service:latest" -t "$service:$SHA" "$dir"
 
           echo "image=$service" >> "$GITHUB_OUTPUT"
 
