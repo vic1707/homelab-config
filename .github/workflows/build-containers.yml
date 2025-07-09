@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 0
 
       - name: Get changed containerfiles paths
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name != 'workflow_dispatch' }}
         id: changed-containerfiles
         uses: tj-actions/changed-files@v46.0.5
         with:
@@ -62,10 +62,10 @@ jobs:
           CHANGED_FILES: ${{ steps.changed-containerfiles.outputs.all_changed_files }}
           MANUAL: ${{ steps.manual-containerfile.outputs.containerfiles }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "containerfiles=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
-          else
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "containerfiles=$MANUAL" >> "$GITHUB_OUTPUT"
+          else
+            echo "containerfiles=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
           fi
 
   build:
