@@ -10,6 +10,14 @@ on:
       containerfile:
           description: The container to build
           type: string
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - '**/*.containerfile'
 
 permissions: {}
 
@@ -95,6 +103,7 @@ jobs:
           echo "image=$service" >> "$GITHUB_OUTPUT"
 
       - name: Push to ghcr.io
+        if: ${{ github.event_name != 'pull_request' }}
         uses: redhat-actions/push-to-registry@v2.8
         with:
           image: ${{ steps.build_image.outputs.image }}
