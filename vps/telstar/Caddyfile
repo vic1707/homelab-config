@@ -2,8 +2,26 @@
 	debug
 	# metrics { per_host }
 	# admin :2019
+
+	log {
+		output file /var/log/caddy/caddy.log
+		level DEBUG
+	}
+
+	crowdsec {
+		api_url http://crowdsec:8080
+		appsec_url http://crowdsec:7422
+		api_key {env.CROWDSEC_CADDY_BOUNCER_API_KEY}
+		enable_hard_fails
+	}
 }
 
 https://vic1707.xyz {
-	redir https://github.com/vic1707
+	log {
+		output file /var/log/caddy/access.log
+	}
+	route {
+		crowdsec
+		redir https://github.com/vic1707
+	}
 }
