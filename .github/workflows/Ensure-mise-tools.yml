@@ -4,12 +4,20 @@ on:
   push:
     branches:
       - main
+    paths:
+      - .mise.toml
+      - requirements.txt
+      - requirements.yml
   pull_request:
     types:
       - opened
       - reopened
       - synchronize
       - ready_for_review
+    paths:
+      - .mise.toml
+      - requirements.txt
+      - requirements.yml
   workflow_dispatch:
 
 permissions: {}
