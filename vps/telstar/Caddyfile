@@ -5,5 +5,5 @@
 }
 
 https://vic1707.xyz {
-	redir https://github.com/vic1707
+	  redir https://github.com/vic1707
 }
