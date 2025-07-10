@@ -88,33 +88,31 @@ jobs:
       - name: Install QEMU
         run: sudo apt install -y qemu-user-static
 
-      - name: Build Image
-        id: build_image
+      - name: Determine tags and imagename
+        id: set-env
         env:
           CONTAINER_FILE: ${{ matrix.file }}
         run: |
-          file="$CONTAINER_FILE"
-          service=$(basename "$file" .containerfile)
-          dir=$(dirname "$file")
-          build_image="$service:build"
-
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             tags=pr-${{ github.event.pull_request.number }}
           else
             tags=latest $SHA
           fi
 
-          echo "📦 Building $service from $file"
-          podman build --format oci --platform "$PLATFORMS" -f "$file" -t "$build_image" "$dir"
-          
-          for tag in $tags; do
-            echo "🏷️ Tagging $tag"
-            podman tag "$build_image" "$service:$tag"
-          done
-
           ## Set step outputs
-          echo "image=$service" >> "$GITHUB_OUTPUT"
+          echo "image=$(basename "$CONTAINER_FILE" .containerfile)" >> "$GITHUB_OUTPUT"
           echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Build Image
+        id: build_image
+        env:
+          CONTAINER_FILE: ${{ matrix.file }}
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ steps.set-env.outputs.image }}
+          tags: ${{ steps.set-env.outputs.tags }}
+          platforms: ${{ env.PLATFORMS }}
+          containerfiles: ${{ matrix.file }}
 
       - name: Push to ghcr.io
         uses: redhat-actions/push-to-registry@v2.8
