@@ -3,6 +3,11 @@
 	# metrics { per_host }
 	# admin :2019
 
+	log {
+		output file /var/log/caddy/caddy.log
+		level DEBUG
+	}
+
 	crowdsec {
 		api_url http://crowdsec:8080
 		appsec_url http://crowdsec:7422
@@ -12,6 +17,9 @@
 }
 
 https://vic1707.xyz {
+	log {
+		output file /var/log/caddy/access.log
+	}
 	route {
 		crowdsec
 		redir https://github.com/vic1707

@@ -329,7 +329,7 @@ storage:
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
-          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/nginx,destination=/var/log/caddy
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
           UserNS=keep-id
           # User=vic1707
 
@@ -362,11 +362,12 @@ storage:
           Environment="ENROLL_KEY={{ $CROWDSEC_API_KEY }}"
           Environment="USE_WAL=true"
           Environment="ENROLL_INSTANCE_NAME=telstar"
+          Environment="COLLECTIONS=crowdsecurity/caddy crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
           # TODO: Dunno if needed, instance is stored in config
           Volume=/srv/vic1707/containers/crowdsec/data:/var/lib/crowdsec/data:Z,rw
           # TODO: Dunno if needed, custom config is enough?
           Volume=/srv/vic1707/containers/crowdsec/config:/etc/crowdsec:Z,rw
-          Volume=/home/vic1707/.config/containers/crowdsec/acquis.d:/etc/crowdsec/acquis.d:rw
+          Volume=/home/vic1707/.config/containers/crowdsec/acquis.d:/etc/crowdsec/acquis.d:Z,rw
           Volume=CrowdsecLogs.volume:/var/log:ro
 
           [Service]
@@ -402,11 +403,27 @@ storage:
           ReadOnly=true
 
           Entrypoint=/bin/mkdir
-          Exec=-p /mnt/nginx
+          Exec=-p /mnt/caddy
           Volume=CrowdsecLogs.volume:/mnt:rw
 
           [Install]
           WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec/acquis.d/appsec.yaml
+      mode: 0400
+      contents:
+        local: ./crowdsec_acquis.d/appsec.yaml
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec/acquis.d/caddy.yaml
+      mode: 0400
+      contents:
+        local: ./crowdsec_acquis.d/caddy.yaml
       user:
         name: vic1707
       group:
