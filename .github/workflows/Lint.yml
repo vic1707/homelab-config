@@ -33,6 +33,14 @@ jobs:
           rg -l "^#!(.*/|.*env +)($SUPPORTED_SHELLS)" . \
               | xargs -r -t shfmt -d -i 4 -s -bn -ci -sr -kp
 
+      - name: Caddy
+        run: |
+          find . \
+            -type f -name "*Caddyfile" \
+            -print \
+            -execdir \
+              podman run --rm -v .:/app --workdir /app caddy:latest caddy fmt {} +
+
   linters:
     name: linters
     runs-on: ubuntu-latest
