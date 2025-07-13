@@ -312,8 +312,7 @@ storage:
         inline: |
           [Unit]
           Description=Caddy Quadlet
-          ConditionPathExists=/run/restore-complete
-          After=crowdsec.container
+          After=crowdsec-readyness.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
@@ -335,6 +334,8 @@ storage:
 
           [Service]
           Restart=always
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
 
           [Install]
           WantedBy=default.target
@@ -348,11 +349,10 @@ storage:
         inline: |
           [Unit]
           Description=Crowdsec Quadlet
-          ConditionPathExists=/run/restore-complete
           After=CrowdsecLogs-init.container
 
           [Container]
-          Image=docker.io/crowdsecurity/crowdsec:v1.6.9
+          Image=docker.io/crowdsecurity/crowdsec:v1.6.10
           ContainerName=crowdsec
           Network=tunnel.network
           NoNewPrivileges=true
@@ -372,6 +372,35 @@ storage:
 
           [Service]
           Restart=always
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/crowdsec-readyness.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Container that ensures crowdsec started and is available
+          After=crowdsec.container
+
+          [Container]
+          Image=ghcr.io/11notes/distroless:curl-8.14.1
+          NoNewPrivileges=true
+          DropCapability=ALL
+          ReadOnly=true
+
+          ContainerName=crowdsec-readyness
+          Network=tunnel.network
+          Exec=--retry 60 --retry-connrefused --retry-delay 2 --max-time 2 -s http://crowdsec:8080/health
+
+          [Service]
+          Type=oneshot
+          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-ready
 
           [Install]
           WantedBy=default.target
