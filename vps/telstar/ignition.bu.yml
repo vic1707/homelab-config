@@ -349,7 +349,6 @@ storage:
         inline: |
           [Unit]
           Description=Crowdsec Quadlet
-          After=CrowdsecLogs-init.container
 
           [Container]
           Image=docker.io/crowdsecurity/crowdsec:v1.6.10
@@ -373,6 +372,7 @@ storage:
           [Service]
           Restart=always
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-volume-ready ]; do sleep 1; done"
 
           [Install]
           WantedBy=default.target
@@ -414,29 +414,11 @@ storage:
         inline: |
           [Volume]
           VolumeName=CrowdsecLogs
-      user:
-        name: vic1707
-      group:
-        name: vic1707
-    - path: /home/vic1707/.config/containers/systemd/CrowdsecLogs-init.container
-      mode: 0400
-      contents:
-        inline: |
-          [Unit]
-          Description=Init container to create file-tree in CrowdsecLogs volume
 
-          [Container]
-          Image=docker.io/library/alpine
-          NoNewPrivileges=true
-          DropCapability=ALL
-          ReadOnly=true
-
-          Entrypoint=/bin/mkdir
-          Exec=-p /mnt/caddy
-          Volume=CrowdsecLogs.volume:/mnt:rw
-
-          [Install]
-          WantedBy=default.target
+          [Service]
+          ExecStartPost=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
+          ExecStartPost=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine touch /mnt/caddy/caddy.log
+          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-volume-ready
       user:
         name: vic1707
       group:
