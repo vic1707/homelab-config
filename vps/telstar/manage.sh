@@ -99,12 +99,13 @@ build_hostfwd_args() {
     done
 
     local hostfwd_combined
-    hostfwd_combined=$(IFS=,; echo "${hostfwd_opts[*]}")
+    hostfwd_combined=$(
+        IFS=,
+        echo "${hostfwd_opts[*]}"
+    )
 
     echo "-netdev user,id=net0,${hostfwd_combined} -device virtio-net-device,netdev=net0"
 }
-
-
 
 COMMAND=$1
 shift

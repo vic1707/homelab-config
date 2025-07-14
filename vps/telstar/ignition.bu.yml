@@ -312,7 +312,7 @@ storage:
         inline: |
           [Unit]
           Description=Caddy Quadlet
-          After=crowdsec-readyness.container
+          After=crowdsec-readiness.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
@@ -380,7 +380,7 @@ storage:
         name: vic1707
       group:
         name: vic1707
-    - path: /home/vic1707/.config/containers/systemd/crowdsec-readyness.container
+    - path: /home/vic1707/.config/containers/systemd/crowdsec-readiness.container
       mode: 0400
       contents:
         inline: |
@@ -394,7 +394,7 @@ storage:
           DropCapability=ALL
           ReadOnly=true
 
-          ContainerName=crowdsec-readyness
+          ContainerName=crowdsec-readiness
           Network=tunnel.network
           Exec=--retry 60 --retry-connrefused --retry-delay 2 --max-time 2 -s http://crowdsec:8080/health
 
