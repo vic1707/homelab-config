@@ -24,6 +24,7 @@
 	}
 
 	# https://github.com/hslatman/caddy-crowdsec-bouncer
+	order crowdsec first
 	crowdsec {
 		api_url http://crowdsec:8080
 		appsec_url http://crowdsec:7422
@@ -39,13 +40,16 @@
 	}
 }
 
-https://vic1707.xyz {
-	import https
+(access_log) {
 	log {
-		output file /var/log/caddy/access.log
+		output file /var/log/caddy/caddy.log
+		level DEBUG
 	}
-	route {
-		crowdsec
-		redir https://github.com/vic1707
-	}
+}
+
+https://vic1707.xyz {
+	import access_log
+	import https
+	crowdsec
+	redir https://github.com/vic1707
 }
