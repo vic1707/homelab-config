@@ -61,6 +61,7 @@ usage() {
             --upload-image      Fetches and upload the latest FCOS image (if necessary)
             --create-server     Fetches and upload the latest FCOS image (if necessary)
             --remove-image      Removes existing FCOS image
+            --remove-server     Removes existing matching server
 
     Arguments:
         <butane-file>           Path to the Butane configuration file (required)
