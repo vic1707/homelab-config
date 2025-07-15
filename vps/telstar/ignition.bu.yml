@@ -1,7 +1,7 @@
 # {{ $SSH_PORT := gopass "telstar/ssh-port" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
-# {{ $CLOUDFLARE_API_TOKEN := gopass "domains/vic1707.xyz/api-key.cloudflare" | strings.TrimSpace | required }}
+# {{ $CLOUDFLARE_API_TOKEN := gopass "domains/vic1707.xyz/api-key.cloudflare" "key" | strings.TrimSpace | required }}
 
 # {{ $ARCH:= "arm64" }} # TODO: from env
 # {{ $ENABLE_BACKUP := conv.ToBool .Env.ENABLE_BACKUP }}
@@ -193,7 +193,6 @@ storage:
               ## Allow SSH
               tcp dport {{ $SSH_PORT }} accept;
               ## Caddy ports
-              tcp dport 80 accept;
               tcp dport 443 accept;
             }
 
@@ -239,11 +238,11 @@ storage:
           # Restrict access to kernel pointers in /proc (helps mitigate kernel info leaks).
           kernel.kptr_restrict = 2
 
-    # Allow the unprivileged user to bind to port 80 and above
+    # Allow the unprivileged user to bind to port 443 and above
     - path: /etc/sysctl.d/90-unprivileged-ports.conf
       contents:
         inline: |
-          net.ipv4.ip_unprivileged_port_start = 80
+          net.ipv4.ip_unprivileged_port_start = 443
 
     ######################
     ## Containers stuff ##
@@ -291,7 +290,6 @@ storage:
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
           Environment="CLOUDFLARE_API_TOKEN={{ $CLOUDFLARE_API_TOKEN }}"
-          PublishPort=80:80
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
