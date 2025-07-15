@@ -3,15 +3,12 @@
 	# metrics { per_host }
 	# admin :2019
 
-	# https://github.com/caddy-dns/cloudflare
-	tls {
-		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-	}
-
-	# https://github.com/WeidiDeng/caddy-cloudflare-ip
-	trusted_proxies cloudflare {
-		interval 12h # How often cloudflare ip lists are retrieved
-		timeout 15s # Maximum time to wait to get a response from cloudflare
+	servers {
+		# https://github.com/WeidiDeng/caddy-cloudflare-ip
+		trusted_proxies cloudflare {
+			interval 12h # How often cloudflare ip lists are retrieved
+			timeout 15s # Maximum time to wait to get a response from cloudflare
+		}
 	}
 
 	# https://github.com/mholt/caddy-dynamicdns
@@ -23,6 +20,15 @@
 	}
 }
 
+
+(https) {
+	# https://github.com/caddy-dns/cloudflare
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+}
+
 https://vic1707.xyz {
+	import https
 	redir https://github.com/vic1707
 }
