@@ -12,12 +12,14 @@ RUN xcaddy build \
     --with github.com/WeidiDeng/caddy-cloudflare-ip \
 	`# Auto update cloudflare DNS records` \
     --with github.com/mholt/caddy-dynamicdns \
+	`# Layer 4 support` \
+	--with github.com/mholt/caddy-l4 \
 	`# Crowdsec bouncer module` \
 	--with github.com/hslatman/caddy-crowdsec-bouncer/http \
 	--with github.com/hslatman/caddy-crowdsec-bouncer/appsec \
 	--with github.com/hslatman/caddy-crowdsec-bouncer/layer4 \
-	--with github.com/mholt/caddy-l4
-
+	`# Allows merging trusted_proxies` \
+	--with github.com/fvbommel/caddy-combine-ip-ranges
 # Final image
 FROM ${CONTAINER_REGISTRY}/caddy:${CADDY_VERSION}-alpine
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
