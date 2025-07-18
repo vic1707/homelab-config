@@ -2,12 +2,21 @@
 	debug
 	# metrics { per_host }
 	# admin :2019
+	log {
+		output file /var/log/caddy/caddy.log
+		level DEBUG
+	}
 
 	servers {
-		# https://github.com/WeidiDeng/caddy-cloudflare-ip
-		trusted_proxies cloudflare {
-			interval 12h # How often cloudflare ip lists are retrieved
-			timeout 15s # Maximum time to wait to get a response from cloudflare
+		# https://github.com/fvbommel/caddy-combine-ip-ranges
+		trusted_proxies combine {
+			# https://github.com/WeidiDeng/caddy-cloudflare-ip
+			cloudflare {
+				interval 12h # How often cloudflare ip lists are retrieved
+				timeout 15s # Maximum time to wait to get a response from cloudflare
+			}
+			# podman network's IP range
+			static 10.89.0.0/26
 		}
 	}
 
@@ -18,6 +27,15 @@
 			vic1707.xyz
 		}
 	}
+
+	# https://github.com/hslatman/caddy-crowdsec-bouncer
+	order crowdsec first
+	crowdsec {
+		api_url http://crowdsec:8080
+		appsec_url http://crowdsec:7422
+		api_key {env.CROWDSEC_CADDY_BOUNCER_API_KEY}
+		enable_hard_fails
+	}
 }
 
 (https) {
@@ -27,7 +45,16 @@
 	}
 }
 
+(access_log) {
+	log {
+		output file /var/log/caddy/caddy.log
+		level DEBUG
+	}
+}
+
 https://vic1707.xyz {
+	import access_log
 	import https
+	crowdsec
 	redir https://github.com/vic1707
 }
