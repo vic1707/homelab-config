@@ -4,10 +4,15 @@
 	# admin :2019
 
 	servers {
-		# https://github.com/WeidiDeng/caddy-cloudflare-ip
-		trusted_proxies cloudflare {
-			interval 12h # How often cloudflare ip lists are retrieved
-			timeout 15s # Maximum time to wait to get a response from cloudflare
+		# https://github.com/fvbommel/caddy-combine-ip-ranges
+		trusted_proxies combine {
+			# https://github.com/WeidiDeng/caddy-cloudflare-ip
+			cloudflare {
+				interval 12h # How often cloudflare ip lists are retrieved
+				timeout 15s # Maximum time to wait to get a response from cloudflare
+			}
+			# podman network's IP range
+			static 10.89.0.0/26
 		}
 	}
 

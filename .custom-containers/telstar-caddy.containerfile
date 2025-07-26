@@ -11,7 +11,9 @@ RUN xcaddy build \
 	`# Automatically retreive cloudflare IPs` \
 	--with github.com/WeidiDeng/caddy-cloudflare-ip \
 	`# Auto update cloudflare DNS records` \
-	--with github.com/mholt/caddy-dynamicdns
+	--with github.com/mholt/caddy-dynamicdns \
+	`# Allows merging trusted_proxies` \
+	--with github.com/fvbommel/caddy-combine-ip-ranges
 
 # Final image
 FROM ${CONTAINER_REGISTRY}/caddy:${CADDY_VERSION}-alpine
