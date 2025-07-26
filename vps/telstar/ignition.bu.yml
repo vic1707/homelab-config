@@ -297,6 +297,7 @@ storage:
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
           UserNS=keep-id
           # User=vic1707
 
@@ -305,6 +306,20 @@ storage:
 
           [Install]
           WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/CrowdsecLogs.volume
+      mode: 0400
+      contents:
+        inline: |
+          [Volume]
+          VolumeName=CrowdsecLogs
+
+          [Service]
+          ExecStartPost=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
+          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-volume-ready
       user:
         name: vic1707
       group:
