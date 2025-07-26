@@ -32,6 +32,7 @@
 	order crowdsec first
 	crowdsec {
 		api_url http://crowdsec:8080
+		appsec_url http://crowdsec:7422
 		api_key {env.CROWDSEC_CADDY_BOUNCER_API_KEY}
 		enable_hard_fails
 	}
