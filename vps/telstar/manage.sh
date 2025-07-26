@@ -90,6 +90,23 @@ generate_ignition() {
     IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
 }
 
+# Accepts port mappings in the format: ["host:guest" "host:guest" ...]
+build_hostfwd_args() {
+    local hostfwd_opts=()
+    for port_pair in "$@"; do
+        IFS=":" read -r host_port guest_port <<< "$port_pair"
+        hostfwd_opts+=("hostfwd=tcp::${host_port}-:${guest_port}")
+    done
+
+    local hostfwd_combined
+    hostfwd_combined=$(
+        IFS=,
+        echo "${hostfwd_opts[*]}"
+    )
+
+    echo "-netdev user,id=net0,${hostfwd_combined} -device virtio-net-device,netdev=net0"
+}
+
 COMMAND=$1
 shift
 case "$COMMAND" in
@@ -106,6 +123,12 @@ case "$COMMAND" in
         unxz "$IMG_PATH"
 
         echo "💻 Starting VM..."
+
+        # Define port mappings
+        INTERNAL_SSH_PORT=$(gopass show -o telstar/ssh-port)
+        HOSTFWD_ARGS=$(build_hostfwd_args "2222:$INTERNAL_SSH_PORT" "4443:443")
+
+        # shellcheck disable=SC2086 # $HOSTFWD_ARGS not in quotes
         qemu-system-aarch64 \
             -machine virt -cpu cortex-a72 \
             -smp $CORE_COUNT -m $RAM_MB \
@@ -113,8 +136,7 @@ case "$COMMAND" in
             -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
             -fw_cfg name=opt/com.coreos/config,file="$IGNITION_PATH" \
             -drive if=virtio,file="${IMG_PATH%%.xz}",format=qcow2,media=disk \
-            -netdev user,id=net0,hostfwd=tcp::2222-:22 \
-            -device virtio-net-device,netdev=net0 \
+            $HOSTFWD_ARGS \
             -serial mon:stdio
 
         ;;
