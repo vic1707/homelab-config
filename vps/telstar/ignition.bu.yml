@@ -14,6 +14,7 @@
 
 ## Generated at build time
 # {{ $CROWDSEC_CADDY_BOUNCER_API_KEY := random.AlphaNum 40 }}
+# {{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY := random.AlphaNum 40 }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -156,6 +157,44 @@ storage:
     - path: /var/lib/extensions/semanage.raw
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-{{$ARCH}}/semanage-3.8-1.fc42-42-{{$ARCH}}.raw
+    # Additional crowdsec bouncer
+    - path: /var/opt/crowdsec-firewall-bouncer.tgz
+      mode: 0400
+      contents:
+        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.33/crowdsec-firewall-bouncer-linux-{{$ARCH}}.tgz
+    - path: /var/opt/crowdsec-firewall-bouncer.yaml
+      mode: 0400
+      contents:
+        inline: |
+          # TODO: prometheus is supported
+          mode: nftables
+          update_frequency: 10s
+
+          api_url: http://127.0.0.1:8080/
+          api_key: {{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY }}
+
+          ## Log
+          log_mode: file
+          log_dir: /var/log/
+          log_level: debug
+          log_compression: true
+          log_max_size: 100
+          log_max_backups: 3
+          log_max_age: 30
+          deny_log: true
+
+          ## nftables
+          nftables:
+            ipv4:
+              enabled: true
+              set-only: false
+              table: crowdsec
+              chain: crowdsec-chain
+            ipv6:
+              enabled: true
+              set-only: false
+              table: crowdsec6
+              chain: crowdsec6-chain
 
     # SSH daemon hardening
     - path: /etc/ssh/sshd_config.d/99-hardening.conf
@@ -352,6 +391,7 @@ storage:
           PublishPort=127.0.0.1:8080:8080
           Environment="TZ=Europe/Paris"
           Environment="BOUNCER_KEY_caddy={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
+          Environment="BOUNCER_KEY_firewall={{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY }}"
           Environment="ENROLL_KEY={{ $CROWDSEC_API_KEY }}"
           Environment="USE_WAL=true"
           Environment="ENROLL_INSTANCE_NAME=telstar"
@@ -464,6 +504,25 @@ systemd:
       mask: true
     - name: systemd-timesyncd.service
       enabled: true # outbound-only time sync (no open ports)
+
+    - name: crowdsec-firewall-bouncer.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=CrowdSec Firewall Bouncer (nftables)
+        After=network.target
+
+        [Service]
+        Type=simple
+        ExecStartPre=/usr/bin/tar --no-same-owner -xvzf /var/opt/crowdsec-firewall-bouncer.tgz --wildcards --strip-components=1 -C /var/opt/ '*/crowdsec-firewall-bouncer'
+        ExecStartPre=/usr/bin/chcon -t bin_t /var/opt/crowdsec-firewall-bouncer
+        ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
+        ExecStart=/var/opt/crowdsec-firewall-bouncer -c /var/opt/crowdsec-firewall-bouncer.yaml
+        Restart=always
+        RestartSec=5
+
+        [Install]
+        WantedBy=multi-user.target
 
     # Manage SELinux, waiting for a better solution
     - name: set-se-state.service
