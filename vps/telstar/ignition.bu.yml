@@ -11,6 +11,9 @@
 # sudo ausearch -m avc -ts recent
 ### Print allow policy
 # sudo ausearch -m avc -ts recent | grep <thing> | audit2allow -m TMP
+
+## Generated at build time
+# {{ $CROWDSEC_CADDY_BOUNCER_API_KEY := random.AlphaNum 40 }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -290,6 +293,7 @@ storage:
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
           Environment="CLOUDFLARE_API_TOKEN={{ $CLOUDFLARE_API_TOKEN }}"
+          Environment="CROWDSEC_CADDY_BOUNCER_API_KEY={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
