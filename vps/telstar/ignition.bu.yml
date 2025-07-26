@@ -157,12 +157,15 @@ storage:
           module podman_mount_journald 1.0;
 
           require {
-            type pasta_t;
-            class cap_userns { setgid setuid };
+            type var_log_t;
+            type container_t;
+            class dir { read watch };
+            class file { read open getattr map };
           }
 
           #============= pasta_t ==============
-          allow pasta_t self:cap_userns { setgid setuid };
+          allow container_t var_log_t:dir { read watch };
+          allow container_t var_log_t:file { read open getattr map };
 
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
@@ -416,10 +419,6 @@ storage:
           Volume=/srv/vic1707/containers/crowdsec/config:/etc/crowdsec:Z,rw
           Volume=/home/vic1707/.config/containers/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:Z,rw
           Volume=CrowdsecLogs.volume:/var/log:ro
-
-          GroupAdd=keep-groups
-          # Enables journal mount # TODO: Remove
-          SecurityLabelDisable=true
           Volume=/var/log/journal:/run/log/journal:ro
 
           [Service]
