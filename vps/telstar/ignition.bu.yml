@@ -114,7 +114,6 @@ storage:
 
           #============= rsync_t ==============
           allow rsync_t self:capability dac_override;
-
     - path: /etc/cifs-credentials
       mode: 0400
       contents:
