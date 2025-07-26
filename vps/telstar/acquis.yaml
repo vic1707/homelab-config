@@ -1,0 +1,7 @@
+---
+source: file
+force_inotify: true
+filenames:
+  - /var/log/caddy/*.log
+labels:
+  type: caddy
