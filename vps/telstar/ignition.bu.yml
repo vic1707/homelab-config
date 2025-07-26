@@ -249,7 +249,6 @@ storage:
     - path: /home/vic1707/.config/containers/systemd/tunnel.network
       mode: 0400
       contents:
-        # Options=isolate=true
         inline: |
           [Network]
           NetworkName=tunnel
@@ -257,6 +256,7 @@ storage:
           IPv6=false
           Subnet=10.89.0.0/26
           Gateway=10.89.0.1
+          Options=isolate=true
       user:
         name: vic1707
       group:
