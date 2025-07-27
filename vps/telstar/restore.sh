@@ -34,7 +34,7 @@ while IFS= read -r path; do
     echo "[INFO] Restoring: $path"
     /usr/bin/rsync --verbose \
         --archive --recursive \
-        --delete \
+        `# --delete # deletes empty folders` \
         --fake-super -M--super \
         --log-file="$LOG" \
         "$SOURCE" "$path"
