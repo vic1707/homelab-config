@@ -2,6 +2,7 @@
 # {{ $STORAGEBOX_USER := gopass "backups/backupiter/telstar.account" "user" | strings.TrimSpace | required }}
 # {{ $STORAGEBOX_PASS := gopass "backups/backupiter/telstar.account" "pass" | strings.TrimSpace | required }}
 # {{ $CLOUDFLARE_API_TOKEN := gopass "domains/vic1707.xyz/api-key.cloudflare" "key" | strings.TrimSpace | required }}
+# {{ $CROWDSEC_API_KEY := gopass "api-key.crowdsec" | strings.TrimSpace | required }}
 
 # {{ $ARCH:= "arm64" }} # TODO: from env
 # {{ $ENABLE_BACKUP := conv.ToBool .Env.ENABLE_BACKUP }}
@@ -10,6 +11,10 @@
 # sudo ausearch -m avc -ts recent
 ### Print allow policy
 # sudo ausearch -m avc -ts recent | grep <thing> | audit2allow -m TMP
+
+## Generated at build time
+# {{ $CROWDSEC_CADDY_BOUNCER_API_KEY := random.AlphaNum 40 }}
+# {{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY := random.AlphaNum 40 }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -42,7 +47,31 @@ storage:
         name: vic1707
       group:
         name: vic1707
+    - path: /srv/vic1707/containers/crowdsec
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/crowdsec/data
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/crowdsec/config
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
     - path: /home/vic1707/.config/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec
       mode: 0755
       user:
         name: vic1707
@@ -121,6 +150,23 @@ storage:
           username={{ $STORAGEBOX_USER }}
           password={{ $STORAGEBOX_PASS }}
     ## {{ end }} ## $ENABLE_BACKUP
+    - path: /etc/selinux/custom-policies/podman-mount-journald.te
+      mode: 0400
+      contents:
+        inline: |
+          module podman_mount_journald 1.0;
+
+          require {
+            type var_log_t;
+            type container_t;
+            class dir { read watch };
+            class file { read open getattr map };
+          }
+
+          #============= pasta_t ==============
+          allow container_t var_log_t:dir { read watch };
+          allow container_t var_log_t:file { read open getattr map };
+
     # enable lingering
     - path: /var/lib/systemd/linger/vic1707
 
@@ -128,6 +174,44 @@ storage:
     - path: /var/lib/extensions/semanage.raw
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-{{$ARCH}}/semanage-3.8-1.fc42-42-{{$ARCH}}.raw
+    # Additional crowdsec bouncer
+    - path: /var/opt/crowdsec-firewall-bouncer.tgz
+      mode: 0400
+      contents:
+        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.33/crowdsec-firewall-bouncer-linux-{{$ARCH}}.tgz
+    - path: /var/opt/crowdsec-firewall-bouncer.yaml
+      mode: 0400
+      contents:
+        inline: |
+          # TODO: prometheus is supported
+          mode: nftables
+          update_frequency: 10s
+
+          api_url: http://127.0.0.1:8080/
+          api_key: {{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY }}
+
+          ## Log
+          log_mode: file
+          log_dir: /var/log/
+          log_level: debug
+          log_compression: true
+          log_max_size: 100
+          log_max_backups: 3
+          log_max_age: 30
+          deny_log: true
+
+          ## nftables
+          nftables:
+            ipv4:
+              enabled: true
+              set-only: false
+              table: crowdsec
+              chain: crowdsec-chain
+            ipv6:
+              enabled: true
+              set-only: false
+              table: crowdsec6
+              chain: crowdsec6-chain
 
     # SSH daemon hardening
     - path: /etc/ssh/sshd_config.d/99-hardening.conf
@@ -277,7 +361,7 @@ storage:
         inline: |
           [Unit]
           Description=Caddy Quadlet
-          ConditionPathExists=/run/restore-complete
+          After=crowdsec-readiness.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
@@ -289,17 +373,111 @@ storage:
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
           Environment="CLOUDFLARE_API_TOKEN={{ $CLOUDFLARE_API_TOKEN }}"
+          Environment="CROWDSEC_CADDY_BOUNCER_API_KEY={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
           PublishPort=443:443
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
           UserNS=keep-id
           # User=vic1707
 
           [Service]
           Restart=always
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
 
           [Install]
           WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/crowdsec.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Crowdsec Quadlet
+
+          [Container]
+          Image=docker.io/crowdsecurity/crowdsec:v1.6.11-debian
+          ContainerName=crowdsec
+          Network=tunnel.network
+          NoNewPrivileges=true
+          DropCapability=ALL
+          PublishPort=127.0.0.1:8080:8080
+          Environment="TZ=Europe/Paris"
+          Environment="BOUNCER_KEY_caddy={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
+          Environment="BOUNCER_KEY_firewall={{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY }}"
+          Environment="ENROLL_KEY={{ $CROWDSEC_API_KEY }}"
+          Environment="USE_WAL=true"
+          Environment="ENROLL_INSTANCE_NAME=telstar"
+          Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          # TODO: Dunno if needed, instance is stored in config
+          Volume=/srv/vic1707/containers/crowdsec/data:/var/lib/crowdsec/data:Z,rw
+          # TODO: Dunno if needed, custom config is enough?
+          Volume=/srv/vic1707/containers/crowdsec/config:/etc/crowdsec:Z,rw
+          Volume=/home/vic1707/.config/containers/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:Z,rw
+          Volume=CrowdsecLogs.volume:/var/log:ro
+          Volume=/var/log/journal:/run/log/journal:ro
+
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+          ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-volume-ready ]; do sleep 1; done"
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/crowdsec-readiness.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Container that ensures crowdsec started and is available
+          After=crowdsec.container
+
+          [Container]
+          Image=ghcr.io/11notes/distroless:curl-8.14.1
+          NoNewPrivileges=true
+          DropCapability=ALL
+          ReadOnly=true
+
+          ContainerName=crowdsec-readiness
+          Network=tunnel.network
+          Exec=--retry 60 --retry-connrefused --retry-delay 2 --max-time 2 -s http://crowdsec:8080/health
+
+          [Service]
+          Type=oneshot
+          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-ready
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/CrowdsecLogs.volume
+      mode: 0400
+      contents:
+        inline: |
+          [Volume]
+          VolumeName=CrowdsecLogs
+
+          [Service]
+          ExecStartPost=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
+          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-volume-ready
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec/acquis.yaml
+      mode: 0400
+      contents:
+        local: ./acquis.yaml
       user:
         name: vic1707
       group:
@@ -345,6 +523,25 @@ systemd:
     - name: systemd-timesyncd.service
       enabled: true # outbound-only time sync (no open ports)
 
+    - name: crowdsec-firewall-bouncer.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=CrowdSec Firewall Bouncer (nftables)
+        After=network.target
+
+        [Service]
+        Type=simple
+        ExecStartPre=/usr/bin/tar --no-same-owner -xvzf /var/opt/crowdsec-firewall-bouncer.tgz --wildcards --strip-components=1 -C /var/opt/ '*/crowdsec-firewall-bouncer'
+        ExecStartPre=/usr/bin/chcon -t bin_t /var/opt/crowdsec-firewall-bouncer
+        ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
+        ExecStart=/var/opt/crowdsec-firewall-bouncer -c /var/opt/crowdsec-firewall-bouncer.yaml
+        Restart=always
+        RestartSec=5
+
+        [Install]
+        WantedBy=multi-user.target
+
     # Manage SELinux, waiting for a better solution
     - name: set-se-state.service
       enabled: true
@@ -361,6 +558,7 @@ systemd:
         RemainAfterExit=yes
         ## Allows sshd to bind to custom port
         ExecStart=/usr/bin/semanage port -a -t ssh_port_t -p tcp {{ $SSH_PORT }}
+        ExecStart=/bin/bash -c '/usr/bin/checkmodule -M -m -o /tmp/podman_mount_journald.mod /etc/selinux/custom-policies/podman-mount-journald.te && /usr/bin/semodule_package -o /tmp/podman_mount_journald.pp -m /tmp/podman_mount_journald.mod && /usr/bin/semodule -i /tmp/podman_mount_journald.pp && /usr/bin/rm -f /tmp/podman_mount_journald.*'
 
         [Install]
         WantedBy=multi-user.target

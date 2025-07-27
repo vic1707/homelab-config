@@ -1,0 +1,45 @@
+---
+listen_addr: 127.0.0.1:7422
+appsec_config: crowdsecurity/appsec-default
+name: CrowdsecAppSec
+source: appsec
+labels:
+  type: appsec
+
+---
+source: file
+force_inotify: true
+filenames:
+  - /var/log/caddy/*.log
+labels:
+  type: caddy
+
+---
+source: journalctl
+journalctl_filter:
+  - "_TRANSPORT=journal"
+labels:
+  type: syslog
+
+---
+source: journalctl
+journalctl_filter:
+  - "_TRANSPORT=syslog"
+labels:
+  type: syslog
+
+---
+source: journalctl
+journalctl_filter:
+  - "_TRANSPORT=stdout"
+labels:
+  type: syslog
+
+---
+source: journalctl
+journalctl_filter:
+  - "_TRANSPORT=kernel"
+labels:
+  type: syslog
+
+---
