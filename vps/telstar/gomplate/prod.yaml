@@ -1,0 +1,16 @@
+ARCH: arm64
+USER: vic1707
+SSH_PORT: {{ gopass "telstar/ssh-port" }}
+
+BACKUP: true
+STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
+STORAGEBOX_PASS: {{ gopass "backups/backupiter/telstar.account" "pass" }}
+
+DOMAIN: vic1707.xyz
+SSL: true
+CLOUDFLARE_API_TOKEN: {{ gopass "domains/vic1707.xyz/api-key.cloudflare" "key" }}
+
+CROWDSEC_API_KEY: {{ gopass "api-key.crowdsec" }}
+
+CROWDSEC_CADDY_BOUNCER_API_KEY: {{ openssl "rand" "-base64" "40" }}
+CROWDSEC_FIREWALL_BOUNCER_API_KEY: {{ openssl "rand" "-base64" "40" }}
