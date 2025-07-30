@@ -361,7 +361,7 @@ storage:
         inline: |
           [Unit]
           Description=Caddy Quadlet
-          After=crowdsec-readiness.container
+          After=crowdsec.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
@@ -383,7 +383,6 @@ storage:
 
           [Service]
           Restart=always
-          ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
 
           [Install]
@@ -405,7 +404,6 @@ storage:
           Network=tunnel.network
           NoNewPrivileges=true
           DropCapability=ALL
-          PublishPort=127.0.0.1:8080:8080
           Environment="TZ=Europe/Paris"
           Environment="BOUNCER_KEY_caddy={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
           Environment="BOUNCER_KEY_firewall={{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY }}"
@@ -421,37 +419,18 @@ storage:
           Volume=CrowdsecLogs.volume:/var/log:ro
           Volume=/var/log/journal:/run/log/journal:ro
 
+          Notify=healthy
+          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:8080/health
+          HealthInterval=30s
+          HealthTimeout=10s
+          HealthRetries=3
+          HealthStartPeriod=30
+
           [Service]
           Restart=always
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-volume-ready ]; do sleep 1; done"
-
-          [Install]
-          WantedBy=default.target
-      user:
-        name: vic1707
-      group:
-        name: vic1707
-    - path: /home/vic1707/.config/containers/systemd/crowdsec-readiness.container
-      mode: 0400
-      contents:
-        inline: |
-          [Unit]
-          Description=Container that ensures crowdsec started and is available
-          After=crowdsec.container
-
-          [Container]
-          Image=ghcr.io/11notes/distroless:curl-8.14.1
-          NoNewPrivileges=true
-          DropCapability=ALL
-          ReadOnly=true
-
-          ContainerName=crowdsec-readiness
-          Network=tunnel.network
-          Exec=--retry 60 --retry-connrefused --retry-delay 2 --max-time 2 -s http://crowdsec:8080/health
-
-          [Service]
-          Type=oneshot
+          # needed by the bounder, I think
           ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-ready
 
           [Install]
