@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
+---
+variant: fcos
+version: 1.6.0
+
+storage:
+  files:
+    # enable lingering
+    - path: /var/lib/systemd/linger/vic1707
+
+  directories:
+    - path: /srv/vic1707
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /srv/vic1707/containers/crowdsec
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/crowdsec
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    # Path for vic1707's systemd units
+    - path: /home/vic1707/.config
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/systemd
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/systemd/user
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    # Path to manually enable vic1707's systemd units - these are links back to the unit file
+    - path: /home/vic1707/.config/systemd/user/default.target.wants
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    # Path for vic1707's podman quadlets
+    - path: /home/vic1707/.config/containers/systemd
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    # Path for vic1707's custom containerfiles
+    - path: /home/vic1707/.config/containers/containerfiles
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+
+passwd:
+  users:
+    - name: vic1707
+      groups: [wheel]
+      password_hash: $y$j9T$gPdejaqSri3Aosk3FJhYK0$n5U3M6CCRxwOo.VwK4JdL3.TSaZIZEZEU9FFjJziD/A
+      ssh_authorized_keys_local:
+        - .ssh/vic1707-telstar.pub
