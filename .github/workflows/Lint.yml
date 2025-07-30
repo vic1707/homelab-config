@@ -67,10 +67,10 @@ jobs:
         run: actionlint
 
       - name: Typos
-        run: typos
+        run: typos -c .config/.typos.toml
 
       - name: Ansible-lint
-        run: ansible-lint
+        run: ansible-lint -c .config/.ansible-lint.yml 
 
       - name: Butane
         run: |
