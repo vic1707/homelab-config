@@ -96,9 +96,9 @@ jobs:
           CONTAINER_FILE: ${{ matrix.file }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            tags=pr-${{ github.event.pull_request.number }}
+            tags="pr-${{ github.event.pull_request.number }}"
           else
-            tags=latest $SHA
+            tags="latest $SHA"
           fi
 
           ## Set step outputs
