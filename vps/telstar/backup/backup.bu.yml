@@ -1,0 +1,139 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
+---
+variant: fcos
+version: 1.6.0
+
+## {{ if .BACKUP }}
+storage:
+  files:
+    - path: /etc/sync/paths.txt
+      mode: 0400
+      contents:
+        inline: |
+          /var/srv/vic1707/
+
+    - path: /etc/sync/restore.sh
+      mode: 0500
+      contents:
+        local: ./restore.sh
+
+    - path: /etc/selinux/custom-policies/rsync-cifs.te
+      mode: 0400
+      contents:
+        inline: |
+          module rsync_cifs 1.0;
+
+          require {
+            type rsync_t;
+            class capability dac_override;
+          }
+
+          #============= rsync_t ==============
+          allow rsync_t self:capability dac_override;
+
+    - path: /etc/cifs-credentials
+      mode: 0400
+      contents:
+        inline: |
+          username={{ .STORAGEBOX_USER }}
+          password={{ .STORAGEBOX_PASS }}
+## {{ end }} ## .BACKUP
+
+systemd:
+  units:
+## {{ if .BACKUP }}
+    - name: set-rsync-se-state.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Configure SELinux
+        After=set-se-state.service
+
+        [Service]
+        Type=oneshot 
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/setsebool rsync_full_access on
+        ExecStart=/bin/bash -c '/usr/bin/checkmodule -M -m -o /tmp/rsync_cifs.mod /etc/selinux/custom-policies/rsync-cifs.te && /usr/bin/semodule_package -o /tmp/rsync_cifs.pp -m /tmp/rsync_cifs.mod && /usr/bin/semodule -i /tmp/rsync_cifs.pp && /usr/bin/rm -f /tmp/rsync_cifs.*'
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: sync-backup.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Sync paths to mounted Hetzner Storage Box
+        After=sync-restore.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/rsync --verbose \
+          --archive --recursive \
+          --delete \
+          --fake-super \
+          --log-file=/var/log/sync-to-storagebox.log \
+          --files-from=/etc/sync/paths.txt \
+          --relative / /var/mnt/storagebox
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: sync-backup.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Periodic sync to mounted Hetzner Storage Box
+
+        [Timer]
+        OnUnitActiveSec=3min
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+
+    - name: sync-restore.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Restore system from CIFS backup on boot
+        After=var-mnt-storagebox.mount
+
+        [Service]
+        Type=oneshot
+        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.txt" "/var/mnt/storagebox"
+        ExecStartPost=/usr/bin/touch /run/restore-complete
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: var-mnt-storagebox.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount CIFS Hetzner Storagebox
+        After=network-online.target set-rsync-se-state.service
+        Requires=network-online.target set-rsync-se-state.service
+
+        [Mount]
+        # https://docs.hetzner.com/storage/storage-box/access/access-samba-cifs/#sambacifs
+        What=//{{ .STORAGEBOX_USER }}.your-storagebox.de/{{ .STORAGEBOX_USER }}
+        Where=/var/mnt/storagebox
+        Type=cifs
+        Options=credentials=/etc/cifs-credentials,_netdev,vers=3.0
+
+        [Install]
+        WantedBy=multi-user.target
+## {{ else }}
+    - name: dummy-restore.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Dummy fake restore service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/touch /run/restore-complete
+
+        [Install]
+        WantedBy=multi-user.target
+## {{ end }} ## .BACKUP

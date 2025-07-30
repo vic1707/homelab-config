@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
+---
+variant: fcos
+version: 1.6.0
+
+storage:
+  directories:
+    - path: /etc/selinux/custom-policies
+  files:
+    # Install semanage
+    - path: /var/lib/extensions/semanage.raw
+      contents:
+        source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-{{.ARCH}}/semanage-3.8-1.fc42-42-{{.ARCH}}.raw
+
+    # Additional crowdsec bouncer
+    - path: /var/opt/crowdsec-firewall-bouncer.tgz
+      mode: 0400
+      contents:
+        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.33/crowdsec-firewall-bouncer-linux-{{.ARCH}}.tgz
+
+    - path: /var/opt/crowdsec-firewall-bouncer.yaml
+      mode: 0400
+      contents:
+        local: crowdsec-firewall-bouncer.yaml
+
+    - path: /etc/selinux/custom-policies/podman-mount-journald.te
+      mode: 0400
+      contents:
+        local: podman-mount-journald.te
+
+systemd:
+  units:
+    # Enable systemd-sysext.service to merge the sysexts on boot
+    - name: systemd-sysext.service
+      enabled: true
+
+    # Enable firewall rules
+    - name: nftables.service
+      enabled: true
+
+    # Remove docker starting at boot
+    - name: docker.service
+      mask: true
+    - name: docker.socket
+      mask: true
+
+    # Enable the Linux Audit Daemon
+    - name: auditd.service
+      enabled: true
+
+    # Disable system security services daemon (~only used in enterprise setting)
+    - name: sssd.socket
+      mask: true
+    - name: sssd.service
+      mask: true
+
+    # Replace chronyd with systemd-timesyncd to avoid open UDP port 323
+    - name: chronyd.service
+      mask: true
+    - name: systemd-timesyncd.service
+      enabled: true # outbound-only time sync (no open ports)
+
+    # SSH port redirection
+    - name: sshd.socket
+      dropins:
+        - name: 99-sshd-port.conf
+          contents_local: sshd-port.conf
+
+    - name: crowdsec-firewall-bouncer.service
+      enabled: true
+      contents_local: crowdsec-firewall-bouncer.service
+
+    # Manage SELinux, waiting for a better solution
+    - name: set-se-state.service
+      enabled: true
+      contents_local: set-se-state.service

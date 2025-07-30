@@ -1,0 +1,12 @@
+module podman_mount_journald 1.0;
+
+require {
+	type var_log_t;
+	type container_t;
+	class dir { read watch };
+	class file { read open getattr map };
+}
+
+#============= pasta_t ==============
+allow container_t var_log_t:dir { read watch };
+allow container_t var_log_t:file { read open getattr map };

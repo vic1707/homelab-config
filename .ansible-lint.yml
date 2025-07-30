@@ -27,3 +27,4 @@ exclude_paths:
   - "*.toml"
   - "*.bu.yml"
   - "*.bu.yaml"
+  - "vps/telstar" # TODO: better path exclusion

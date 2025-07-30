@@ -1,0 +1,16 @@
+[Unit]
+Description=Configure SELinux
+After=systemd-sysext.service
+Wants=systemd-sysext.service
+Requires=systemd-sysext.service
+Before=sshd.service
+
+[Service]
+Type=oneshot 
+RemainAfterExit=yes
+## Allows sshd to bind to custom port
+ExecStart=/usr/bin/semanage port -a -t ssh_port_t -p tcp {{ .SSH_PORT }}
+ExecStart=/bin/bash -c '/usr/bin/checkmodule -M -m -o /tmp/podman_mount_journald.mod /etc/selinux/custom-policies/podman-mount-journald.te && /usr/bin/semodule_package -o /tmp/podman_mount_journald.pp -m /tmp/podman_mount_journald.mod && /usr/bin/semodule -i /tmp/podman_mount_journald.pp && /usr/bin/rm -f /tmp/podman_mount_journald.*'
+
+[Install]
+WantedBy=multi-user.target
