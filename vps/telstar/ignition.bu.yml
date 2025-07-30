@@ -381,6 +381,13 @@ storage:
           UserNS=keep-id
           # User=vic1707
 
+          Notify=healthy
+          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
+          HealthInterval=30s
+          HealthTimeout=10s
+          HealthRetries=3
+          HealthStartPeriod=30
+
           [Service]
           Restart=always
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
