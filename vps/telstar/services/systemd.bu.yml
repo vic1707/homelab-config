@@ -26,7 +26,7 @@ storage:
     - path: /etc/selinux/custom-policies/podman-mount-journald.te
       mode: 0400
       contents:
-        local: podman_mount_journald.te
+        local: podman-mount-journald.te
 
 systemd:
   units:
