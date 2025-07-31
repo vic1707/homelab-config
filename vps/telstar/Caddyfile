@@ -58,3 +58,7 @@ https://vic1707.xyz {
 	crowdsec
 	redir https://github.com/vic1707
 }
+
+:9999/health {
+	respond "OK"
+}
