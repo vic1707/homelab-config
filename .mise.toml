@@ -4,7 +4,7 @@ ANSIBLE_HOME="{{ config_root }}/.ansible"
 GOPASS_HOMEDIR="{{ config_root }}"
 
 [hooks]
-postinstall = "pip install -r {{ config_root }}/requirements.txt"
+postinstall = "pip install -r {{ config_root }}/.config/requirements.txt && ansible-galaxy install --force -r .config/requirements.yml"
 
 [tools]
 actionlint = "1.7.7"
