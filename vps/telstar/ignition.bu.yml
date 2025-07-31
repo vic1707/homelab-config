@@ -384,12 +384,14 @@ storage:
           Notify=healthy
           HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
           HealthInterval=30s
-          HealthTimeout=10s
-          HealthRetries=3
-          HealthStartPeriod=30
+          HealthTimeout=5s
+          HealthRetries=5
+          HealthStartPeriod=30s
 
           [Service]
           Restart=always
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
 
           [Install]
@@ -427,14 +429,16 @@ storage:
           Volume=/var/log/journal:/run/log/journal:ro
 
           Notify=healthy
-          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:8080/health
+          HealthCmd=cscli lapi status
           HealthInterval=30s
-          HealthTimeout=10s
-          HealthRetries=3
-          HealthStartPeriod=30
+          HealthTimeout=5s
+          HealthRetries=5
+          HealthStartPeriod=180s
 
           [Service]
           Restart=always
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-volume-ready ]; do sleep 1; done"
           # needed by the bounder, I think
