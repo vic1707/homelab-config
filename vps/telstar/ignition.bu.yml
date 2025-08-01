@@ -423,15 +423,9 @@ storage:
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
-          UserNS=keep-id
-          # User=vic1707
 
           Notify=healthy
-          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
-          HealthInterval=30s
-          HealthTimeout=5s
-          HealthRetries=5
-          HealthStartPeriod=30s
+          ## We rely on image's healthcheck
 
           [Service]
           Restart=on-failure
