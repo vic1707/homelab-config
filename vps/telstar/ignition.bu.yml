@@ -53,18 +53,6 @@ storage:
         name: vic1707
       group:
         name: vic1707
-    - path: /srv/vic1707/containers/crowdsec/data
-      mode: 0755
-      user:
-        name: vic1707
-      group:
-        name: vic1707
-    - path: /srv/vic1707/containers/crowdsec/config
-      mode: 0755
-      user:
-        name: vic1707
-      group:
-        name: vic1707
     - path: /home/vic1707/.config/containers/caddy
       mode: 0755
       user:
@@ -400,6 +388,12 @@ storage:
         name: vic1707
       group:
         name: vic1707
+    - path: /srv/vic1707/containers/crowdsec/config/online_api_credentials.yaml
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
     - path: /home/vic1707/.config/containers/systemd/crowdsec.container
       mode: 0400
       contents:
@@ -413,6 +407,8 @@ storage:
           Network=tunnel.network
           NoNewPrivileges=true
           DropCapability=ALL
+          Tmpfs=/etc/crowdsec
+          Tmpfs=/var/lib/crowdsec/data
           Environment="TZ=Europe/Paris"
           Environment="BOUNCER_KEY_caddy={{ $CROWDSEC_CADDY_BOUNCER_API_KEY }}"
           Environment="BOUNCER_KEY_firewall={{ $CROWDSEC_FIREWALL_BOUNCER_API_KEY }}"
@@ -420,10 +416,7 @@ storage:
           Environment="USE_WAL=true"
           Environment="ENROLL_INSTANCE_NAME=telstar"
           Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
-          # TODO: Dunno if needed, instance is stored in config
-          Volume=/srv/vic1707/containers/crowdsec/data:/var/lib/crowdsec/data:Z,rw
-          # TODO: Dunno if needed, custom config is enough?
-          Volume=/srv/vic1707/containers/crowdsec/config:/etc/crowdsec:Z,rw
+          Volume=/srv/vic1707/containers/crowdsec/config/online_api_credentials.yaml:/etc/crowdsec/online_api_credentials.yaml:Z,rw
           Volume=/home/vic1707/.config/containers/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:Z,rw
           Volume=CrowdsecLogs.volume:/var/log:ro
           Volume=/var/log/journal:/run/log/journal:ro
