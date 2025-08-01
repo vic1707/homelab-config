@@ -1,9 +1,9 @@
 # Build stage
-## can be docker.io/<user> || registry.fedoraproject.org || registry.access.redhat.com
-ARG CONTAINER_REGISTRY=docker.io/library
+## can be docker.io || registry.fedoraproject.org || registry.access.redhat.com
+ARG CONTAINER_REGISTRY=docker.io
 ARG CADDY_VERSION=2.10.0
 
-FROM ${CONTAINER_REGISTRY}/caddy:${CADDY_VERSION}-builder-alpine AS builder
+FROM ${CONTAINER_REGISTRY}/library/caddy:${CADDY_VERSION}-builder-alpine AS builder
 
 RUN xcaddy build \
 	`# Use cloudflare dns validation` \
@@ -22,5 +22,5 @@ RUN xcaddy build \
 	--with github.com/hslatman/caddy-crowdsec-bouncer/layer4
 
 # Final image
-FROM ${CONTAINER_REGISTRY}/caddy:${CADDY_VERSION}-alpine
+FROM ${CONTAINER_REGISTRY}/11notes/caddy:${CADDY_VERSION}
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
