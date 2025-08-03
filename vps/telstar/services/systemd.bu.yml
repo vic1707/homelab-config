@@ -21,12 +21,12 @@ storage:
     - path: /var/opt/crowdsec-firewall-bouncer.yaml
       mode: 0400
       contents:
-        local: crowdsec-firewall-bouncer.yaml
+        local: services/crowdsec-firewall-bouncer.yaml
 
     - path: /etc/selinux/custom-policies/podman-mount-journald.te
       mode: 0400
       contents:
-        local: podman-mount-journald.te
+        local: services/podman-mount-journald.te
 
 systemd:
   units:
@@ -64,13 +64,13 @@ systemd:
     - name: sshd.socket
       dropins:
         - name: 99-sshd-port.conf
-          contents_local: sshd-port.conf
+          contents_local: services/sshd-port.conf
 
     - name: crowdsec-firewall-bouncer.service
       enabled: true
-      contents_local: crowdsec-firewall-bouncer.service
+      contents_local: services/crowdsec-firewall-bouncer.service
 
     # Manage SELinux, waiting for a better solution
     - name: set-se-state.service
       enabled: true
-      contents_local: set-se-state.service
+      contents_local: services/set-se-state.service

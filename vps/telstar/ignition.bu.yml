@@ -6,15 +6,15 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
-version: 1.6.0
+version: 1.7.0-experimental
 
 ignition:
   config:
     merge:
-      - local: backup/backup.bu.yml
-      - local: users/vic1707.bu.yml
-      - local: users/core.bu.yml
-      - local: services/systemd.bu.yml
+      - local_butane: backup/backup.bu.yml
+      - local_butane: users/vic1707.bu.yml
+      - local_butane: users/core.bu.yml
+      - local_butane: services/systemd.bu.yml
 
 storage:
   links:
