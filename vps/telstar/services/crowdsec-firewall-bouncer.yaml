@@ -1,0 +1,29 @@
+# TODO: prometheus is supported
+mode: nftables
+update_frequency: 10s
+
+api_url: http://127.0.0.1:8080/
+api_key: {{ .CROWDSEC_FIREWALL_BOUNCER_API_KEY }}
+
+## Log
+log_mode: file
+log_dir: /var/log/
+log_level: debug
+log_compression: true
+log_max_size: 100
+log_max_backups: 3
+log_max_age: 30
+deny_log: true
+
+## nftables
+nftables:
+  ipv4:
+    enabled: true
+    set-only: false
+    table: crowdsec
+    chain: crowdsec-chain
+  ipv6:
+    enabled: true
+    set-only: false
+    table: crowdsec6
+    chain: crowdsec6-chain

@@ -1,0 +1,11 @@
+ARCH: arm64
+USER: vic1707-dev
+SSH_PORT: {{ gopass "telstar/ssh-port" }}
+
+BACKUP: false
+
+DOMAIN: localhost
+SSL: false
+
+CROWDSEC_CADDY_BOUNCER_API_KEY: {{ openssl "rand" "-base64" "40" }}
+CROWDSEC_FIREWALL_BOUNCER_API_KEY: {{ openssl "rand" "-base64" "40" }}

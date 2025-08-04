@@ -84,9 +84,10 @@ shift
 # Actual work
 #############################################
 generate_ignition() {
+    : "${ENV:?❌ ENV variable is not set. Please set it before running the script.}"
     echo "⚙️ Generating Ignition file..."
     IGNITION_PATH="$(mktemp)"
-    gomplate -f "$BUTANE_FILE" --plugin gopass=gopass | butane --files-dir "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
+    gomplate --config gomplate/config.yaml -f "gomplate/${ENV}.yaml" | ~/Desktop/butane/bin/arm64/butane --enable-gomplate -d  "$(dirname "$BUTANE_FILE")"  ignition.bu.yml --output "$IGNITION_PATH"
     IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
 }
 

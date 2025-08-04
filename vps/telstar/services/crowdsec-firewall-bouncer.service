@@ -1,0 +1,15 @@
+[Unit]
+Description=CrowdSec Firewall Bouncer (nftables)
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/tar --no-same-owner -xvzf /var/opt/crowdsec-firewall-bouncer.tgz --wildcards --strip-components=1 -C /var/opt/ '*/crowdsec-firewall-bouncer'
+ExecStartPre=/usr/bin/chcon -t bin_t /var/opt/crowdsec-firewall-bouncer
+ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
+ExecStart=/var/opt/crowdsec-firewall-bouncer -v -c /var/opt/crowdsec-firewall-bouncer.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
