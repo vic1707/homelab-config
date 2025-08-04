@@ -27,3 +27,6 @@ exclude_paths:
   - "*.toml"
   - "*.bu.yml"
   - "*.bu.yaml"
+  - "*.gomplate.yml"
+  - "*.gomplate.yaml"
+

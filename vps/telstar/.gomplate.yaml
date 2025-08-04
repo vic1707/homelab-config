@@ -1,0 +1,7 @@
+experimental: false
+missingKey: error
+verbose: true
+
+context:
+  .:
+    url: stdin://_.yaml

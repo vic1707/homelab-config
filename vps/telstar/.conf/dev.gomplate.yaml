@@ -1,0 +1,23 @@
+## General config
+ARCH: arm64
+SSH_PORT: {{ gopass "telstar/ssh-port" }}
+
+## User
+USER: vic1707-dev
+PASSWORD: {{ gopass "telstar/vic1707-pass" | crypto.Bcrypt 30 }}
+
+## Domain configuration
+DOMAIN: localhost
+SSL: false
+# CLOUDFLARE_API_TOKEN
+
+## Backup strategy
+BACKUP: false
+# STORAGEBOX_USER
+# STORAGEBOX_PASS
+
+## Crowdsec conf
+CROWDSEC_API_KEY: ""
+CROWDSEC_INSTANCE_NAME: telstar-dev
+CROWDSEC_CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+CROWDSEC_FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
