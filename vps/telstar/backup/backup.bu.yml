@@ -15,7 +15,7 @@ storage:
     - path: /etc/sync/restore.sh
       mode: 0500
       contents:
-        local: backup/restore.sh
+        local: restore.sh
 
     - path: /etc/selinux/custom-policies/rsync-cifs.te
       mode: 0400

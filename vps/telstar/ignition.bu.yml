@@ -11,10 +11,18 @@ version: 1.7.0-experimental
 ignition:
   config:
     merge:
-      - local_butane: backup/backup.bu.yml
-      - local_butane: users/vic1707.bu.yml
-      - local_butane: users/core.bu.yml
-      - local_butane: services/systemd.bu.yml
+      - local_butane:
+          files_dir: .
+          path: backup/backup.bu.yml
+      - local_butane:
+          files_dir: .
+          path: users/vic1707.bu.yml
+      - local_butane:
+          files_dir: .
+          path: users/core.bu.yml
+      - local_butane:
+          files_dir: .
+          path: services/systemd.bu.yml
 
 storage:
   links:
@@ -228,7 +236,7 @@ storage:
           Environment="TZ=Europe/Paris"
           Environment="BOUNCER_KEY_caddy={{ .CROWDSEC_CADDY_BOUNCER_API_KEY }}"
           Environment="BOUNCER_KEY_firewall={{ .CROWDSEC_FIREWALL_BOUNCER_API_KEY }}"
-          Environment="ENROLL_KEY={{ .CROWDSEC_API_KEY }}"
+          # Environment="ENROLL_KEY={{ .CROWDSEC_API_KEY }}"
           Environment="USE_WAL=true"
           Environment="ENROLL_INSTANCE_NAME=telstar"
           Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
