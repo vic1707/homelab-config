@@ -30,6 +30,7 @@
 
 	# https://github.com/hslatman/caddy-crowdsec-bouncer
 	order crowdsec first
+	order appsec first
 	crowdsec {
 		api_url http://crowdsec:8080
 		appsec_url http://crowdsec:7422
@@ -56,6 +57,7 @@ https://vic1707.xyz {
 	import access_log
 	import https
 	crowdsec
+	appsec
 	redir https://github.com/vic1707
 }
 
