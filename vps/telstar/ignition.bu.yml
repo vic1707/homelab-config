@@ -377,7 +377,7 @@ storage:
           HealthStartPeriod=30s
 
           [Service]
-          Restart=always
+          Restart=on-failure
           # Podman handles it via Healthcheck and Notify=healthy
           TimeoutStartSec=infinity
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
@@ -423,7 +423,7 @@ storage:
           HealthStartPeriod=180s
 
           [Service]
-          Restart=always
+          Restart=on-failure
           # Podman handles it via Healthcheck and Notify=healthy
           TimeoutStartSec=infinity
           ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
