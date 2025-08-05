@@ -427,7 +427,6 @@ storage:
           # Podman handles it via Healthcheck and Notify=healthy
           TimeoutStartSec=infinity
           ExecStartPre=/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
-          ExecStartPre=/bin/bash -c "until [ -f /run/user/%U/crowdsec-volume-ready ]; do sleep 1; done"
           # needed by the bounder
           ExecStartPost=/usr/bin/touch /run/user/%U/crowdsec-ready
 
@@ -445,8 +444,7 @@ storage:
           VolumeName=CrowdsecLogs
 
           [Service]
-          ExecStartPost=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
-          ExecStartPost=/usr/bin/touch /run/user/%U/crowdsec-volume-ready
+          ExecStart=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
       user:
         name: vic1707
       group:
