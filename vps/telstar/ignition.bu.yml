@@ -352,6 +352,7 @@ storage:
           After=crowdsec.container
 
           [Container]
+          AutoUpdate=registry
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
           ContainerName=caddy
           Network=tunnel.network
@@ -396,6 +397,7 @@ storage:
           Description=Crowdsec Quadlet
 
           [Container]
+          AutoUpdate=registry
           Image=docker.io/crowdsecurity/crowdsec:v1.6.11-debian
           ContainerName=crowdsec
           Network=tunnel.network
