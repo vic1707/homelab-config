@@ -352,6 +352,7 @@ storage:
           After=crowdsec.container
 
           [Container]
+          AutoUpdate=registry
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
           ContainerName=caddy
           Network=tunnel.network
@@ -377,10 +378,10 @@ storage:
           HealthStartPeriod=30s
 
           [Service]
-          Restart=always
+          Restart=on-failure
           # Podman handles it via Healthcheck and Notify=healthy
           TimeoutStartSec=infinity
-          ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+          ExecStartPre=/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
 
           [Install]
           WantedBy=default.target
@@ -396,6 +397,7 @@ storage:
           Description=Crowdsec Quadlet
 
           [Container]
+          AutoUpdate=registry
           Image=docker.io/crowdsecurity/crowdsec:v1.6.11-debian
           ContainerName=crowdsec
           Network=tunnel.network
@@ -423,13 +425,12 @@ storage:
           HealthStartPeriod=180s
 
           [Service]
-          Restart=always
+          Restart=on-failure
           # Podman handles it via Healthcheck and Notify=healthy
           TimeoutStartSec=infinity
-          ExecStartPre=/usr/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
-          ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-volume-ready ]; do sleep 1; done"
-          # needed by the bounder, I think
-          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-ready
+          ExecStartPre=/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+          # needed by the bounder
+          ExecStartPost=/usr/bin/touch /run/user/%U/crowdsec-ready
 
           [Install]
           WantedBy=default.target
@@ -445,8 +446,7 @@ storage:
           VolumeName=CrowdsecLogs
 
           [Service]
-          ExecStartPost=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
-          ExecStartPost=/usr/bin/touch /run/user/1001/crowdsec-volume-ready
+          ExecStart=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
       user:
         name: vic1707
       group:
@@ -505,13 +505,13 @@ systemd:
       contents: |
         [Unit]
         Description=CrowdSec Firewall Bouncer (nftables)
-        After=network.target
 
         [Service]
+        TimeoutStartSec=180
         Type=simple
         ExecStartPre=/usr/bin/tar --no-same-owner -xvzf /var/opt/crowdsec-firewall-bouncer.tgz --wildcards --strip-components=1 -C /var/opt/ '*/crowdsec-firewall-bouncer'
         ExecStartPre=/usr/bin/chcon -t bin_t /var/opt/crowdsec-firewall-bouncer
-        ExecStartPre=/usr/bin/bash -c "until [ -f /run/user/1001/crowdsec-ready ]; do sleep 1; done"
+        ExecStartPre=/bin/bash -c "until [ -f /run/user/$(id -u vic1707)/crowdsec-ready ]; do sleep 1; done"
         ExecStart=/var/opt/crowdsec-firewall-bouncer -v -c /var/opt/crowdsec-firewall-bouncer.yaml
         Restart=always
         RestartSec=5
