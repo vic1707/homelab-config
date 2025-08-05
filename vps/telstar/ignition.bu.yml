@@ -166,7 +166,7 @@ storage:
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
       contents:
-        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.33/crowdsec-firewall-bouncer-linux-{{$ARCH}}.tgz
+        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.34/crowdsec-firewall-bouncer-linux-{{$ARCH}}.tgz
     - path: /var/opt/crowdsec-firewall-bouncer.yaml
       mode: 0400
       contents:
