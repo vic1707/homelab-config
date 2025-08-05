@@ -3,21 +3,25 @@ ARCH: arm64
 SSH_PORT: {{ gopass "telstar/ssh-port" }}
 
 ## User
-USER: vic1707
-PASSWORD: {{ gopass "telstar/vic1707-pass" | crypto.Bcrypt 30 }}
+MAIN_USER:
+  NAME: vic1707
+  PASSWORD: {{ gopass "telstar/vic1707-pass" | crypto.Bcrypt 30 }}
 
 ## Domain configuration
-DOMAIN: vic1707.xyz
-SSL: true
-CLOUDFLARE_API_TOKEN: {{ gopass "domains/vic1707.xyz/api-key.cloudflare" "key" }}
+DOMAIN:
+  URL: vic1707.xyz
+  SSL: true
+  CLOUDFLARE_API_TOKEN: {{ gopass "domains/vic1707.xyz/api-key.cloudflare" "key" }}
 
 ## Backup strategy
-BACKUP: true
-STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
-STORAGEBOX_PASS: {{ gopass "backups/backupiter/telstar.account" "pass" }}
+BACKUP:
+  ENABLED: true
+  STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
+  STORAGEBOX_PASS: {{ gopass "backups/backupiter/telstar.account" "pass" }}
 
 ## Crowdsec conf
-CROWDSEC_API_KEY: {{ gopass "api-key.crowdsec" }}
-CROWDSEC_INSTANCE_NAME: telstar
-CROWDSEC_CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
-CROWDSEC_FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+CROWDSEC:
+  ENROLL_KEY: {{ gopass "api-key.crowdsec" }}
+  INSTANCE_NAME: telstar
+  CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+  FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
