@@ -505,9 +505,9 @@ systemd:
       contents: |
         [Unit]
         Description=CrowdSec Firewall Bouncer (nftables)
-        After=network.target
 
         [Service]
+        TimeoutStartSec=180
         Type=simple
         ExecStartPre=/usr/bin/tar --no-same-owner -xvzf /var/opt/crowdsec-firewall-bouncer.tgz --wildcards --strip-components=1 -C /var/opt/ '*/crowdsec-firewall-bouncer'
         ExecStartPre=/usr/bin/chcon -t bin_t /var/opt/crowdsec-firewall-bouncer
