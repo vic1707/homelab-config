@@ -1,0 +1,35 @@
+---
+purelymail_ownership_proof_key: "{{ lookup('community.general.passwordstore', 'domains/{{ domain }}/ownership-proof-key.purelymail') }}"
+
+purelymailmail_dns_records_map:
+  CNAME:
+    - record: "purelymail1._domainkey.{{ domain }}"
+      value: "key1.dkimroot.purelymail.com"
+      proxied: false
+
+    - record: "purelymail2._domainkey.{{ domain }}"
+      value: "key2.dkimroot.purelymail.com"
+      proxied: false
+
+    - record: "purelymail3._domainkey.{{ domain }}"
+      value: "key3.dkimroot.purelymail.com"
+      proxied: false
+
+    - record: "_dmarc.{{ domain }}"
+      value: "dmarcroot.purelymail.com"
+      proxied: false
+
+  MX:
+    - record: "{{ domain }}"
+      value: "mailserver.purelymail.com"
+      priority: 50
+      proxied: false
+
+  TXT:
+    - record: "{{ domain }}"
+      value: '"v=spf1 include:_spf.purelymail.com ~all"'
+      proxied: false
+
+    - record: "{{ domain }}"
+      value: '"{{ purelymail_ownership_proof_key }}"'
+      proxied: false
