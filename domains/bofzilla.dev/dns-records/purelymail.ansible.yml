@@ -31,5 +31,5 @@ purelymailmail_dns_records_map:
       proxied: false
 
     - record: "{{ domain }}"
-      value: '"{{ purelymail_ownership_proof_key }}"'
+      value: '"purelymail_ownership_proof={{ purelymail_ownership_proof_key }}"'
       proxied: false
