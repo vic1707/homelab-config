@@ -1,0 +1,18 @@
+---
+telstar_ipv4: "{{ lookup('community.general.passwordstore', 'telstar/ipv4') }}"
+telstar_ipv6: "{{ lookup('community.general.passwordstore', 'telstar/ipv6') }}"
+
+homelab_dns_records_map:
+  CNAME:
+    - record: "*.{{ domain }}"
+      value: "{{ domain }}"
+      proxied: true
+
+  A:
+    - record: "{{ domain }}"
+      value: "{{ telstar_ipv4 }}"
+      proxied: true
+  AAAA:
+    - record: "{{ domain }}"
+      value: "{{ telstar_ipv6 }}"
+      proxied: true
