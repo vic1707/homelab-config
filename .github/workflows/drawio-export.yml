@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Use Draw.io CLI to export diagram
-        uses: rlespinasse/drawio-export-action@v2.34.0
+        uses: rlespinasse/drawio-export-action@v2.35.0
         with:
           format: svg
           remove-page-suffix: true
