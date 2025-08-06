@@ -1,7 +1,7 @@
 ---
 purelymail_ownership_proof_key: "{{ lookup('community.general.passwordstore', 'domains/{{ domain }}/ownership-proof-key.purelymail') }}"
 
-purelymailmail_dns_records_map:
+purelymail_dns_records_map:
   CNAME:
     - record: "purelymail1._domainkey.{{ domain }}"
       value: "key1.dkimroot.purelymail.com"

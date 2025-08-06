@@ -116,8 +116,7 @@
           - zone: "{{ domain }}"
             records: >-
               {{
-                protonmail_dns_records_map
-                | combine(brevo_dns_records_map, list_merge='append')
+                purelymail_dns_records_map
                 | combine(homelab_dns_records_map, list_merge='append')
                 | moreati.jq.jq('to_entries | map(.value[] + { type: .key })')
               }}
