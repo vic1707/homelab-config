@@ -92,8 +92,9 @@ shift
 generate_ignition() {
     echo "⚙️ Generating Ignition file..."
     IGNITION_PATH="$(mktemp)"
-    gomplate --config gomplate/config.yaml -f ".conf/$ENV.gomplate.yaml" \
-        | butane -d "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH" ignition.bu.yml
+    gomplate --config .conf/.gomplate.yaml -f ".conf/$ENV.gomplate.yaml" \
+        | gomplate -f ignition.bu.yml \
+        | butane -d "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
     IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
 }
 
