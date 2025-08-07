@@ -1,7 +1,7 @@
-experimental: false
+experimental: true
 missingKey: error
 verbose: true
 
 context:
   .:
-    url: stdin://_.yaml
+    url: stdin:///_.yaml

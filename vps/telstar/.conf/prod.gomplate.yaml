@@ -5,7 +5,7 @@ SSH_PORT: {{ gopass "telstar/ssh-port" }}
 ## User
 MAIN_USER:
   NAME: vic1707
-  HASH_PASSWORD: {{ gopass "telstar/vic1707-pass" | crypto.Bcrypt 30 }}
+  HASH_PASSWORD: {{ gopass "telstar/vic1707-pass" | crypto.Bcrypt }}
 
 ## Domain configuration
 DOMAIN:
