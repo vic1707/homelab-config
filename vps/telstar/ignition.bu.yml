@@ -697,7 +697,7 @@ passwd:
       groups: [wheel]
       password_hash: "{{ .MAIN_USER.HASH_PASSWORD }}" # WARN: hash checks on hetzner will always fail
       ssh_authorized_keys:
-        - {{ path.Join ".ssh" .MAIN_USER.NAME | file.Read | crypto.Ed25519DerivePublicKey }}
+        - '{{ path.Join ".ssh" .MAIN_USER.NAME | file.Read | crypto.Ed25519DerivePublicKey }}'
 
     # Disable default "core" user
     - name: core
