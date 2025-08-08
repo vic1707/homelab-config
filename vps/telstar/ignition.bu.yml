@@ -312,7 +312,7 @@ storage:
           [Network]
           NetworkName=tunnel
           Driver=bridge
-          IPv6=false
+          IPv6=true
           Subnet=10.89.0.0/26
           Gateway=10.89.0.1
           Options=isolate=true
@@ -355,7 +355,6 @@ storage:
               domains {
                 vic1707.xyz
               }
-              versions ipv4
             }
             {{ end }}
 
