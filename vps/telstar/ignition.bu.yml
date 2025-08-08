@@ -316,6 +316,7 @@ storage:
           Subnet=10.89.0.0/26
           Gateway=10.89.0.1
           Options=isolate=true
+          Internal=true
       user:
         name: vic1707
       group:
