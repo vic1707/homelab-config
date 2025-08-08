@@ -1,0 +1,22 @@
+## General config
+ARCH: arm64
+SSH_PORT: {{ gopass "telstar/ssh-port" }}
+
+## Domain configuration
+DOMAIN:
+  URL: vic1707.xyz
+  SSL: true
+  CLOUDFLARE_API_TOKEN: {{ gopass "domains/vic1707.xyz/api-key.cloudflare" "key" }}
+
+## Backup strategy
+BACKUP:
+  ENABLED: true
+  STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
+  STORAGEBOX_PASS: {{ gopass "backups/backupiter/telstar.account" "pass" }}
+
+## Crowdsec conf
+CROWDSEC:
+  ENROLL_KEY: {{ gopass "api-key.crowdsec" }}
+  INSTANCE_NAME: telstar
+  CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+  FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}

@@ -1,0 +1,22 @@
+## General config
+ARCH: arm64
+SSH_PORT: {{ gopass "telstar/ssh-port" }}
+
+## Domain configuration
+DOMAIN:
+  URL: localhost
+  SSL: false
+  # CLOUDFLARE_API_TOKEN
+
+## Backup strategy
+BACKUP:
+  ENABLED: false
+  # STORAGEBOX_USER
+  # STORAGEBOX_PASS
+
+## Crowdsec conf
+CROWDSEC:
+  ENROLL_KEY: ""
+  INSTANCE_NAME: telstar-dev
+  CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+  FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}

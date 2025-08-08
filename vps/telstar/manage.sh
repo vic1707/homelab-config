@@ -19,6 +19,12 @@ SERVER_LOCATION=fsn1 # fsn1 = EU-Central (Germany)
 ## FCOS
 STREAM=stable
 
+## Required variables
+[[ -f ".conf/${ENV:?ENV is not set}.gomplate.yaml" ]] || {
+    echo "Error: Config file '.conf/${ENV}.gomplate.yaml' does not exist. Check 'ENV' variable" >&2
+    exit 1
+}
+
 #############################################
 # Imported Variables
 #############################################
@@ -86,7 +92,9 @@ shift
 generate_ignition() {
     echo "⚙️ Generating Ignition file..."
     IGNITION_PATH="$(mktemp)"
-    gomplate -f "$BUTANE_FILE" --plugin gopass=gopass | butane --files-dir "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
+    gomplate --config .conf/.gomplate.yaml -f ".conf/$ENV.gomplate.yaml" \
+        | gomplate -f ignition.bu.yml \
+        | butane -d "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
     IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
 }
 

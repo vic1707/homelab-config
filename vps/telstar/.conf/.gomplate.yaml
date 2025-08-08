@@ -1,0 +1,6 @@
+experimental: false
+missingKey: error
+verbose: true
+
+plugins:
+  gopass: gopass
