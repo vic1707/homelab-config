@@ -1,14 +1,14 @@
 ---
-## ansible-galaxy install -r requirements.yml
+## ansible-galaxy install -f -r .config/requirements.yml
 collections:
   - name: community.general
-    version: 11.0.0
+    version: 11.1.2
   - name: linuxhq.cloudflare
     version: 1.2.0
   - name: moreati.jq
     version: 0.2.1
   - name: community.hrobot
-    version: 2.4.0
+    version: 2.5.0
 
 roles:
   - name: rywillia.ssh-copy-id
