@@ -693,11 +693,11 @@ systemd:
 
 passwd:
   users:
-    - name: "{{ .MAIN_USER.NAME }}"
+    - name: vic1707
       groups: [wheel]
-      password_hash: "{{ .MAIN_USER.HASH_PASSWORD }}" # WARN: hash checks on hetzner will always fail
-      ssh_authorized_keys:
-        - '{{ path.Join ".ssh" .MAIN_USER.NAME | file.Read | crypto.Ed25519DerivePublicKey }}'
+      password_hash: $y$j9T$gPdejaqSri3Aosk3FJhYK0$n5U3M6CCRxwOo.VwK4JdL3.TSaZIZEZEU9FFjJziD/A
+      ssh_authorized_keys_local:
+        - .ssh/vic1707-telstar.pub
 
     # Disable default "core" user
     - name: core
