@@ -409,7 +409,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
+          Image=ghcr.io/vic1707/homelab/telstar-caddy:pr-25
           ContainerName=caddy
           Network=tunnel.network
           ReadOnly=true
