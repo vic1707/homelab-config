@@ -8,7 +8,7 @@ for secret in $(gopass ls -f); do
 
     if [[ -z ${output} ]]; then
         unused_secrets+=("$secret")
-        break
+        continue
     fi
 
     match_count=$(wc -l <<< "$output")

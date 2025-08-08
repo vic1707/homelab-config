@@ -6,8 +6,8 @@
 
   vars:
     domain: bofzilla.dev
-    cf_auth_token: "{{ lookup('community.general.passwordstore', 'domains/' + domain + '/api-key.cloudflare', subkey='key') }}"
-    cf_account_name: "{{ domain.split('.')[0] }}"
+    cf_auth_token: "{{ lookup('community.general.passwordstore', 'domains/bofzilla.dev/api-key.cloudflare', subkey='key') }}"
+    cf_account_name: bofzilla.dev
 
     waf:
       block:

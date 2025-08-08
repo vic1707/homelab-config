@@ -1,35 +1,35 @@
 ---
-purelymail_ownership_proof_key: "{{ lookup('community.general.passwordstore', 'domains/{{ domain }}/ownership-proof-key.purelymail') }}"
+purelymail_ownership_proof_key: "{{ lookup('community.general.passwordstore', 'domains/bofzilla.dev/ownership-proof-key.purelymail') }}"
 
 purelymail_dns_records_map:
   CNAME:
-    - record: "purelymail1._domainkey.{{ domain }}"
+    - record: "purelymail1._domainkey.bofzilla.dev"
       value: "key1.dkimroot.purelymail.com"
       proxied: false
 
-    - record: "purelymail2._domainkey.{{ domain }}"
+    - record: "purelymail2._domainkey.bofzilla.dev"
       value: "key2.dkimroot.purelymail.com"
       proxied: false
 
-    - record: "purelymail3._domainkey.{{ domain }}"
+    - record: "purelymail3._domainkey.bofzilla.dev"
       value: "key3.dkimroot.purelymail.com"
       proxied: false
 
-    - record: "_dmarc.{{ domain }}"
+    - record: "_dmarc.bofzilla.dev"
       value: "dmarcroot.purelymail.com"
       proxied: false
 
   MX:
-    - record: "{{ domain }}"
+    - record: "bofzilla.dev"
       value: "mailserver.purelymail.com"
       priority: 50
       proxied: false
 
   TXT:
-    - record: "{{ domain }}"
+    - record: "bofzilla.dev"
       value: '"v=spf1 include:_spf.purelymail.com ~all"'
       proxied: false
 
-    - record: "{{ domain }}"
+    - record: "bofzilla.dev"
       value: '"purelymail_ownership_proof={{ purelymail_ownership_proof_key }}"'
       proxied: false

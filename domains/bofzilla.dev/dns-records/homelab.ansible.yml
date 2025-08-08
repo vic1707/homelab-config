@@ -4,15 +4,15 @@ telstar_ipv6: "{{ lookup('community.general.passwordstore', 'telstar/ipv6') }}"
 
 homelab_dns_records_map:
   CNAME:
-    - record: "*.{{ domain }}"
-      value: "{{ domain }}"
+    - record: "*.bofzilla.dev"
+      value: "bofzilla.dev"
       proxied: true
 
   A:
-    - record: "{{ domain }}"
+    - record: "bofzilla.dev"
       value: "{{ telstar_ipv4 }}"
       proxied: true
   AAAA:
-    - record: "{{ domain }}"
+    - record: "bofzilla.dev"
       value: "{{ telstar_ipv6 }}"
       proxied: true
