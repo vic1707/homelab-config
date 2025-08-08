@@ -9,18 +9,18 @@ postinstall = "pip install -r {{ config_root }}/.config/requirements.txt && ansi
 [tools]
 actionlint = "1.7.7"
 bat = "0.25.0"
-gopass = "1.15.16"
-python = "3.13.5"
 butane = "0.24.0"
-gomplate = "4.3.2"
+gomplate = "4.3.3"
+gopass = "1.15.16"
 hcloud = "1.51.0"
 hcloud-upload-image = "1.1.0"
-jq = "1.8.0"
-just = "1.40.0"
+jq = "1.8.1"
+just = "1.42.4"
+python = "3.13.6"
 ripgrep = "14.1.1"
-shellcheck = "0.10.0"
-shfmt = "3.11.0"
-typos = "1.33.1"
+shellcheck = "0.11.0"
+shfmt = "3.12.0"
+typos = "1.35.2"
 zizmor = "1.5.2" # https://github.com/cargo-bins/cargo-quickinstall/issues/367
 
 [alias]

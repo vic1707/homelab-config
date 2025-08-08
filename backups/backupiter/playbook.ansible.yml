@@ -5,8 +5,7 @@
   vars:
     storagebox_name: backupiter
     backupiter_id: "{{ lookup('community.general.passwordstore', 'backups/backupiter/id') }}"
-    hrobot_user: "{{ lookup('community.general.passwordstore', 'api-account.hrobot', subkey='user') }}"
-    hrobot_password: "{{ lookup('community.general.passwordstore', 'api-account.hrobot', subkey='pass') }}"
+    hetzner_token: "{{ lookup('community.general.passwordstore', 'api-token.hetzner', subkey='key') }}"
 
     backupiter_root_user: "{{ lookup('community.general.passwordstore', 'backups/backupiter/root.account', subkey='user') }}"
     backupiter_root_password: "{{ lookup('community.general.passwordstore', 'backups/backupiter/root.account', subkey='pass') }}"
@@ -27,8 +26,7 @@
   tasks:
     - name: Settings
       community.hrobot.storagebox:
-        hetzner_user: "{{ hrobot_user }}"
-        hetzner_password: "{{ hrobot_password }}"
+        hetzner_token: "{{ hetzner_token }}"
         id: "{{ backupiter_id }}"
 
         name: "{{ storagebox_name }}"
@@ -40,16 +38,14 @@
 
     - name: Ensure password
       community.hrobot.storagebox_set_password:
-        hetzner_user: "{{ hrobot_user }}"
-        hetzner_password: "{{ hrobot_password }}"
+        hetzner_token: "{{ hetzner_token }}"
         id: "{{ backupiter_id }}"
 
         password: "{{ backupiter_root_password }}"
 
     - name: Setup snapshot policy
       community.hrobot.storagebox_snapshot_plan:
-        hetzner_user: "{{ hrobot_user }}"
-        hetzner_password: "{{ hrobot_password }}"
+        hetzner_token: "{{ hetzner_token }}"
         storagebox_id: "{{ backupiter_id }}"
 
         plans:
@@ -57,8 +53,7 @@
 
     - name: Set Telstar Subaccount
       community.hrobot.storagebox_subaccount:
-        hetzner_user: "{{ hrobot_user }}"
-        hetzner_password: "{{ hrobot_password }}"
+        hetzner_token: "{{ hetzner_token }}"
         storagebox_id: "{{ backupiter_id }}"
         password_mode: ignore-if-exists
 
