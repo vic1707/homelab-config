@@ -10,6 +10,7 @@ postinstall = "pip install -r {{ config_root }}/.config/requirements.txt && ansi
 actionlint = "1.7.7"
 bat = "0.25.0"
 butane = "0.24.0"
+dockle = "0.4.15"
 gomplate = "4.3.3"
 gopass = "1.15.16"
 hcloud = "1.51.0"
