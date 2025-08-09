@@ -405,8 +405,10 @@ storage:
             redir https://github.com/vic1707
           }
 
-          :9999/health {
-            respond "OK"
+          :9999 {
+            handle /health {
+              respond "OK"
+            }
           }
 
       user:
