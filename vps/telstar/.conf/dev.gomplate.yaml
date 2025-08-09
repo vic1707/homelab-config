@@ -1,6 +1,7 @@
 ## General config
 ARCH: arm64
 SSH_PORT: {{ gopass "telstar/ssh-port" }}
+PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 
 ## Domain configuration
 DOMAIN:

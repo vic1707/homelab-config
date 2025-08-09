@@ -329,10 +329,8 @@ storage:
           NetworkName=tunnel
           Driver=bridge
           IPv6=true
-          Subnet=10.89.0.0/26
-          Gateway=10.89.0.1
+          Subnet={{ .PODMAN_TUNNEL_SUBNET }}
           Options=isolate=true
-          Internal=true
       user:
         name: vic1707
       group:
@@ -357,7 +355,7 @@ storage:
                   timeout 15s # Maximum time to wait to get a response from cloudflare
                 }
                 # podman network's IP range
-                static 10.89.0.0/26
+                static {{ .PODMAN_TUNNEL_SUBNET }}
               }
 
               # https://github.com/hslatman/caddy-crowdsec-bouncer/issues/33#issuecomment-2241205984
