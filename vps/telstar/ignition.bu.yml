@@ -398,7 +398,7 @@ storage:
             }
           }
 
-          https://{{ .DOMAIN.URL }} {
+          https://www.{{ .DOMAIN.URL }}, https://{{ .DOMAIN.URL }} {
             import access_log
             {{ if .DOMAIN.SSL }} import https {{ end }}
             crowdsec
