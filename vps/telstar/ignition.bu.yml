@@ -189,7 +189,7 @@ storage:
               chain: crowdsec6-chain
 
     # SSH daemon hardening
-    - path: /etc/ssh/sshd_config.d/99-hardening.conf
+    - path: /etc/ssh/sshd_config.d/35-hardening.conf
       mode: 0400
       contents:
         inline: |
@@ -201,6 +201,22 @@ storage:
           MaxSessions 2                   # Max connections per IP
           MaxStartups 2                   # Maximum incoming connection attempts
           LogLevel VERBOSE
+
+          HostKey /etc/ssh/ssh_host_ed25519_key
+          HostKey /etc/ssh/ssh_host_rsa_key
+          KexAlgorithms mlkem768x25519-sha256,sntrup761x25519-sha512@openssh.com
+          HostKeyAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+          Ciphers aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+          MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+          CASignatureAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+          HostbasedAcceptedAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+          PubkeyAcceptedAlgorithms ssh-ed25519,rsa-sha2-512,rsa-sha2-256
+          RekeyLimit 512M 1h
+          GSSAPIAuthentication no
+          GSSAPIKeyExchange no
+          RequiredRSASize 3072
+          KbdInteractiveAuthentication no
+          Compression no
 
     # Require password for sudo (wheel and sudo groups)
     - path: /etc/sudoers.d/99-wheel-sudo-require-password
@@ -312,9 +328,8 @@ storage:
           [Network]
           NetworkName=tunnel
           Driver=bridge
-          IPv6=false
-          Subnet=10.89.0.0/26
-          Gateway=10.89.0.1
+          IPv6=true
+          Subnet={{ .PODMAN_TUNNEL_SUBNET }}
           Options=isolate=true
       user:
         name: vic1707
@@ -340,7 +355,7 @@ storage:
                   timeout 15s # Maximum time to wait to get a response from cloudflare
                 }
                 # podman network's IP range
-                static 10.89.0.0/26
+                static {{ .PODMAN_TUNNEL_SUBNET }}
               }
 
               # https://github.com/hslatman/caddy-crowdsec-bouncer/issues/33#issuecomment-2241205984
@@ -354,7 +369,6 @@ storage:
               domains {
                 vic1707.xyz
               }
-              versions ipv4
             }
             {{ end }}
 
