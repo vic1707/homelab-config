@@ -369,6 +369,7 @@ storage:
               domains {
                 vic1707.xyz
               }
+              versions ipv4
             }
             {{ end }}
 
