@@ -24,7 +24,7 @@ CROWDSEC:
 ## Auth
 LLDAP:
   SUBDOMAIN: lldap.auth
-  ADMIN_USER: admin
-  ADMIN_PASS: adminadmin
-  KEY_SEED: dummy-seed
+  ADMIN_USER: {{ gopass "telstar/lldap-admin" "user" }}
+  ADMIN_PASS: {{ gopass "telstar/lldap-admin" "pass" }}
+  KEY_SEED: {{ gopass "telstar/lldap-key-seed" }}
   JWT_SECRET: {{ random.AlphaNum 60 }}
