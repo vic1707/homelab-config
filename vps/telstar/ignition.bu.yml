@@ -606,12 +606,12 @@ storage:
 
           ## Admin account
           ldap_user_dn = '{{ .LLDAP.ADMIN_USER }}'
-          ldap_user_pass = '{{ .LLDAP.ADMIN_PASS }}'
+          ldap_user_pass = '''{{ .LLDAP.ADMIN_PASS }}'''
           ldap_user_email = '{{ .LLDAP.ADMIN_USER }}@{{ .DOMAIN.URL }}'
 
           ## Seeding
-          jwt_secret = '{{ .LLDAP.JWT_SECRET }}'  ## Can be random everytime
-          key_seed = '{{ .LLDAP.KEY_SEED }}'      ## Must stay
+          jwt_secret = '''{{ .LLDAP.JWT_SECRET }}'''  ## Can be random everytime
+          key_seed = '''{{ .LLDAP.KEY_SEED }}'''      ## Must stay
           key_file = ''                           ## Avoids a warning log
 
       user:
