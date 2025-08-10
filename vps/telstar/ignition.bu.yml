@@ -599,20 +599,20 @@ storage:
           ## TODO: SMTP here or done through Authelia?
           ## General settings
           # verbose = true
-          http_host = "0.0.0.0"
-          http_url = "https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}"
-          database_url = "sqlite:///db/users.db?mode=rwc"
-          ldap_base_dn = "dc={{ join (.DOMAIN.URL | strings.Split ".") ",dc=" }}" # dirty hack but works
+          http_host = '0.0.0.0'
+          http_url = 'https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}'
+          database_url = 'sqlite:///db/users.db?mode=rwc'
+          ldap_base_dn = 'dc={{ join (.DOMAIN.URL | strings.Split ".") ",dc=" }}' # dirty hack but works
 
           ## Admin account
-          ldap_user_dn = "{{ .LLDAP.ADMIN_USER }}"
-          ldap_user_pass = "{{ .LLDAP.ADMIN_PASS }}"
-          ldap_user_email = "{{ .LLDAP.ADMIN_USER }}@{{ .DOMAIN.URL }}"
+          ldap_user_dn = '{{ .LLDAP.ADMIN_USER }}'
+          ldap_user_pass = '{{ .LLDAP.ADMIN_PASS }}'
+          ldap_user_email = '{{ .LLDAP.ADMIN_USER }}@{{ .DOMAIN.URL }}'
 
           ## Seeding
-          jwt_secret = "{{ .LLDAP.JWT_SECRET }}"  ## Can be random everytime
-          key_seed = "{{ .LLDAP.KEY_SEED }}"      ## Must stay
-          key_file = ""                           ## Avoids a warning log
+          jwt_secret = '{{ .LLDAP.JWT_SECRET }}'  ## Can be random everytime
+          key_seed = '{{ .LLDAP.KEY_SEED }}'      ## Must stay
+          key_file = ''                           ## Avoids a warning log
 
       user:
         name: vic1707
