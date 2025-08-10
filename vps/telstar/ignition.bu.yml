@@ -40,7 +40,19 @@ storage:
         name: vic1707
       group:
         name: vic1707
+    - path: /srv/vic1707/containers/lldap
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
     - path: /home/vic1707/.config/containers/caddy
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/lldap
       mode: 0755
       user:
         name: vic1707
@@ -410,6 +422,14 @@ storage:
             redir https://github.com/vic1707
           }
 
+          https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import access_log
+            {{ if .DOMAIN.SSL }} import https {{ end }}
+            crowdsec
+            appsec
+            reverse_proxy http://lldap:17170
+          }
+
           :9999 {
             handle /health {
               respond "OK"
@@ -444,8 +464,6 @@ storage:
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
-          UserNS=keep-id
-          # User=vic1707
 
           Notify=healthy
           HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
@@ -532,6 +550,70 @@ storage:
       mode: 0400
       contents:
         local: ./acquis.yaml
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/lldap.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=LLDAP Quadlet
+
+          [Container]
+          AutoUpdate=registry
+          Image=ghcr.io/lldap/lldap:stable-alpine-rootless
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          ContainerName=lldap
+          Network=tunnel.network
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Environment="TZ=Europe/Paris"
+          Volume=/srv/vic1707/containers/lldap:/db:Z,rw
+          Volume=/home/vic1707/.config/containers/lldap/config.toml:/data/lldap_config.toml:Z,ro
+
+          Notify=healthy
+          HealthCmd=/app/lldap healthcheck --config-file /data/lldap_config.toml
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+          ExecStartPre=/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/lldap/config.toml
+      mode: 0400
+      contents:
+        inline: |
+          ## TODO: SMTP here or done through Authelia?
+          ## General settings
+          # verbose = true
+          http_host = "0.0.0.0"
+          http_url = "https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}"
+          database_url = "sqlite:///db/users.db?mode=rwc"
+          ldap_base_dn = "dc={{ join (.DOMAIN.URL | strings.Split ".") ",dc=" }}" # dirty hack but works
+
+          ## Admin account
+          ldap_user_dn = "{{ .LLDAP.ADMIN_USER }}"
+          ldap_user_pass = "{{ .LLDAP.ADMIN_PASS }}"
+          ldap_user_email = "{{ .LLDAP.ADMIN_USER }}@{{ .DOMAIN.URL }}"
+
+          ## Seeding
+          jwt_secret = "{{ .LLDAP.JWT_SECRET }}"  ## Can be random everytime
+          key_seed = "{{ .LLDAP.KEY_SEED }}"      ## Must stay
+          key_file = ""                           ## Avoids a warning log
+
       user:
         name: vic1707
       group:
