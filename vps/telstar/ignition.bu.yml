@@ -148,12 +148,16 @@ storage:
     # Install semanage
     - path: /var/lib/extensions/semanage.raw
       contents:
-        source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-{{.ARCH}}/semanage-3.8-1.fc42-42-{{.ARCH}}.raw
+        source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
+        verification:
+          hash: sha256-0d74ef57342eaff8c0dc8164e6b7e212d889f158c5c5d1571966b5cf43c0ea8f
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
       contents:
-        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.34/crowdsec-firewall-bouncer-linux-{{.ARCH}}.tgz
+        source: https://github.com/crowdsecurity/cs-firewall-bouncer/releases/download/v0.0.34/crowdsec-firewall-bouncer-linux-arm64.tgz
+        verification:
+          hash: sha256-41899de18ad928e89de26a6fcd46ae8c7cb9a3b95369e850335106db0bf727aa
     - path: /var/opt/crowdsec-firewall-bouncer.yaml
       mode: 0400
       contents:
