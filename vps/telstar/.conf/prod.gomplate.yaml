@@ -27,5 +27,6 @@ LLDAP:
   SUBDOMAIN: lldap.auth
   ADMIN_USER: {{ gopass "telstar/lldap-admin" "user" }}
   ADMIN_PASS: {{ gopass "telstar/lldap-admin" "pass" }}
+  AUTHELIA_PASSWORD: {{ random.AlphaNum 60 }}
   KEY_SEED: {{ gopass "telstar/lldap-key-seed" }}
   JWT_SECRET: {{ random.AlphaNum 60 }}

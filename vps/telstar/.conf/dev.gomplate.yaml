@@ -27,5 +27,6 @@ LLDAP:
   SUBDOMAIN: lldap.auth
   ADMIN_USER: admin
   ADMIN_PASS: adminadmin
+  AUTHELIA_PASSWORD: {{ random.AlphaNum 60 }}
   KEY_SEED: dummy-seed
   JWT_SECRET: {{ random.AlphaNum 60 }}
