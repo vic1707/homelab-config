@@ -262,17 +262,27 @@ storage:
               ## DROP everything by default
               policy drop;
 
+              # reject invalid/trash traffic
+              ct state { invalid } drop
+              tcp flags & (fin|syn|rst|ack) != syn ct state { new } drop
+
               ## Allow loopback (localhost) traffic
               # @typos-ignore
               iif lo accept;
 
-              ## Allow established or related connections
-              ct state established, related accept;
+              # Allow ICMP (IPv4 + IPv6)
+              # TODO: less allowed types?
+              ip protocol icmp accept
+              ip6 nexthdr icmpv6 accept
 
-              ## Allow SSH
-              tcp dport {{ .SSH_PORT }} accept;
-              ## Caddy ports
-              tcp dport 443 accept;
+
+              ## Allow established or related connections
+              ct state { established, related } accept;
+
+              # SSH + rate limit up to 3 new SSH connections per minute
+              tcp dport {{ .SSH_PORT }} tcp flags syn ct state new limit rate 3/minute accept
+
+              tcp dport { https } accept;
 
               ## Log drop packets
               # ip protocol { tcp } counter log prefix "tcp.in.dropped: ";
