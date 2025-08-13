@@ -579,6 +579,7 @@ storage:
           Volume=/srv/vic1707/containers/lldap:/db:Z,rw
           Volume=/home/vic1707/.config/containers/lldap/config.toml:/data/lldap_config.toml:Z,ro
           Volume=/home/vic1707/.config/containers/lldap/users.json:/bootstrap/user-configs/users.json:Z,ro
+          Volume=/home/vic1707/.config/containers/lldap/group-bot.json:/bootstrap/group-configs/group-bot.json:Z,ro
 
           Notify=healthy
           HealthCmd=/app/lldap healthcheck --config-file /data/lldap_config.toml
@@ -627,8 +628,16 @@ storage:
       contents:
         inline: |
           [
-            { "username": "authelia", "password": "SuperSecretPass", "groups": ["lldap_password_manager"] }
+            { "username": "authelia", "password": "SuperSecretPass", "groups": ["lldap_password_manager", "bot"] }
           ]
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/lldap/group-bot.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "bot" }'
       user:
         name: vic1707
       group:
