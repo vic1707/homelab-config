@@ -295,8 +295,17 @@ storage:
               ## hook into the kernel's OUTPUT path to filter packets
               type filter hook output priority 0;
 
-              ## ALLOW everything by default
-              policy accept;
+              ## DROP everything by default
+              policy drop;
+
+              ct state { related, established } accept;
+
+              tcp dport { http, https } accept;
+              ## DNS requests
+              udp dport { domain } accept;
+              tcp dport { domain } accept;
+              ## timesyncd
+              udp dport { ntp } accept;
 
               # Log drop packets
               # ip protocol { tcp } counter log prefix "tcp.out.dropped: ";
