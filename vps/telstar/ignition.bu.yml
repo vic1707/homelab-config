@@ -273,6 +273,10 @@ storage:
               tcp dport {{ .SSH_PORT }} accept;
               ## Caddy ports
               tcp dport 443 accept;
+
+              ## Log drop packets
+              # ip protocol { tcp } counter log prefix "tcp.in.dropped: ";
+              # ip protocol { udp } counter log prefix "udp.in.dropped: ";
             }
 
             chain forward {
@@ -281,6 +285,10 @@ storage:
 
               ## DROP everything by default
               policy drop;
+
+              # Log drop packets
+              # ip protocol { tcp } counter log prefix "tcp.fwd.dropped: ";
+              # ip protocol { udp } counter log prefix "udp.fwd.dropped: ";
             }
 
             chain output {
@@ -289,6 +297,10 @@ storage:
 
               ## ALLOW everything by default
               policy accept;
+
+              # Log drop packets
+              # ip protocol { tcp } counter log prefix "tcp.out.dropped: ";
+              # ip protocol { udp } counter log prefix "udp.out.dropped: ";
             }
           }
 
