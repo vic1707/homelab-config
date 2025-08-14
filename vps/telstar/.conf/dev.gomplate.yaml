@@ -20,3 +20,13 @@ CROWDSEC:
   INSTANCE_NAME: telstar-dev
   CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
   FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+
+## Auth
+LLDAP:
+  EXPOSE: true
+  SUBDOMAIN: lldap.auth
+  ADMIN_USER: admin
+  ADMIN_PASS: adminadmin
+  AUTHELIA_PASSWORD: {{ random.AlphaNum 60 }}
+  KEY_SEED: dummy-seed
+  JWT_SECRET: {{ random.AlphaNum 60 }}
