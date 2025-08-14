@@ -31,7 +31,7 @@ jobs:
     outputs:
       containerfiles: ${{ steps.set-containerfiles.outputs.containerfiles }}
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5.0.0
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -80,7 +80,7 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5.0.0
         with:
           persist-credentials: false
           fetch-depth: 0
