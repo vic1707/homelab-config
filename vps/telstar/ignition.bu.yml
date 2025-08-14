@@ -46,6 +46,12 @@ storage:
         name: vic1707
       group:
         name: vic1707
+    - path: /srv/vic1707/containers/authelia
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
     - path: /home/vic1707/.config/containers/caddy
       mode: 0755
       user:
@@ -59,6 +65,12 @@ storage:
       group:
         name: vic1707
     - path: /home/vic1707/.config/containers/crowdsec
+      mode: 0755
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/authelia
       mode: 0755
       user:
         name: vic1707
@@ -162,7 +174,7 @@ storage:
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
         verification:
-          hash: sha256-0d74ef57342eaff8c0dc8164e6b7e212d889f158c5c5d1571966b5cf43c0ea8f
+          hash: sha256-85ed5939055c2102ea8bbb7c84a2e7982a605281eec6162b3796e5977e076688
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
@@ -670,6 +682,95 @@ storage:
       mode: 0400
       contents:
         inline: '{ "name": "bot" }'
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/systemd/authelia.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Authelia Quadlet
+          After=lldap-bootstrap.container
+
+          [Container]
+          Image=ghcr.io/authelia/authelia:4.39.6
+          Network=tunnel.network
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Environment="TZ=Europe/Paris"
+
+          Volume=/home/vic1707/.config/containers/authelia/configuration.yml:/config/configuration.yml:Z,ro
+          Volume=/srv/vic1707/containers/authelia:/data:Z,rw
+
+          Notify=healthy
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+      user:
+        name: vic1707
+      group:
+        name: vic1707
+    - path: /home/vic1707/.config/containers/authelia/configuration.yml
+      mode: 0400
+      contents:
+        inline: |
+          theme: dark
+
+          log:
+              level: debug
+
+          # Is the authz mode for caddy
+          server:
+              endpoints:
+                  authz:
+                      forward-auth:
+                          implementation: ForwardAuth
+
+              storage:
+                  local:
+                      path: /data/db.sqlite3
+
+              session:
+                  name: authelia_session_{{ .DOMAIN.URL }}
+                  # secret handled via podman secrets
+                  cookies:
+                      - domain: '{{ .DOMAIN.URL }}'
+                        authelia_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+
+              notifier:
+                  smtp:
+                      address: smtp://smtp.eu.mailgun.org:587
+                      sender: 'auth@mg.{{ .DOMAIN.URL }}'
+                      username: 'postmaster@mg.{{ .DOMAIN.URL }}'
+                      subject: '[Authelia - {{ .DOMAIN.URL }}] {title}'
+
+          #####################
+          ## Auth strategies ##
+          #####################
+          # First factor
+          authentication_backend:
+              file:
+                  path: /config/users_database.yml
+
+          # 2nd factors
+          totp:
+              disable: false
+              issuer: Authelia - {{ .DOMAIN.URL }}
+              digits: 8
+              secret_size: 64
+              allowed_algorithms: [sha256, sha512]
+
+          webauthn:
+              disable: false
+              display_name: Authelia - {{ .DOMAIN.URL }}
+              attestation_conveyance_preference: none
+              user_verification: preferred
+              timeout: 60s
       user:
         name: vic1707
       group:

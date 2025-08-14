@@ -30,3 +30,7 @@ LLDAP:
   AUTHELIA_PASSWORD: {{ random.AlphaNum 60 }}
   KEY_SEED: {{ gopass "telstar/lldap-key-seed" }}
   JWT_SECRET: {{ random.AlphaNum 60 }}
+
+AUTHELIA:
+  SUBDOMAIN: auth
+  STORAGE_ENCRYPTION_KEY: {{ gopass "telstar/authelia-storage-encryption-key" }}

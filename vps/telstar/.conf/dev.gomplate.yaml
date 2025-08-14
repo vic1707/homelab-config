@@ -30,3 +30,7 @@ LLDAP:
   AUTHELIA_PASSWORD: {{ random.AlphaNum 60 }}
   KEY_SEED: dummy-seed
   JWT_SECRET: {{ random.AlphaNum 60 }}
+
+AUTHELIA:
+  SUBDOMAIN: auth
+  STORAGE_ENCRYPTION_KEY: foobar
