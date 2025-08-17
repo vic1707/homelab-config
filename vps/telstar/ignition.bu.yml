@@ -40,7 +40,19 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /srv/bofzilla/containers/lldap
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap
       mode: 0755
       user:
         name: bofzilla
@@ -531,6 +543,71 @@ storage:
       mode: 0400
       contents:
         local: ./acquis.yaml
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/lldap.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=LLDAP Server
+
+          [Container]
+          AutoUpdate=registry
+          Image=ghcr.io/lldap/lldap:latest-alpine-rootless
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          ContainerName=lldap
+          Network=tunnel.network
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Environment="TZ=Europe/Paris"
+          Environment="LLDAP_ADMIN_PASSWORD={{ .LLDAP.ADMIN_PASS }}"
+
+          Volume=/srv/bofzilla/containers/lldap:/db:Z,rw
+          Volume=/home/bofzilla/.config/containers/lldap/config.toml:/data/lldap_config.toml:Z,ro
+
+          Notify=healthy
+          HealthCmd=/app/lldap healthcheck --config-file /data/lldap_config.toml
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+          ExecStartPre=/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/config.toml
+      mode: 0400
+      contents:
+        inline: |
+          ## TODO: SMTP here or done through Authelia?
+          ## General settings
+          # verbose = true
+          http_host = '0.0.0.0'
+          http_url = 'https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}'
+          database_url = 'sqlite:///db/users.db?mode=rwc'
+          ldap_base_dn = 'dc={{ join (.DOMAIN.URL | strings.Split ".") ",dc=" }}' # dirty hack but works
+
+          ## Admin account
+          ldap_user_dn = '{{ .LLDAP.ADMIN_USER }}'
+          ldap_user_pass = '''{{ .LLDAP.ADMIN_PASS }}'''
+          ldap_user_email = '{{ .LLDAP.ADMIN_USER }}@{{ .DOMAIN.URL }}'
+
+          ## Seeding
+          jwt_secret = '''{{ .LLDAP.JWT_SECRET }}'''  ## Can be random everytime
+          key_seed = '''{{ .LLDAP.KEY_SEED }}'''      ## Must stay
+          key_file = ''                           ## Avoids a warning log
       user:
         name: bofzilla
       group:
