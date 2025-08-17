@@ -643,6 +643,7 @@ storage:
           Environment="LLDAP_URL=http://lldap:17170"
           Environment="LLDAP_ADMIN_PASSWORD={{ .LLDAP.ADMIN_PASS }}"
 
+          Volume=/home/bofzilla/.config/containers/lldap/authelia-user.json:/bootstrap/user-configs/authelia-user.json:Z,ro
           Volume=/home/bofzilla/.config/containers/lldap/service-accounts-group.json:/bootstrap/group-configs/service-accounts-group.json:Z,ro
 
           Entrypoint=/app/bootstrap.sh
@@ -662,6 +663,14 @@ storage:
       mode: 0400
       contents:
         inline: '{ "name": "service-accounts" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/authelia-user.json
+      mode: 0400
+      contents:
+        inline: '{ "id": "authelia", "email": "authelia@{{ .DOMAIN.URL }}", "password": "{{ .AUTHELIA.LLDAP_PASSWORD }}", "groups": ["lldap_password_manager", "service-accounts"] }'
       user:
         name: bofzilla
       group:

@@ -29,3 +29,6 @@ LLDAP:
   ADMIN_PASS: {{ gopass "--password" "telstar/lldap-admin" }}
   KEY_SEED: {{ gopass "telstar/lldap-key-seed" }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
+
+AUTHELIA:
+  LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
