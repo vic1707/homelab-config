@@ -18,5 +18,5 @@ BACKUP:
 CROWDSEC:
   ENROLL_KEY: {{ gopass "api-key.crowdsec" }}
   INSTANCE_NAME: telstar
-  CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
-  FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 40 }}
+  CADDY_BOUNCER_API_KEY: {{ random.AlphaNum 80 }}
+  FIREWALL_BOUNCER_API_KEY: {{ random.AlphaNum 80 }}

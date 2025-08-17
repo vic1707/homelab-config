@@ -150,7 +150,7 @@ storage:
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
         verification:
-          hash: sha256-0d74ef57342eaff8c0dc8164e6b7e212d889f158c5c5d1571966b5cf43c0ea8f
+          hash: sha256-ec163db808a1ad88c8ea7c3c572c1f9d36043d21e552a35f1676bdacc3260241
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
@@ -435,6 +435,7 @@ storage:
           Network=tunnel.network
           ReadOnly=true
           DropCapability=ALL
+          # exec container process `/usr/bin/caddy`: Operation not permitted
           AddCapability=NET_BIND_SERVICE
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
@@ -444,8 +445,6 @@ storage:
           Volume=/home/vic1707/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
           Volume=/srv/vic1707/containers/caddy:/data/caddy:Z,rw
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
-          UserNS=keep-id
-          # User=vic1707
 
           Notify=healthy
           HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
