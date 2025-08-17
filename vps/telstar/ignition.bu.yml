@@ -622,6 +622,51 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/lldap-bootstrap.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=LLDAP Bootstrap
+          After=lldap.container
+
+          [Container]
+          Image=ghcr.io/lldap/lldap:latest-alpine-rootless
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          Network=tunnel.network
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Environment="TZ=Europe/Paris"
+          Environment="LLDAP_URL=http://lldap:17170"
+          Environment="LLDAP_ADMIN_PASSWORD={{ .LLDAP.ADMIN_PASS }}"
+
+          Volume=/home/bofzilla/.config/containers/lldap/service-accounts-group.json:/bootstrap/group-configs/service-accounts-group.json:Z,ro
+
+          Entrypoint=/app/bootstrap.sh
+
+          [Service]
+          Type=oneshot
+          ## Needed in order to wait for its end
+          RemainAfterExit=true
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/service-accounts-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "service-accounts" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
 
 systemd:
   units:
