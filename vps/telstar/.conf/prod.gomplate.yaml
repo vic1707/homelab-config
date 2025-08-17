@@ -32,3 +32,5 @@ LLDAP:
 
 AUTHELIA:
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
+  SMTP_PASS: {{ gopass "bofzilla.dev/smtp/no-reply" "pass" }}
+  SMTP_ADDRESS: {{ gopass "bofzilla.dev/smtp/no-reply" "address" }}
