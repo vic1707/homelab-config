@@ -31,6 +31,10 @@ LLDAP:
   JWT_SECRET: {{ random.AlphaNum 120 }}
 
 AUTHELIA:
+  SUBDOMAIN: auth
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
   SMTP_ADDRESS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "address" }}
   SMTP_PASS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "pass" }}
+  STORAGE_ENCRYPTION_KEY: {{ random.AlphaNum 120 }}
+  JWT_SECRET: {{ random.AlphaNum 120 }}
+  JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}
