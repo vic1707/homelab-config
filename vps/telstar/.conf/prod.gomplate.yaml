@@ -23,6 +23,7 @@ CROWDSEC:
 
 ## Auth
 LLDAP:
+  EXPOSE: false
   SUBDOMAIN: lldap.auth
   ADMIN_USER: {{ gopass "telstar/lldap-admin" "user" }}
   ADMIN_PASS: {{ gopass "--password" "telstar/lldap-admin" }}

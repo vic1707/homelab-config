@@ -422,6 +422,16 @@ storage:
             redir https://github.com/vic1707
           }
 
+          {{ if .LLDAP.EXPOSE }}
+          https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import access_log
+            {{ if .DOMAIN.SSL }} import https {{ end }}
+            crowdsec
+            appsec
+            reverse_proxy http://lldap:17170
+          }
+          {{ end }}
+
           :9999 {
             handle /health {
               respond "OK"

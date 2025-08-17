@@ -23,6 +23,7 @@ CROWDSEC:
 
 ## Auth
 LLDAP:
+  EXPOSE: true
   SUBDOMAIN: lldap.auth
   ADMIN_USER: admin
   ADMIN_PASS: adminadmin
