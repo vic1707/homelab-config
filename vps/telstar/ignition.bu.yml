@@ -446,6 +446,14 @@ storage:
           }
           {{ end }}
 
+          https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import access_log
+            {{ if .DOMAIN.SSL }} import https {{ end }}
+            crowdsec
+            appsec
+            reverse_proxy authelia:9091
+          }
+
           :9999 {
             handle /health {
               respond "OK"
