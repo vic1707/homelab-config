@@ -428,6 +428,18 @@ storage:
             }
           }
 
+          # https://www.authelia.com/integration/proxies/caddy/
+          # https://caddyserver.com/docs/caddyfile/directives/forward_auth#authelia
+          # https://caddy.community/t/securing-web-apps-with-caddy-and-authelia-in-docker-compose-an-opinionated-practical-and-minimal-production-ready-login-portal-guide/20465
+          ## Only works for subdomains, subpaths: https://www.authelia.com/integration/proxies/caddy/#subpath
+          (secure) {
+            forward_auth {args[0]} authelia:9091 {
+              uri /api/authz/forward-auth
+              copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+              # header_up Host {host}:{port}
+            }
+          }
+
           https://www.{{ .DOMAIN.URL }}, https://{{ .DOMAIN.URL }} {
             import access_log
             {{ if .DOMAIN.SSL }} import https {{ end }}
@@ -436,15 +448,14 @@ storage:
             redir https://github.com/vic1707
           }
 
-          {{ if .LLDAP.EXPOSE }}
           https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
             import access_log
+            import secure *
             {{ if .DOMAIN.SSL }} import https {{ end }}
             crowdsec
             appsec
             reverse_proxy http://lldap:17170
           }
-          {{ end }}
 
           https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
             import access_log
@@ -757,6 +768,11 @@ storage:
 
           access_control:
             default_policy: deny
+            rules:
+            - domain: {{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+              policy: two_factor
+              subject:
+                - ['group:lldap_admin']
 
           identity_validation:
             elevated_session:
