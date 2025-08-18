@@ -542,7 +542,7 @@ storage:
           Environment="ENROLL_KEY={{ .CROWDSEC.ENROLL_KEY }}"
           Environment="USE_WAL=true"
           Environment="ENROLL_INSTANCE_NAME=telstar"
-          Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules LePresidente/authelia"
           Volume=/srv/bofzilla/containers/crowdsec:/etc/crowdsec:Z,rw
           Volume=/home/bofzilla/.config/containers/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:Z,rw
           Volume=CrowdsecLogs.volume:/var/log:ro
@@ -577,7 +577,7 @@ storage:
           VolumeName=CrowdsecLogs
 
           [Service]
-          ExecStart=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
+          ExecStart=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy /mnt/authelia
       user:
         name: bofzilla
       group:
@@ -731,6 +731,7 @@ storage:
           Tmpfs=/app
           Volume=/home/bofzilla/.config/containers/authelia/configuration.yml:/config/configuration.yml:Z,ro
           Volume=/srv/bofzilla/containers/authelia:/data:Z,rw
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/var/log/authelia
 
           Notify=healthy
           HealthCmd=/app/healthcheck.sh
@@ -758,6 +759,9 @@ storage:
 
           log:
             level: debug
+            format: text
+            file_path: /var/log/authelia/authelia.log
+            keep_stdout: true
 
           # Is the authz mode for caddy
           server:
