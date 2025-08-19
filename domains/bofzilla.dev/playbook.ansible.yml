@@ -6,7 +6,7 @@
 
   vars:
     domain: bofzilla.dev
-    cf_auth_token: "{{ lookup('community.general.passwordstore', 'domains/bofzilla.dev/api-key.cloudflare', subkey='key') }}"
+    cf_auth_token: "{{ lookup('community.general.passwordstore', 'domains/bofzilla.dev/api-key.cloudflare') }}"
     cf_account_name: bofzilla.dev
 
     waf:

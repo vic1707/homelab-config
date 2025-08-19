@@ -28,7 +28,7 @@ STREAM=stable
 #############################################
 # Imported Variables
 #############################################
-HCLOUD_TOKEN=$(gopass show -o api-token.hetzner key)
+HCLOUD_TOKEN=$(gopass show -o api-token.hetzner)
 export HCLOUD_TOKEN
 
 #############################################
