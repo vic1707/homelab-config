@@ -4,15 +4,15 @@ PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 
 ## Domain configuration
 DOMAIN:
-  URL: vic1707.xyz
+  URL: bofzilla.dev
   SSL: true
-  CLOUDFLARE_API_TOKEN: {{ gopass "domains/vic1707.xyz/api-key.cloudflare" "key" }}
+  CLOUDFLARE_API_TOKEN: {{ gopass "--password" "domains/bofzilla.dev/api-key.cloudflare" }}
 
 ## Backup strategy
 BACKUP:
   ENABLED: true
   STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
-  STORAGEBOX_PASS: {{ gopass "backups/backupiter/telstar.account" "pass" }}
+  STORAGEBOX_PASS: {{ gopass "--password" "backups/backupiter/telstar.account" }}
 
 ## Crowdsec conf
 CROWDSEC:
