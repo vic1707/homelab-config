@@ -34,6 +34,6 @@ AUTHELIA:
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
   SMTP_ADDRESS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "address" }}
   SMTP_PASS: {{ gopass "--password" "domains/bofzilla.dev/smtp/no-reply.purelymail" }}
-  STORAGE_ENCRYPTION_KEY: {{ random.AlphaNum 120 }}
+  STORAGE_ENCRYPTION_KEY: {{ gopass "telstar/authelia-storage-encryption-key" }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
   JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}
