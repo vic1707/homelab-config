@@ -715,7 +715,7 @@ passwd:
   users:
     - name: bofzilla
       groups: [wheel]
-      password_hash: $y$j9T$gPdejaqSri3Aosk3FJhYK0$n5U3M6CCRxwOo.VwK4JdL3.TSaZIZEZEU9FFjJziD/A
+      password_hash: $y$j9T$uLiWqr0dmF4Op1GerGVIb.$w0t1TBTgyIbGU5tIT5z04Sl08O9Tx4MFc7GCh/s3KVC
       ssh_authorized_keys_local:
         - .ssh/bofzilla.pub
 
