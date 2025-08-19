@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v5.0.0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@v2.4.4
+      - uses: jdx/mise-action@v3.0.2
       - name: Activate virtual environment
         run: echo PATH="${GITHUB_WORKSPACE}/.venv/bin:$PATH" >> "$GITHUB_ENV"
 
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v5.0.0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@v2.4.4
+      - uses: jdx/mise-action@v3.0.2
       - name: Activate virtual environment
         run: echo PATH="${GITHUB_WORKSPACE}/.venv/bin:$PATH" >> "$GITHUB_ENV"
 
