@@ -577,7 +577,6 @@ storage:
           NoNewPrivileges=true
 
           Environment="TZ=Europe/Paris"
-          Environment="LLDAP_ADMIN_PASSWORD={{ .LLDAP.ADMIN_PASS }}"
 
           Volume=/srv/bofzilla/containers/lldap:/db:Z,rw
           Volume=/home/bofzilla/.config/containers/lldap/config.toml:/data/lldap_config.toml:Z,ro
