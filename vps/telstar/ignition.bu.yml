@@ -649,7 +649,7 @@ storage:
           ## Seeding
           jwt_secret = '''{{ .LLDAP.JWT_SECRET }}'''  ## Can be random everytime
           key_seed = '''{{ .LLDAP.KEY_SEED }}'''      ## Must stay
-          key_file = ''                           ## Avoids a warning log
+          key_file = ''                               ## Avoids a warning log
       user:
         name: bofzilla
       group:
