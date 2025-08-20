@@ -43,3 +43,9 @@ labels:
   type: syslog
 
 ---
+filenames:
+  - /var/log/authelia/authelia.log
+labels:
+  type: authelia
+
+---

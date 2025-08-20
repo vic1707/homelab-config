@@ -2,6 +2,8 @@
 # sudo ausearch -m avc -ts recent
 ### Print allow policy
 # sudo ausearch -m avc -ts recent | grep <thing> | audit2allow -m TMP
+
+## {{ $LLDAP_BASE_DN := printf "dc=%s" (conv.Join (.DOMAIN.URL | strings.Split `.`) `,dc=`) }}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Relativ-IT/Butane-Schemas/Release/Butane-Schema.json
 variant: fcos
@@ -46,6 +48,12 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /srv/bofzilla/containers/authelia
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy
       mode: 0755
       user:
@@ -59,6 +67,12 @@ storage:
       group:
         name: bofzilla
     - path: /home/bofzilla/.config/containers/crowdsec
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/authelia
       mode: 0755
       user:
         name: bofzilla
@@ -162,7 +176,7 @@ storage:
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
         verification:
-          hash: sha256-5802f372a05765c470e063dde2c4637f91590e04605d286d279dd1a997680759
+          hash: sha256-708b3bdf8068f16002104e066f0e266747cdb83f8e95135ce6a50669e8e1ad47
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
@@ -414,6 +428,18 @@ storage:
             }
           }
 
+          # https://www.authelia.com/integration/proxies/caddy/
+          # https://caddyserver.com/docs/caddyfile/directives/forward_auth#authelia
+          # https://caddy.community/t/securing-web-apps-with-caddy-and-authelia-in-docker-compose-an-opinionated-practical-and-minimal-production-ready-login-portal-guide/20465
+          ## Only works for subdomains, subpaths: https://www.authelia.com/integration/proxies/caddy/#subpath
+          (secure) {
+            forward_auth {args[0]} authelia:9091 {
+              uri /api/authz/forward-auth
+              copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
+              # header_up Host {host}:{port}
+            }
+          }
+
           https://www.{{ .DOMAIN.URL }}, https://{{ .DOMAIN.URL }} {
             import access_log
             {{ if .DOMAIN.SSL }} import https {{ end }}
@@ -422,15 +448,22 @@ storage:
             redir https://github.com/vic1707
           }
 
-          {{ if .LLDAP.EXPOSE }}
           https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
             import access_log
+            import secure *
             {{ if .DOMAIN.SSL }} import https {{ end }}
             crowdsec
             appsec
             reverse_proxy http://lldap:17170
           }
-          {{ end }}
+
+          https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import access_log
+            {{ if .DOMAIN.SSL }} import https {{ end }}
+            crowdsec
+            appsec
+            reverse_proxy authelia:9091
+          }
 
           :9999 {
             handle /health {
@@ -509,7 +542,7 @@ storage:
           Environment="ENROLL_KEY={{ .CROWDSEC.ENROLL_KEY }}"
           Environment="USE_WAL=true"
           Environment="ENROLL_INSTANCE_NAME=telstar"
-          Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules"
+          Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules LePresidente/authelia"
           Volume=/srv/bofzilla/containers/crowdsec:/etc/crowdsec:Z,rw
           Volume=/home/bofzilla/.config/containers/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:Z,rw
           Volume=CrowdsecLogs.volume:/var/log:ro
@@ -544,7 +577,7 @@ storage:
           VolumeName=CrowdsecLogs
 
           [Service]
-          ExecStart=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy
+          ExecStart=/usr/bin/podman run --rm -v CrowdsecLogs:/mnt docker.io/library/alpine mkdir -p /mnt/caddy /mnt/authelia
       user:
         name: bofzilla
       group:
@@ -606,7 +639,7 @@ storage:
           http_host = '0.0.0.0'
           http_url = 'https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}'
           database_url = 'sqlite:///db/users.db?mode=rwc'
-          ldap_base_dn = 'dc={{ join (.DOMAIN.URL | strings.Split ".") ",dc=" }}' # dirty hack but works
+          ldap_base_dn = '{{ $LLDAP_BASE_DN }}'
 
           ## Admin account
           ldap_user_dn = '{{ .LLDAP.ADMIN_USER }}'
@@ -616,7 +649,7 @@ storage:
           ## Seeding
           jwt_secret = '''{{ .LLDAP.JWT_SECRET }}'''  ## Can be random everytime
           key_seed = '''{{ .LLDAP.KEY_SEED }}'''      ## Must stay
-          key_file = ''                           ## Avoids a warning log
+          key_file = ''                               ## Avoids a warning log
       user:
         name: bofzilla
       group:
@@ -643,6 +676,7 @@ storage:
           Environment="LLDAP_URL=http://lldap:17170"
           Environment="LLDAP_ADMIN_PASSWORD={{ .LLDAP.ADMIN_PASS }}"
 
+          Volume=/home/bofzilla/.config/containers/lldap/authelia-user.json:/bootstrap/user-configs/authelia-user.json:Z,ro
           Volume=/home/bofzilla/.config/containers/lldap/service-accounts-group.json:/bootstrap/group-configs/service-accounts-group.json:Z,ro
 
           Entrypoint=/app/bootstrap.sh
@@ -662,6 +696,169 @@ storage:
       mode: 0400
       contents:
         inline: '{ "name": "service-accounts" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/authelia-user.json
+      mode: 0400
+      contents:
+        inline: '{ "id": "authelia", "email": "authelia@{{ .DOMAIN.URL }}", "password": "{{ .AUTHELIA.LLDAP_PASSWORD }}", "groups": ["lldap_password_manager", "service-accounts"] }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/authelia.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Authelia Quadlet
+          After=lldap-bootstrap.container
+
+          [Container]
+          Image=ghcr.io/authelia/authelia:4.39.6
+          ContainerName=authelia
+          Network=tunnel.network
+          ReadOnly=true
+          DropCapability=ALL
+          # su-exec: setgroups(0): Operation not permitted
+          AddCapability=SETGID
+          NoNewPrivileges=true
+
+          Environment="TZ=Europe/Paris"
+
+          Tmpfs=/app
+          Volume=/home/bofzilla/.config/containers/authelia/configuration.yml:/config/configuration.yml:Z,ro
+          Volume=/srv/bofzilla/containers/authelia:/data:Z,rw
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/var/log/authelia
+
+          Notify=healthy
+          HealthCmd=/app/healthcheck.sh
+          HealthInterval=30s
+          HealthTimeout=3s
+          HealthRetries=5
+          HealthStartPeriod=60s
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/authelia/configuration.yml
+      mode: 0400
+      contents:
+        inline: |
+          theme: dark
+
+          log:
+            level: debug
+            format: text
+            file_path: /var/log/authelia/authelia.log
+            keep_stdout: true
+
+          # Is the authz mode for caddy
+          server:
+            endpoints:
+              authz:
+                forward-auth:
+                  implementation: ForwardAuth
+
+          access_control:
+            default_policy: deny
+            rules:
+              - domain: {{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+                policy: two_factor
+                subject:
+                  - group:lldap_admin
+
+          identity_validation:
+            elevated_session:
+              code_lifespan: '5 minutes'
+              elevation_lifespan: '10 minutes'
+              characters: 8
+              require_second_factor: true
+            reset_password:
+              jwt_secret: {{ .AUTHELIA.JWT_SECRET_PWD_RESET }}
+              jwt_algorithm: HS512
+
+          storage:
+            encryption_key: {{ .AUTHELIA.STORAGE_ENCRYPTION_KEY }}
+            local:
+              path: /data/db.sqlite3
+
+          session:
+            secret: {{ .AUTHELIA.JWT_SECRET }}
+            name: authelia_session_{{ .DOMAIN.URL }}
+            cookies:
+              - domain: {{ .DOMAIN.URL }}
+                authelia_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+
+          password_policy:
+            standard:
+              enabled: true
+              min_length: 50
+              require_uppercase: true
+              require_lowercase: true
+              require_number: true
+              require_special: true
+            # Doesn't restrict... <https://www.authelia.com/configuration/security/password-policy/#zxcvbn>
+            # zxcvbn:
+            #   enabled: true
+            #   min_score: 4
+
+          notifier:
+            smtp:
+              address: smtp://smtp.purelymail.com:587
+              sender: {{ .AUTHELIA.SMTP_ADDRESS }}
+              username: {{ .AUTHELIA.SMTP_ADDRESS }}
+              password: {{ .AUTHELIA.SMTP_PASS }}
+              subject: '{title}'
+              startup_check_address: test@authelia.com
+
+          telemetry:
+            metrics:
+              enabled: false
+
+          #####################
+          ## Auth strategies ##
+          #####################
+          # First factor
+          authentication_backend:
+            ldap:
+              implementation: lldap
+              address: ldap://lldap:3890
+              base_dn: {{ $LLDAP_BASE_DN }}
+              user: uid=authelia,OU=people,{{ $LLDAP_BASE_DN }}
+              password: {{ .AUTHELIA.LLDAP_PASSWORD }}
+              ## Login via username or email, but service-accounts can't login through authelia
+                # login allowed by uid OR mail (default)
+                # must be a person (default, lldap stores everybody in this)
+                # must NOT be in service-accounts group
+              users_filter: (&(|({username_attribute}={input})({mail_attribute}={input}))(objectClass=person)(!(memberOf=cn=service-accounts,ou=groups,{{ $LLDAP_BASE_DN }})))
+
+          # 2nd factors
+          totp:
+            disable: false
+            issuer: Authelia - {{ .DOMAIN.URL }}
+            digits: 8
+            secret_size: 64
+            algorithm: sha512
+            allowed_algorithms: [sha256, sha512]
+
+          webauthn:
+            disable: false
+            display_name: Authelia - {{ .DOMAIN.URL }}
+            attestation_conveyance_preference: none
+            timeout: 60s
+            selection_criteria:
+              user_verification: preferred
       user:
         name: bofzilla
       group:
