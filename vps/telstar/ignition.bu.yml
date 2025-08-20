@@ -176,7 +176,7 @@ storage:
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
         verification:
-          hash: sha256-5802f372a05765c470e063dde2c4637f91590e04605d286d279dd1a997680759
+          hash: sha256-708b3bdf8068f16002104e066f0e266747cdb83f8e95135ce6a50669e8e1ad47
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
@@ -832,6 +832,7 @@ storage:
             issuer: Authelia - {{ .DOMAIN.URL }}
             digits: 8
             secret_size: 64
+            algorithm: sha512
             allowed_algorithms: [sha256, sha512]
 
           webauthn:
