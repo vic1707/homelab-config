@@ -800,6 +800,19 @@ storage:
               - domain: {{ .DOMAIN.URL }}
                 authelia_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
 
+          password_policy:
+            standard:
+              enabled: true
+              min_length: 50
+              require_uppercase: true
+              require_lowercase: true
+              require_number: true
+              require_special: true
+            # Doesn't restrict... <https://www.authelia.com/configuration/security/password-policy/#zxcvbn>
+            # zxcvbn:
+            #   enabled: true
+            #   min_score: 4
+
           notifier:
             smtp:
               address: smtp://smtp.purelymail.com:587
@@ -808,6 +821,10 @@ storage:
               password: {{ .AUTHELIA.SMTP_PASS }}
               subject: '{title}'
               startup_check_address: test@authelia.com
+
+          telemetry:
+            metrics:
+              enabled: false
 
           #####################
           ## Auth strategies ##
