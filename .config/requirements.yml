@@ -9,6 +9,8 @@ collections:
     version: 0.2.1
   - name: community.hrobot
     version: 2.5.0
+  - name: commscope.icx
+    version: 1.0.5
 
 roles:
   - name: rywillia.ssh-copy-id
