@@ -36,5 +36,5 @@ jobs:
       - name: Install asdf prerequisites
         run: apk add --no-cache curl git bash
 
-      - uses: jdx/mise-action@v3.0.2
+      - uses: jdx/mise-action@v3.1.0
 
