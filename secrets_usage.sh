@@ -4,7 +4,7 @@ set -euo pipefail
 
 unused_secrets=()
 for secret in $(gopass ls -f); do
-    output=$(rg --no-heading --line-number --fixed-strings "$secret" . || true)
+    output=$(rg --ignore --hidden --no-heading --line-number --fixed-strings "$secret" . || true)
 
     if [[ -z ${output} ]]; then
         unused_secrets+=("$secret")

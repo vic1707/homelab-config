@@ -134,7 +134,7 @@ case "$COMMAND" in
 
         # Define port mappings
         INTERNAL_SSH_PORT=$(gopass show -o telstar/ssh-port)
-        HOSTFWD_ARGS=$(build_hostfwd_args "2222:$INTERNAL_SSH_PORT" "4443:443")
+        HOSTFWD_ARGS=$(build_hostfwd_args "2222:$INTERNAL_SSH_PORT" "443:443")
 
         # shellcheck disable=SC2086 # $HOSTFWD_ARGS not in quotes
         qemu-system-aarch64 \

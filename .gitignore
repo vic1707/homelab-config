@@ -1,3 +1,4 @@
+.git/
 .ansible/
 .cache/gopass
 .venv/
