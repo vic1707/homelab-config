@@ -51,6 +51,12 @@ jobs:
       - uses: jdx/mise-action@v3.1.0
       - name: Activate virtual environment
         run: echo PATH="${GITHUB_WORKSPACE}/.venv/bin:$PATH" >> "$GITHUB_ENV"
+      - name: Get changed containerfiles paths
+        id: changed-containerfiles
+        uses: tj-actions/changed-files@v46.0.5
+        with:
+          files: '**/*.containerfile'
+          matrix: true
 
       - name: Shellcheck
         run: |
@@ -79,3 +85,21 @@ jobs:
             -print \
             -execdir \
               butane --strict --files-dir . --check {} +
+
+      - name: Lint with dockle
+        if: steps.changed-containerfiles.outputs.any_changed == 'true'
+        env:
+          CONTAINERFILES: ${{ steps.changed-containerfiles.outputs.all_changed_files }}
+        run: |
+          set -euo pipefail
+
+          echo "$CONTAINERFILES" | jq -r '.[]' | while read -r containerfile; do
+            echo "🔍 Linting containerfile: $containerfile"
+            IMAGE_NAME="${containerfile#*/}"
+            
+            podman build -t "$IMAGE_NAME" -f "$containerfile" .
+            podman save -o "$IMAGE_NAME.tar" "$IMAGE_NAME"
+
+            export DOCKER_CONTENT_TRUST=1 # CIS-DI-0005 - Enable Content trust for Docker
+            dockle --debug --exit-code 1 --input "$IMAGE_NAME.tar"
+          done

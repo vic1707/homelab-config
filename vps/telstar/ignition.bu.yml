@@ -485,7 +485,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
+          Image=ghcr.io/vic1707/homelab/telstar-caddy:pr-25
           ContainerName=caddy
           Network=tunnel.network
           ReadOnly=true
@@ -502,11 +502,7 @@ storage:
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
 
           Notify=healthy
-          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
-          HealthInterval=30s
-          HealthTimeout=5s
-          HealthRetries=5
-          HealthStartPeriod=30s
+          ## We rely on image's healthcheck
 
           [Service]
           Restart=on-failure
