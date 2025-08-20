@@ -776,7 +776,7 @@ storage:
             - domain: {{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}
               policy: two_factor
               subject:
-                - ['group:lldap_admin']
+                - group:lldap_admin
 
           identity_validation:
             elevated_session:
@@ -797,7 +797,7 @@ storage:
             secret: {{ .AUTHELIA.JWT_SECRET }}
             name: authelia_session_{{ .DOMAIN.URL }}
             cookies:
-              - domain: {{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+              - domain: {{ .DOMAIN.URL }}
                 authelia_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
 
           notifier:
