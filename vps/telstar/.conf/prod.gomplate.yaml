@@ -5,7 +5,7 @@ PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 ## Domain configuration
 DOMAIN:
   URL: bofzilla.dev
-  SSL: true
+  EXPOSED: true
   CLOUDFLARE_API_TOKEN: {{ gopass "--password" "domains/bofzilla.dev/api-key.caddy.cloudflare" }}
 
 ## Backup strategy

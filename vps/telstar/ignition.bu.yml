@@ -381,8 +381,8 @@ storage:
               trusted_proxies combine {
                 # https://github.com/WeidiDeng/caddy-cloudflare-ip
                 cloudflare {
-                  interval 12h # How often cloudflare ip lists are retrieved
-                  timeout 15s # Maximum time to wait to get a response from cloudflare
+                  interval 12h   # How often cloudflare ip lists are retrieved
+                  timeout 15s    # Maximum time to wait to get a response from cloudflare
                 }
                 # podman network's IP range
                 static {{ .PODMAN_TUNNEL_SUBNET }}
@@ -392,16 +392,20 @@ storage:
               client_ip_headers Cf-Connecting-Ip X-Forwarded-For
             }
 
-            {{ if .DOMAIN.SSL }}
-            # https://github.com/mholt/caddy-dynamicdns
-            dynamic_dns {
-              provider cloudflare {env.CLOUDFLARE_API_TOKEN}
-              domains {
-                {{ .DOMAIN.URL }}
+            # {{ if .DOMAIN.EXPOSED }}
+              acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+              # https://github.com/mholt/caddy-dynamicdns
+              dynamic_dns {
+                provider cloudflare {env.CLOUDFLARE_API_TOKEN}
+                domains {
+                  {{ .DOMAIN.URL }}
+                }
+                versions ipv4
               }
-              versions ipv4
-            }
-            {{ end }}
+            # {{ else }}
+              local_certs
+            # {{ end }}
 
             # https://github.com/hslatman/caddy-crowdsec-bouncer
             order crowdsec first
@@ -414,20 +418,6 @@ storage:
             }
           }
 
-          (https) {
-            # https://github.com/caddy-dns/cloudflare
-            tls {
-              dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-            }
-          }
-
-          (access_log) {
-            log {
-              output file /var/log/caddy/access.log
-              level DEBUG
-            }
-          }
-
           # https://www.authelia.com/integration/proxies/caddy/
           # https://caddyserver.com/docs/caddyfile/directives/forward_auth#authelia
           # https://caddy.community/t/securing-web-apps-with-caddy-and-authelia-in-docker-compose-an-opinionated-practical-and-minimal-production-ready-login-portal-guide/20465
@@ -436,32 +426,32 @@ storage:
             forward_auth {args[0]} authelia:9091 {
               uri /api/authz/forward-auth
               copy_headers Remote-User Remote-Groups Remote-Name Remote-Email
-              # header_up Host {host}:{port}
             }
           }
 
-          https://www.{{ .DOMAIN.URL }}, https://{{ .DOMAIN.URL }} {
-            import access_log
-            {{ if .DOMAIN.SSL }} import https {{ end }}
+          (site_common) {
+            log {
+              output file /var/log/caddy/access.log
+              level DEBUG
+            }
+
             crowdsec
             appsec
+          }
+
+          https://www.{{ .DOMAIN.URL }}, https://{{ .DOMAIN.URL }} {
+            import site_common
             redir https://github.com/vic1707
           }
 
           https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
-            import access_log
+            import site_common
             import secure *
-            {{ if .DOMAIN.SSL }} import https {{ end }}
-            crowdsec
-            appsec
             reverse_proxy http://lldap:17170
           }
 
           https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
-            import access_log
-            {{ if .DOMAIN.SSL }} import https {{ end }}
-            crowdsec
-            appsec
+            import site_common
             reverse_proxy authelia:9091
           }
 
@@ -470,7 +460,6 @@ storage:
               respond "OK"
             }
           }
-
       user:
         name: bofzilla
       group:
@@ -494,7 +483,7 @@ storage:
           AddCapability=NET_BIND_SERVICE
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
-          {{ if .DOMAIN.SSL }} Environment="CLOUDFLARE_API_TOKEN={{ .DOMAIN.CLOUDFLARE_API_TOKEN }}" {{ end }}
+          {{ if .DOMAIN.EXPOSED }} Environment="CLOUDFLARE_API_TOKEN={{ .DOMAIN.CLOUDFLARE_API_TOKEN }}" {{ end }}
           Environment="CROWDSEC_CADDY_BOUNCER_API_KEY={{ .CROWDSEC.CADDY_BOUNCER_API_KEY }}"
           PublishPort=443:443
           Volume=/home/bofzilla/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
