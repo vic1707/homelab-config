@@ -773,10 +773,10 @@ storage:
           access_control:
             default_policy: deny
             rules:
-            - domain: {{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}
-              policy: two_factor
-              subject:
-                - group:lldap_admin
+              - domain: {{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+                policy: two_factor
+                subject:
+                  - group:lldap_admin
 
           identity_validation:
             elevated_session:

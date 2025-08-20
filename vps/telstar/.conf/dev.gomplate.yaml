@@ -23,7 +23,7 @@ CROWDSEC:
 
 ## Auth
 LLDAP:
-  SUBDOMAIN: lldap.auth
+  SUBDOMAIN: lldap
   ADMIN_USER: {{ gopass "telstar/lldap-admin" "user" }}
   ADMIN_PASS: {{ gopass "--password" "telstar/lldap-admin" }}
   KEY_SEED: {{ gopass "telstar/lldap-key-seed" }}
