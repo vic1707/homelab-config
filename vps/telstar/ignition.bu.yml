@@ -467,6 +467,11 @@ storage:
             reverse_proxy authelia:9091
           }
 
+          https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import site_common
+            reverse_proxy wg-portal:8888
+          }
+
           :9999 {
             handle /health {
               respond "OK"
@@ -914,6 +919,9 @@ storage:
           core:
             admin_user: null
             admin_password: null
+
+          web:
+            external_url: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}
       user:
         name: bofzilla
       group:
