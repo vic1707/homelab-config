@@ -1083,6 +1083,8 @@ storage:
           [Container]
           Image=ghcr.io/h44z/wg-portal:v2.0.4
           ContainerName=wg-portal
+          ## Fixes initial OIDC healthcheck
+          AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           Network=tunnel.network
           ReadOnly=true
           DropCapability=ALL
