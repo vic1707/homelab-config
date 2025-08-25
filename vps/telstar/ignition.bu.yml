@@ -810,6 +810,14 @@ storage:
               jwt_secret: {{ .AUTHELIA.JWT_SECRET_PWD_RESET }}
               jwt_algorithm: HS512
 
+          identity_providers:
+            oidc:
+              hmac_secret: {{ random.AlphaNum 140 }}
+              jwks:
+                # Trust me, strange syntax is needed
+                - key: |
+                    {{- print "\n" (crypto.RSAGenerateKey | indent 20) }}
+
           storage:
             encryption_key: {{ .AUTHELIA.STORAGE_ENCRYPTION_KEY }}
             local:
