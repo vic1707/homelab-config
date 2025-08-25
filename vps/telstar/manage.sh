@@ -92,8 +92,8 @@ shift
 generate_ignition() {
     echo "⚙️ Generating Ignition file..."
     IGNITION_PATH="$(mktemp)"
-    gomplate --config .conf/.gomplate.yaml -f ".conf/$ENV.gomplate.yaml" \
-        | gomplate -f ignition.bu.yml \
+    ~/Desktop/gomplate/bin/gomplate --config .conf/.gomplate.yaml -f ".conf/$ENV.gomplate.yaml" \
+        |  ~/Desktop/gomplate/bin/gomplate -f ignition.bu.yml \
         | butane -d "$(dirname "$BUTANE_FILE")" --output "$IGNITION_PATH"
     IGNITION_HASH=$(md5sum "$IGNITION_PATH" | cut -d' ' -f1)
 }
@@ -134,7 +134,7 @@ case "$COMMAND" in
 
         # Define port mappings
         INTERNAL_SSH_PORT=$(gopass show -o telstar/ssh-port)
-        HOSTFWD_ARGS=$(build_hostfwd_args "2222:$INTERNAL_SSH_PORT" "443:443")
+        HOSTFWD_ARGS=$(build_hostfwd_args "2222:$INTERNAL_SSH_PORT" "443:443" "51820:51820")
 
         # shellcheck disable=SC2086 # $HOSTFWD_ARGS not in quotes
         qemu-system-aarch64 \
@@ -146,7 +146,6 @@ case "$COMMAND" in
             -drive if=virtio,file="${IMG_PATH%%.xz}",format=qcow2,media=disk \
             $HOSTFWD_ARGS \
             -serial mon:stdio
-
         ;;
     hetzner)
         ENABLE_BACKUP=true generate_ignition
