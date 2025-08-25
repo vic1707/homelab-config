@@ -494,6 +494,7 @@ storage:
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
           ContainerName=caddy
           Network=tunnel.network
+          IP={{ .CADDY_IP }}
           ReadOnly=true
           DropCapability=ALL
           # exec container process `/usr/bin/caddy`: Operation not permitted
@@ -904,6 +905,8 @@ storage:
           [Container]
           Image=ghcr.io/h44z/wg-portal:v2.0.4
           ContainerName=wg-portal
+          ## Fixes initial OIDC healthcheck
+          AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY_IP }}
           Network=tunnel.network
           ReadOnly=true
           DropCapability=ALL

@@ -2,6 +2,7 @@
 SSH_PORT: {{ gopass "telstar/ssh-port" }}
 PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 BOFZILLA_PASSWORD: {{ gopass "telstar/bofzilla-pass" | strings.TrimSpace | crypto.YescryptMCF 18 24 }}
+CADDY_IP: 10.89.0.59
 
 ## Domain configuration
 DOMAIN:
