@@ -44,3 +44,6 @@ AUTHELIA:
 
 GATUS:
   SUBDOMAIN: uptime
+
+WG_PORTAL:
+  SUBDOMAIN: wgportal
