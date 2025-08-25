@@ -818,6 +818,20 @@ storage:
                 # Trust me, strange syntax is needed
                 - key: |
                     {{- print "\n" (crypto.RSAGenerateKey | indent 20) }}
+              clients:
+              - client_id: wgportal
+                client_name: wg-portal
+                client_secret: {{ crypto.PBKDF2MCF .AUTHELIA.WG_PORTAL_CLIENT_SECRET (random.AlphaNum 150) 2048 75 "SHA512" }}
+                public: false
+                authorization_policy: two_factor
+                redirect_uris:
+                  - https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0/auth/login/authelia/callback
+                scopes:
+                  - openid
+                  - profile
+                  - groups
+                  - email
+                userinfo_signed_response_alg: none
 
           storage:
             encryption_key: {{ .AUTHELIA.STORAGE_ENCRYPTION_KEY }}
@@ -949,6 +963,27 @@ storage:
 
           web:
             external_url: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+
+          auth:
+            callback_url_prefix: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0
+            oidc:
+              - id: Authelia
+                provider_name: authelia
+                display_name: Login with</br>Authelia
+                base_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+                client_id: wgportal
+                client_secret: {{ .AUTHELIA.WG_PORTAL_CLIENT_SECRET }}
+                field_map: 
+                  user_identifier: preferred_username
+                  email: email
+                  firstname: name
+                  department: groups
+                extra_scopes:
+                  - openid
+                  - profile
+                  - groups
+                  - email
+                registration_enabled: true
       user:
         name: bofzilla
       group:
