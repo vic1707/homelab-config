@@ -706,6 +706,22 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/wg-portal-user-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "wg-portal-user" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/wg-portal-admin-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "wg-portal-admin" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/lldap/authelia-user.json
       mode: 0400
       contents:
