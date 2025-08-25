@@ -504,6 +504,11 @@ storage:
             import site_common
             reverse_proxy gatus:8080
           }
+
+          https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import site_common
+            reverse_proxy wg-portal:8888
+          }
       user:
         name: bofzilla
       group:
@@ -1097,6 +1102,9 @@ storage:
           database:
             type: sqlite
             dsn: /data/db.sqlite3
+
+          web:
+            external_url: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}
 
           advanced:
             api_admin_only: true
