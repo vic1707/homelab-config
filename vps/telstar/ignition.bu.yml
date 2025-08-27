@@ -523,6 +523,7 @@ storage:
           Network=tunnel.network
           NoNewPrivileges=true
           DropCapability=ALL
+          ReadOnly=true
           Tmpfs=/var/lib/crowdsec/data
           PublishPort=127.0.0.1:8080:8080
           Environment="TZ=Europe/Paris"
