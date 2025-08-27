@@ -31,6 +31,7 @@ LLDAP:
 
 AUTHELIA:
   SUBDOMAIN: auth
+  DEFAULT_AUTH_POLICY: one_factor
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
   SMTP_ADDRESS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "address" }}
   SMTP_PASS: {{ gopass "--password" "domains/bofzilla.dev/smtp/no-reply.purelymail" }}
