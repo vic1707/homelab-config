@@ -235,10 +235,22 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
 
-      - name: Dockle
+      - name: Cache
+        id: cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: img.tar
+          key: ${{ matrix.image }}
+
+      - name: Pull image
+        if: steps.cache.outputs.cache-hit != 'true'
         env:
           IMAGE: ${{ matrix.image }}
         run: |
           podman pull "$IMAGE"
           podman save -o img.tar "$IMAGE"
-          dockle --exit-code 1 --input img.tar
+
+      - name: Dockle
+        run: |
+          export DOCKER_CONTENT_TRUST=1 # CIS-DI-0005 - Enable Content trust for Docker
+          dockle --debug --exit-code 1 --input img.tar
