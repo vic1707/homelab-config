@@ -27,19 +27,24 @@ env:
 
 jobs:
   detect-changes:
+    name: Detect changed containerfiles
     runs-on: ubuntu-latest
     outputs:
       containerfiles: ${{ steps.set-containerfiles.outputs.containerfiles }}
     steps:
-      - uses: actions/checkout@v5.0.0
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Get changed containerfiles paths
         if: ${{ github.event_name != 'workflow_dispatch' }}
         id: changed-containerfiles
-        uses: tj-actions/changed-files@v46.0.5
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
         with:
           files: '**/*.containerfile'
           matrix: true
@@ -69,6 +74,7 @@ jobs:
           fi
 
   build:
+    name: Build & Push custom containers
     needs: detect-changes
     runs-on: ubuntu-latest
     strategy:
@@ -80,10 +86,14 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v5.0.0
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-          fetch-depth: 0
 
       - name: Install QEMU
         run: |
@@ -109,7 +119,7 @@ jobs:
         id: build_image
         env:
           CONTAINER_FILE: ${{ matrix.file }}
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
           image: ${{ steps.set-env.outputs.image }}
           tags: ${{ steps.set-env.outputs.tags }}
@@ -117,7 +127,7 @@ jobs:
           containerfiles: ${{ matrix.file }}
 
       - name: Push to ghcr.io
-        uses: redhat-actions/push-to-registry@v2.8
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
           image: ${{ steps.build_image.outputs.image }}
           tags: ${{ steps.build_image.outputs.tags }}
