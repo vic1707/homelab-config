@@ -19,10 +19,10 @@ jobs:
     name: formatters
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@v3.1.0
+      - uses: jdx/mise-action@ca0c5fc9c8a8386dae8ba5d37608a083a307991c # v3.1.0
       - name: Activate virtual environment
         run: echo PATH="${GITHUB_WORKSPACE}/.venv/bin:$PATH" >> "$GITHUB_ENV"
 
@@ -45,10 +45,10 @@ jobs:
     name: linters
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - uses: jdx/mise-action@v3.1.0
+      - uses: jdx/mise-action@ca0c5fc9c8a8386dae8ba5d37608a083a307991c # v3.1.0
       - name: Activate virtual environment
         run: echo PATH="${GITHUB_WORKSPACE}/.venv/bin:$PATH" >> "$GITHUB_ENV"
 
