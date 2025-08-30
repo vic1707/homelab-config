@@ -83,6 +83,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
 
       - name: Get changed inline images
         if: ${{ github.event_name != 'workflow_dispatch' }}
@@ -90,9 +91,9 @@ jobs:
         run: |
           # Get diff for PR, or last commit for push
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-                DIFF_RANGE="origin/$GITHUB_BASE_REF...HEAD"
+            DIFF_RANGE="origin/$GITHUB_BASE_REF...HEAD"
           else
-                DIFF_RANGE="HEAD~1..HEAD"
+            DIFF_RANGE="HEAD~1..HEAD"
           fi
 
           images=$(
@@ -112,12 +113,12 @@ jobs:
         run: |
           IMAGES=$(
             rg -N --no-heading --no-line-number --no-filename \
-                -o 'Image=\S+' \
-                -g '**/*.bu.yml' \
-                -g '**/*.container' \
+                -o 'Image=\S+' . \
+                -g '**/*.bu.yml' -g '**/*.container' \
                 | sed -E 's/^Image=//' \
                 | sort -u \
-                | jq -R . | jq -s -c .
+                | jq -R \
+                | jq -s -c
           )
           echo "images=$IMAGES" >> "$GITHUB_OUTPUT"
 
@@ -150,20 +151,22 @@ jobs:
       - name: Deduplicate inline images
         id: dedup
         env:
+          CONTAINERFILES: ${{ needs.detect-containerfiles-changes.outputs.containerfiles }}
           IMAGES: ${{ needs.detect-inline-images-changes.outputs.images }}
         run: |
-          filtered=$(
-          jq --argjson basenames "$CONTAINERFILES" --argjson images "$IMAGES" '
-              # Convert containerfile paths to basenames
-              $basenames
-              | map(basename(.) | sub("\\.containerfile$"; "")) as $bases
+          BASENAMES=$(
+            jq -r '.[]' <<< "$CONTAINERFILES" \
+                | xargs -n1 basename -s .containerfile \
+                | jq -R -s -c 'split("\n")[:-1]'
+          )
+          IMAGES=$(jq -n -c \
+            --argjson images "$IMAGES" \
+            --argjson basenames "$BASENAMES" \
+            '$images - [$images[] as $i | $basenames[] as $b | $i | select(contains($b))]'
+          )
 
-              # Keep only images that do NOT include any basename
-              | $images
-              | map(select(($bases | map(contains(.)?) | any) | not))
-          ')
-
-          echo "images=$filtered" >> "$GITHUB_OUTPUT"
+          echo "Filtered images: $IMAGES"
+          echo "images=$IMAGES" >> "$GITHUB_OUTPUT"
 
   build-and-check:
     name: Build & Check changed containerfiles
@@ -171,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        file: ${{ fromJson(needs.detect-containerfiles-changes.outputs.containerfiles) }}
+        containerfile: ${{ fromJson(needs.detect-containerfiles-changes.outputs.containerfiles) }}
       max-parallel: 4
       fail-fast: false
 
@@ -184,18 +187,19 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
 
       - name: Compute cache key
         id: cache-key
-        run: echo "hash=$(sha256sum "$containerfile" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+        env:
+          CONTAINERFILE: ${{ matrix.containerfile }}
+        run: echo "hash=$(sha256sum "$CONTAINERFILE" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
       - name: Cache
         id: cache
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: img.tar
           key: ${{ steps.cache-key.outputs.hash }}
-
-      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
 
       - name: Install QEMU
         if: steps.cache.outputs.cache-hit != 'true'
@@ -205,8 +209,10 @@ jobs:
 
       - name: Build image
         if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          CONTAINERFILE: ${{ matrix.containerfile }}
         run: |
-          podman build -t img -f "$containerfile" .
+          podman build -t img -f "$CONTAINERFILE" .
           podman save -o img.tar img
 
       - name: Dockle
