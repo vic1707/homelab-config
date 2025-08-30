@@ -133,6 +133,38 @@ jobs:
             echo "images=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
           fi
 
+  dedup-images:
+    name: Dedup images to check
+    runs-on: ubuntu-latest
+    needs:
+      - detect-containerfiles-changes
+      - detect-inline-images-changes
+    outputs:
+      images: ${{ steps.dedup.outputs.images }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Deduplicate inline images
+        id: dedup
+        env:
+          IMAGES: ${{ needs.detect-inline-images-changes.outputs.images }}
+        run: |
+          filtered=$(
+          jq --argjson basenames "$CONTAINERFILES" --argjson images "$IMAGES" '
+              # Convert containerfile paths to basenames
+              $basenames
+              | map(basename(.) | sub("\\.containerfile$"; "")) as $bases
+
+              # Keep only images that do NOT include any basename
+              | $images
+              | map(select(($bases | map(contains(.)?) | any) | not))
+          ')
+
+          echo "images=$filtered" >> "$GITHUB_OUTPUT"
+
   build-and-check:
     name: Build & Check changed containerfiles
     needs: detect-containerfiles-changes
@@ -169,11 +201,11 @@ jobs:
 
   check-inline-images:
     name: Check changed inline images
-    needs: detect-inline-images-changes
+    needs: dedup-images
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ${{ fromJson(needs.detect-inline-images-changes.outputs.images) }}
+        image: ${{ fromJson(needs.dedup-images.outputs.images) }}
       max-parallel: 4
       fail-fast: false
 
