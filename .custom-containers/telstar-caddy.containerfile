@@ -1,5 +1,5 @@
 # Build stage
-FROM docker.io/library/caddy:2.10.0-builder-alpine AS builder
+FROM docker.io/library/caddy:2.10.2-builder-alpine AS builder
 
 RUN xcaddy build \
 	`# Use cloudflare dns validation` \
@@ -18,5 +18,5 @@ RUN xcaddy build \
 	--with github.com/hslatman/caddy-crowdsec-bouncer/layer4
 
 # Final image
-FROM docker.io/library/caddy:2.10.0-alpine
+FROM docker.io/library/caddy:2.10.2-alpine
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
