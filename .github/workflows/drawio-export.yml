@@ -8,11 +8,12 @@ on:
       - .github/workflows/drawio-export.yml
   workflow_dispatch:
 
-permissions:
-  contents: write # <https://github.com/peaceiris/actions-gh-pages?tab=readme-ov-file#%EF%B8%8F-first-deployment-with-github_token>
+permissions: {}
 
 jobs:
   drawio-export:
+    permissions:
+      contents: write # <https://github.com/peaceiris/actions-gh-pages?tab=readme-ov-file#%EF%B8%8F-first-deployment-with-github_token>
     name: drawio-export
     runs-on: ubuntu-latest
     steps:
