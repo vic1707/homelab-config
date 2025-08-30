@@ -64,9 +64,9 @@ jobs:
           ALL: ${{ steps.all-containerfiles.outputs.containerfiles }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "containerfiles=$ALL" >> "$GITHUB_OUTPUT"
+            echo "containerfiles=${ALL:-[]}" >> "$GITHUB_OUTPUT"
           else
-            echo "containerfiles=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+            echo "containerfiles=${CHANGED_FILES:-[]}" >> "$GITHUB_OUTPUT"
           fi
 
   detect-inline-images-changes:
@@ -129,9 +129,9 @@ jobs:
           ALL: ${{ steps.all-images.outputs.images }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "images=$ALL" >> "$GITHUB_OUTPUT"
+            echo "images=${ALL:-[]}" >> "$GITHUB_OUTPUT"
           else
-            echo "images=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+            echo "images=${CHANGED_FILES:-[]}" >> "$GITHUB_OUTPUT"
           fi
 
   dedup-images:
@@ -140,6 +140,7 @@ jobs:
     needs:
       - detect-containerfiles-changes
       - detect-inline-images-changes
+    if: needs.detect-containerfiles-changes.outputs.containerfiles != '[]' && needs.detect-inline-images-changes.outputs.images != '[]'
     outputs:
       images: ${{ steps.dedup.outputs.images }}
     steps:
@@ -172,6 +173,7 @@ jobs:
     name: Build & Check changed containerfiles
     needs: detect-containerfiles-changes
     runs-on: ubuntu-latest
+    if: needs.detect-containerfiles-changes.outputs.containerfiles != '[]'
     strategy:
       matrix:
         containerfile: ${{ fromJson(needs.detect-containerfiles-changes.outputs.containerfiles) }}
@@ -224,6 +226,7 @@ jobs:
     name: Check changed inline images
     needs: dedup-images
     runs-on: ubuntu-latest
+    if: needs.dedup-images.outputs.images != '[]'
     strategy:
       matrix:
         image: ${{ fromJson(needs.dedup-images.outputs.images) }}
