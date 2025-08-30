@@ -79,3 +79,6 @@ jobs:
             -print \
             -execdir \
               butane --strict --files-dir . --check {} +
+
+      - name: Wrkflw
+        run: wrkflw validate
