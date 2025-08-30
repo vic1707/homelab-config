@@ -27,6 +27,7 @@ env:
 
 jobs:
   detect-changes:
+    name: Detect changed containerfiles
     runs-on: ubuntu-latest
     outputs:
       containerfiles: ${{ steps.set-containerfiles.outputs.containerfiles }}
@@ -69,6 +70,7 @@ jobs:
           fi
 
   build:
+    name: Build & Push custom containers
     needs: detect-changes
     runs-on: ubuntu-latest
     strategy:
