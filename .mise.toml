@@ -21,6 +21,7 @@ ripgrep = "14.1.1"
 shellcheck = "0.11.0"
 shfmt = "3.12.0"
 typos = "1.35.5"
+"cargo:wrkflw" = "0.7.3"
 zizmor = "1.5.2" # https://github.com/cargo-bins/cargo-quickinstall/issues/367
 
 [alias]
