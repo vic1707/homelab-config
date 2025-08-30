@@ -235,11 +235,6 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
 
-      - name: Install QEMU
-        run: |
-          sudo apt update
-          sudo apt install -y qemu-user-static
-
       - name: Dockle
         env:
           IMAGE: ${{ matrix.image }}
