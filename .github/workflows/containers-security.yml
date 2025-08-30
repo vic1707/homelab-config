@@ -69,6 +69,70 @@ jobs:
             echo "containerfiles=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
           fi
 
+  detect-inline-images-changes:
+    name: Detect changed inline container images
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.set-images.outputs.images }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Get changed inline images
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        id: changed-inline-images
+        run: |
+          # Get diff for PR, or last commit for push
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+                DIFF_RANGE="origin/$GITHUB_BASE_REF...HEAD"
+          else
+                DIFF_RANGE="HEAD~1..HEAD"
+          fi
+
+          images=$(
+            git diff "$DIFF_RANGE" -- '*.bu.yml' '*.container' \
+                | grep '^+' | grep -v '+++' \
+                | grep -Eo 'Image=[^ ]+' \
+                | sed -E 's/^Image=//' \
+                | sort -u \
+                | jq -R . | jq -s -c .
+          )
+
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+
+      - name: Get all images
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        id: all-images
+        run: |
+          IMAGES=$(
+            rg -N --no-heading --no-line-number --no-filename \
+                -o 'Image=\S+' \
+                -g '**/*.bu.yml' \
+                -g '**/*.container' \
+                | sed -E 's/^Image=//' \
+                | sort -u \
+                | jq -R . | jq -s -c .
+          )
+          echo "images=$IMAGES" >> "$GITHUB_OUTPUT"
+
+      - name: Set images
+        id: set-images
+        env:
+          CHANGED_IMAGES: ${{ steps.changed-inline-images.outputs.images }}
+          ALL: ${{ steps.all-images.outputs.images }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "images=$ALL" >> "$GITHUB_OUTPUT"
+          else
+            echo "images=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+          fi
+
   build-and-check:
     name: Build & Check changed containerfiles
     needs: detect-containerfiles-changes
@@ -102,3 +166,37 @@ jobs:
 
           export DOCKER_CONTENT_TRUST=1 # CIS-DI-0005 - Enable Content trust for Docker
           dockle --debug --exit-code 1 --input img.tar
+
+  check-inline-images:
+    name: Check changed inline images
+    needs: detect-inline-images-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ${{ fromJson(needs.detect-inline-images-changes.outputs.images) }}
+      max-parallel: 4
+      fail-fast: false
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+
+      - name: Install QEMU
+        run: |
+          sudo apt update
+          sudo apt install -y qemu-user-static
+
+      - name: Dockle
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          podman pull "$IMAGE"
+          podman save -o img.tar "$IMAGE"
+          dockle --exit-code 1 --input img.tar
