@@ -501,7 +501,6 @@ storage:
           Restart=on-failure
           # Podman handles it via Healthcheck and Notify=healthy
           TimeoutStartSec=infinity
-          ExecStartPre=/bin/bash -c "until [ -f /run/restore-complete ]; do sleep 1; done"
 
           [Install]
           WantedBy=default.target
