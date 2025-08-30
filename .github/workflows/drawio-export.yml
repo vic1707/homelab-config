@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 0 # Needed by rlespinasse/drawio-export-action
 
       - name: Use Draw.io CLI to export diagram
         uses: rlespinasse/drawio-export-action@726d216fe67f8baf5986fd9a27412ffb0e402555 # v2.35.0
