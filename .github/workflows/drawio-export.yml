@@ -1,3 +1,4 @@
+# wrkflw run --runtime podman .github/workflows/drawio-export.yml
 name: Draw.io-export
 
 on:

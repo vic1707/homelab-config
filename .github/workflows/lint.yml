@@ -1,3 +1,4 @@
+# wrkflw run --runtime podman .github/workflows/lint.yml
 name: Lint & Format
 
 on:

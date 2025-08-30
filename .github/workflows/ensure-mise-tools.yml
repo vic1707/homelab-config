@@ -1,3 +1,4 @@
+# wrkflw run --runtime podman .github/workflows/ensure-mise-tools.yml
 name: Ensure mise tools can be installed
 
 on:
