@@ -82,6 +82,7 @@ jobs:
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
+          fetch-depth: 0 # Needed for the git diff
           persist-credentials: false
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
 
@@ -131,7 +132,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "images=${ALL:-[]}" >> "$GITHUB_OUTPUT"
           else
-            echo "images=${CHANGED_FILES:-[]}" >> "$GITHUB_OUTPUT"
+            echo "images=${CHANGED_IMAGES:-[]}" >> "$GITHUB_OUTPUT"
           fi
 
   dedup-images:
@@ -140,7 +141,7 @@ jobs:
     needs:
       - detect-containerfiles-changes
       - detect-inline-images-changes
-    if: needs.detect-containerfiles-changes.outputs.containerfiles != '[]' && needs.detect-inline-images-changes.outputs.images != '[]'
+    if: needs.detect-containerfiles-changes.outputs.containerfiles != '[]' || needs.detect-inline-images-changes.outputs.images != '[]'
     outputs:
       images: ${{ steps.dedup.outputs.images }}
     steps:
