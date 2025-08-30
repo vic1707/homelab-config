@@ -1,10 +1,104 @@
-name: TODO
+name: Check Container Images
 
 on:
+  push:
+    branches: [moving-out] # TODO: rename to main once we're done with big refacto
+    paths:
+      - "**/*.containerfile"
+      - "**/*.bu.yml"
+      - "**/*.container"
   workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - "**/*.containerfile"
+      - "**/*.bu.yml"
+      - "**/*.container"
+
+permissions: {}
 
 jobs:
-  todo:
+  detect-containerfiles-changes:
+    name: Detect changed containerfiles
     runs-on: ubuntu-latest
+    outputs:
+      containerfiles: ${{ steps.set-containerfiles.outputs.containerfiles }}
     steps:
-      - run: echo "TODO"
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # Needed by tj-actions/changed-files
+
+      - name: Get changed containerfiles paths
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        id: changed-containerfiles
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        with:
+          files: "**/*.containerfile"
+          matrix: true
+
+      - name: Get all containerfiles
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        id: all-containerfiles
+        run: |
+          CONTAINER_FILES=$(
+            find . -type f -name '*.containerfile' \
+                | jq -R . \
+                | jq -s -c .
+          )
+          echo "containerfiles=$CONTAINER_FILES" >> "$GITHUB_OUTPUT"
+
+      - name: Set containerfiles
+        id: set-containerfiles
+        env:
+          CHANGED_FILES: ${{ steps.changed-containerfiles.outputs.all_changed_files }}
+          ALL: ${{ steps.all-containerfiles.outputs.containerfiles }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "containerfiles=$ALL" >> "$GITHUB_OUTPUT"
+          else
+            echo "containerfiles=$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-and-check:
+    name: Build & Check changed containerfiles
+    needs: detect-containerfiles-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file: ${{ fromJson(needs.detect-containerfiles-changes.outputs.containerfiles) }}
+      max-parallel: 4
+      fail-fast: false
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+
+      - name: Install QEMU
+        run: |
+          sudo apt update
+          sudo apt install -y qemu-user-static
+
+      - name: Dockle
+        run: |
+          podman build -t img -f "$containerfile" .
+          podman save -o img.tar img
+
+          export DOCKER_CONTENT_TRUST=1 # CIS-DI-0005 - Enable Content trust for Docker
+          dockle --debug --exit-code 1 --input img.tar
