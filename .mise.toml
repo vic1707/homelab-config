@@ -1,10 +1,10 @@
+## Will still need
+# pip install -r .config/requirements.txt
+# ansible-galaxy install --force -r .config/requirements.yml
 [env]
 _.python.venv = { path = "{{ config_root }}/.venv", create = true }
 ANSIBLE_HOME="{{ config_root }}/.ansible"
 GOPASS_HOMEDIR="{{ config_root }}"
-
-[hooks]
-postinstall = "pip install -r {{ config_root }}/.config/requirements.txt && ansible-galaxy install --force -r .config/requirements.yml"
 
 [tools]
 actionlint = "1.7.7"
@@ -28,9 +28,6 @@ butane = "asdf:Okeanos/asdf-butane"
 gomplate = "asdf:tapih/asdf-gomplate"
 hcloud-upload-image = "asdf:vic1707/asdf-hcloud-upload-image"
 zizmor = "asdf:vic1707/asdf-zizmor"
-
-[settings]
-experimental = true ## Enables hooks
 
 [settings.python]
 compile = false ## Forces download of precompiled bin
