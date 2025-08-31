@@ -20,6 +20,9 @@ on:
       - "**/*.container"
 
 permissions: {}
+env:
+    # Healthchecks defined in image
+    DOCKLE_IGNORE: CIS-DI-0006
 
 jobs:
   detect-containerfiles-changes:
@@ -221,7 +224,7 @@ jobs:
       - name: Dockle
         run: |
           export DOCKER_CONTENT_TRUST=1 # CIS-DI-0005 - Enable Content trust for Docker
-          dockle --debug --exit-code 1 --input img.tar
+          dockle --debug --ignore "${{ env.DOCKLE_IGNORE }}" --exit-code 1 --input img.tar
 
   check-inline-images:
     name: Check changed inline images
@@ -263,4 +266,4 @@ jobs:
       - name: Dockle
         run: |
           export DOCKER_CONTENT_TRUST=1 # CIS-DI-0005 - Enable Content trust for Docker
-          dockle --debug --exit-code 1 --input img.tar
+          dockle --debug --ignore "${{ env.DOCKLE_IGNORE }}" --exit-code 1 --input img.tar
