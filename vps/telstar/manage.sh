@@ -26,12 +26,6 @@ STREAM=stable
 }
 
 #############################################
-# Imported Variables
-#############################################
-HCLOUD_TOKEN=$(gopass show -o api-token.hetzner)
-export HCLOUD_TOKEN
-
-#############################################
 # Utility functions
 #############################################
 get_fcos_release_infos() {
@@ -149,6 +143,8 @@ case "$COMMAND" in
 
         ;;
     hetzner)
+        HCLOUD_TOKEN=toto
+        export HCLOUD_TOKEN
         ENABLE_BACKUP=true generate_ignition
         get_fcos_release_infos "$STREAM" aarch64 hetzner raw.xz HETZNER_INFOS
         IMG_TAGS="version=${HETZNER_INFOS[0]},stream=$STREAM"
