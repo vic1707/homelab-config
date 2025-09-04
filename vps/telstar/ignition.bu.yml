@@ -585,7 +585,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=ghcr.io/lldap/lldap:latest-alpine-rootless
+          Image=ghcr.io/vic1707/homelab/telstar-lldap:latest
           User=%U
           Group=%G
           UserNS=keep-id:uid=%U,gid=%G
@@ -597,11 +597,15 @@ storage:
 
           Environment="TZ=Europe/Paris"
 
-          Volume=/srv/bofzilla/containers/lldap:/db:Z,rw
-          Volume=/home/bofzilla/.config/containers/lldap/config.toml:/data/lldap_config.toml:Z,ro
+          Volume=/srv/bofzilla/containers/lldap:/data:Z,rw
+          Volume=/home/bofzilla/.config/containers/lldap/config.toml:/config/lldap_config.toml:Z,ro
 
           Notify=healthy
-          HealthCmd=/app/lldap healthcheck --config-file /data/lldap_config.toml
+          HealthCmd=["/bin/lldap", "healthcheck", "--config-file", "/config/lldap_config.toml"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -624,7 +628,7 @@ storage:
           # verbose = true
           http_host = '0.0.0.0'
           http_url = 'https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}'
-          database_url = 'sqlite:///db/users.db?mode=rwc'
+          database_url = 'sqlite:///data/users.db?mode=rwc'
           ldap_base_dn = '{{ $LLDAP_BASE_DN }}'
 
           ## Admin account
