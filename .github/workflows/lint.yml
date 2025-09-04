@@ -33,7 +33,7 @@ jobs:
         # fix command `shfmt -w -i 4 -s -bn -ci -sr -kp .`
         run: |
           SUPPORTED_SHELLS="sh|bash"
-          rg -l "^#!(.*/|.*env +)($SUPPORTED_SHELLS)" . \
+          rg --ignore --hidden -l "^#!(.*/|.*env +)($SUPPORTED_SHELLS)" . \
               | xargs -r -t shfmt -d -i 4 -s -bn -ci -sr -kp
 
       - name: Caddy
@@ -65,7 +65,7 @@ jobs:
       - name: Shellcheck
         run: |
           SUPPORTED_SHELLS="sh|bash"
-          rg -l "^#!(.*/|.*env +)($SUPPORTED_SHELLS)" . \
+          rg --ignore --hidden -l "^#!(.*/|.*env +)($SUPPORTED_SHELLS)" . \
               | xargs -r -t shellcheck
 
       - name: Zizmor
