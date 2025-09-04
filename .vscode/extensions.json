@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "github.vscode-github-actions",
+        "mhutchie.git-graph",
+        "redhat.ansible",
+        "tamasfe.even-better-toml",
+        "timonwong.shellcheck",
+        "gruntfuggly.todo-tree",
+    ]
+}

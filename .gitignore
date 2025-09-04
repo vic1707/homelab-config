@@ -2,7 +2,9 @@
 .ansible/
 .cache/gopass
 .venv/
-.vscode/
+
+.vscode/**/*
+!.vscode/extensions.json
 
 ## VPS FCOS
 __TMP__*/
