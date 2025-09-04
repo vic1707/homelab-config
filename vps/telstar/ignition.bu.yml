@@ -703,28 +703,28 @@ storage:
           After=lldap-bootstrap.container
 
           [Container]
-          Image=ghcr.io/authelia/authelia:4.39.6
+          Image=ghcr.io/vic1707/homelab/telstar-authelia:latest
           ContainerName=authelia
           Network=tunnel.network
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
           ReadOnly=true
           DropCapability=ALL
-          # su-exec: setgroups(0): Operation not permitted
-          AddCapability=SETGID
           NoNewPrivileges=true
 
           Environment="TZ=Europe/Paris"
 
-          Tmpfs=/app
           Volume=/home/bofzilla/.config/containers/authelia/configuration.yml:/config/configuration.yml:Z,ro
           Volume=/srv/bofzilla/containers/authelia:/data:Z,rw
-          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/var/log/authelia
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/log
 
           Notify=healthy
-          HealthCmd=/app/healthcheck.sh
-          HealthInterval=30s
-          HealthTimeout=3s
-          HealthRetries=5
-          HealthStartPeriod=60s
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:9091/api/health", "-I"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -746,7 +746,7 @@ storage:
           log:
             level: debug
             format: text
-            file_path: /var/log/authelia/authelia.log
+            file_path: /log/authelia.log
             keep_stdout: true
 
           # Is the authz mode for caddy
