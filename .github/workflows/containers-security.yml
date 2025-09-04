@@ -20,9 +20,6 @@ on:
       - "**/*.container"
 
 permissions: {}
-env:
-  # Healthchecks defined in image
-  DOCKLE_IGNORE: CIS-DI-0006
 
 jobs:
   detect-image-changes:
@@ -205,8 +202,20 @@ jobs:
           podman pull "${{ matrix.target }}"
           podman save -o img.tar "${{ matrix.target }}"
 
-      # --- Dockle check ---
-      - name: Dockle
+      - name: Run scans
         run: |
-          export DOCKER_CONTENT_TRUST=1
-          dockle --debug --ignore "${{ env.DOCKLE_IGNORE }}" --exit-code 1 --input img.tar
+          EXITCODE=0
+
+          echo "=== Dockle ==="
+          dockle --debug --exit-code 1 --input img.tar || EXITCODE=$?
+
+          echo "=== Grype ==="
+          grype --fail-on low img.tar || EXITCODE=$?
+
+          echo "=== Dive ==="
+          dive --ci docker-archive://./img.tar || EXITCODE=$?
+
+          if [ $EXITCODE -ne 0 ]; then
+            echo "One or more scans failed"
+            exit $EXITCODE
+          fi
