@@ -196,13 +196,8 @@ storage:
           api_key: {{ .CROWDSEC.FIREWALL_BOUNCER_API_KEY }}
 
           ## Log
-          log_mode: file
-          log_dir: /var/log/
+          log_mode: stdout
           log_level: debug
-          log_compression: true
-          log_max_size: 100
-          log_max_backups: 3
-          log_max_age: 30
           deny_log: true
 
           ## nftables
@@ -519,7 +514,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=docker.io/crowdsecurity/crowdsec:v1.6.11-debian
+          Image=docker.io/crowdsecurity/crowdsec:v1.7.0-debian
           ContainerName=crowdsec
           Network=tunnel.network
           NoNewPrivileges=true
