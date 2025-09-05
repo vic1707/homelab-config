@@ -196,13 +196,8 @@ storage:
           api_key: {{ .CROWDSEC.FIREWALL_BOUNCER_API_KEY }}
 
           ## Log
-          log_mode: file
-          log_dir: /var/log/
+          log_mode: stdout
           log_level: debug
-          log_compression: true
-          log_max_size: 100
-          log_max_backups: 3
-          log_max_age: 30
           deny_log: true
 
           ## nftables
@@ -431,7 +426,7 @@ storage:
 
           (site_common) {
             log {
-              output file /var/log/caddy/access.log
+              output file /log/access.log
               level DEBUG
             }
 
@@ -479,23 +474,25 @@ storage:
           Network=tunnel.network
           ReadOnly=true
           DropCapability=ALL
-          # exec container process `/usr/bin/caddy`: Operation not permitted
-          AddCapability=NET_BIND_SERVICE
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
           NoNewPrivileges=true
           Environment="TZ=Europe/Paris"
           {{ if .DOMAIN.EXPOSED }} Environment="CLOUDFLARE_API_TOKEN={{ .DOMAIN.CLOUDFLARE_API_TOKEN }}" {{ end }}
           Environment="CROWDSEC_CADDY_BOUNCER_API_KEY={{ .CROWDSEC.CADDY_BOUNCER_API_KEY }}"
-          PublishPort=443:443
-          Volume=/home/bofzilla/.config/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
+          PublishPort=443
+          Sysctl=net.ipv4.ip_unprivileged_port_start=80
+          Volume=/home/bofzilla/.config/containers/caddy/Caddyfile:/config/Caddyfile:Z,ro
           Volume=/srv/bofzilla/containers/caddy:/data/caddy:Z,rw
-          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/var/log/caddy
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/log
 
           Notify=healthy
-          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:9999/health
-          HealthInterval=30s
-          HealthTimeout=5s
-          HealthRetries=5
-          HealthStartPeriod=30s
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:9999/health", "-I"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -517,7 +514,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=docker.io/crowdsecurity/crowdsec:v1.6.11-debian
+          Image=docker.io/crowdsecurity/crowdsec:v1.7.0-debian
           ContainerName=crowdsec
           Network=tunnel.network
           NoNewPrivileges=true
@@ -588,7 +585,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=ghcr.io/lldap/lldap:latest-alpine-rootless
+          Image=ghcr.io/vic1707/homelab/telstar-lldap:latest
           User=%U
           Group=%G
           UserNS=keep-id:uid=%U,gid=%G
@@ -600,11 +597,15 @@ storage:
 
           Environment="TZ=Europe/Paris"
 
-          Volume=/srv/bofzilla/containers/lldap:/db:Z,rw
-          Volume=/home/bofzilla/.config/containers/lldap/config.toml:/data/lldap_config.toml:Z,ro
+          Volume=/srv/bofzilla/containers/lldap:/data:Z,rw
+          Volume=/home/bofzilla/.config/containers/lldap/config.toml:/config/lldap_config.toml:Z,ro
 
           Notify=healthy
-          HealthCmd=/app/lldap healthcheck --config-file /data/lldap_config.toml
+          HealthCmd=["/bin/lldap", "healthcheck", "--config-file", "/config/lldap_config.toml"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -627,7 +628,7 @@ storage:
           # verbose = true
           http_host = '0.0.0.0'
           http_url = 'https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}'
-          database_url = 'sqlite:///db/users.db?mode=rwc'
+          database_url = 'sqlite:///data/users.db?mode=rwc'
           ldap_base_dn = '{{ $LLDAP_BASE_DN }}'
 
           ## Admin account
@@ -706,28 +707,28 @@ storage:
           After=lldap-bootstrap.container
 
           [Container]
-          Image=ghcr.io/authelia/authelia:4.39.6
+          Image=ghcr.io/vic1707/homelab/telstar-authelia:latest
           ContainerName=authelia
           Network=tunnel.network
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
           ReadOnly=true
           DropCapability=ALL
-          # su-exec: setgroups(0): Operation not permitted
-          AddCapability=SETGID
           NoNewPrivileges=true
 
           Environment="TZ=Europe/Paris"
 
-          Tmpfs=/app
           Volume=/home/bofzilla/.config/containers/authelia/configuration.yml:/config/configuration.yml:Z,ro
           Volume=/srv/bofzilla/containers/authelia:/data:Z,rw
-          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/var/log/authelia
+          Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/log
 
           Notify=healthy
-          HealthCmd=/app/healthcheck.sh
-          HealthInterval=30s
-          HealthTimeout=3s
-          HealthRetries=5
-          HealthStartPeriod=60s
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:9091/api/health", "-I"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -749,7 +750,7 @@ storage:
           log:
             level: debug
             format: text
-            file_path: /var/log/authelia/authelia.log
+            file_path: /log/authelia.log
             keep_stdout: true
 
           # Is the authz mode for caddy
