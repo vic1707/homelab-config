@@ -1,5 +1,5 @@
 # Cheating stage
-    FROM ghcr.io/authelia/authelia:4.39.6 as authelia
+    FROM ghcr.io/authelia/authelia:4.39.8 as authelia
     FROM docker.io/library/debian:13.0 as bins
 
     COPY --from=authelia /app/authelia /bin/authelia
