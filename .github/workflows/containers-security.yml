@@ -204,6 +204,8 @@ jobs:
           podman save -o img.tar "${{ matrix.target }}"
 
       - name: Run scans
+        env:
+          DOCKER_CONTENT_TRUST: 1
         run: |
           EXITCODE=0
 
