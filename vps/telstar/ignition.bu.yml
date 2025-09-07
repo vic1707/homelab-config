@@ -1081,11 +1081,14 @@ storage:
           After=authelia.container caddy.container
 
           [Container]
-          Image=ghcr.io/h44z/wg-portal:v2.0.4
+          Image=ghcr.io/vic1707/homelab/telstar-wg-portal:latest
           ContainerName=wg-portal
           ## Fixes initial OIDC healthcheck
           AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           Network=tunnel.network
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
           ReadOnly=true
           DropCapability=ALL
           # Needed to be able to create a new VPN
@@ -1096,15 +1099,15 @@ storage:
 
           Environment="TZ=Europe/Paris"
           PublishPort=51820-51825
-          Volume=/home/bofzilla/.config/containers/wg-portal/config.yaml:/app/config/config.yaml:Z,ro
+          Volume=/home/bofzilla/.config/containers/wg-portal/config.yaml:/config/config.yaml:Z,ro
           Volume=/srv/bofzilla/containers/wg-portal:/data:Z,rw
 
           Notify=healthy
-          HealthCmd=wget --spider --quiet --tries=1 --timeout=5 http://localhost:8888
-          HealthInterval=30s
-          HealthTimeout=5s
-          HealthRetries=5
-          HealthStartPeriod=30s
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:8888/", "-I"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
