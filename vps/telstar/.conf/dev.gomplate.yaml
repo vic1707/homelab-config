@@ -1,6 +1,8 @@
 ## General config
 SSH_PORT: {{ gopass "telstar/ssh-port" }}
 PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
+BOFZILLA_PASSWORD: {{ gopass "telstar/bofzilla-pass" | strings.TrimSpace | crypto.YescryptMCF 12 32 }}
+
 CADDY:
   IP: 10.89.0.60
 
@@ -38,6 +40,8 @@ AUTHELIA:
   STORAGE_ENCRYPTION_KEY: {{ gopass "telstar/authelia-storage-encryption-key" }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
   JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}
+  ## OIDC
+  WG_PORTAL_CLIENT_SECRET: {{ random.AlphaNum 150 }}
 
 GATUS:
   SUBDOMAIN: uptime

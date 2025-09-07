@@ -843,6 +843,25 @@ storage:
                 # Trust me, strange syntax is needed
                 - key: |
                     {{- print "\n" (crypto.RSAGenerateKey | indent 20) }}
+              claims_policies:
+                wgportal_full:
+                  id_token: ['preferred_username', 'email', 'groups', 'name']
+              clients:
+                - client_id: wgportal
+                  client_name: wg-portal
+                  client_secret: {{ crypto.PBKDF2MCF .AUTHELIA.WG_PORTAL_CLIENT_SECRET (random.AlphaNum 150) 2048 75 "SHA512" }}
+                  public: false
+                  authorization_policy: {{ .AUTHELIA.DEFAULT_AUTH_POLICY }}
+                  redirect_uris:
+                    - https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0/auth/login/authelia/callback
+                  scopes:
+                    - openid
+                    - profile
+                    - groups
+                    - email
+                  userinfo_signed_response_alg: none
+                  consent_mode: implicit
+                  claims_policy: wgportal_full
 
           storage:
             encryption_key: {{ .AUTHELIA.STORAGE_ENCRYPTION_KEY }}
@@ -1102,6 +1121,10 @@ storage:
           Volume=/home/bofzilla/.config/containers/wg-portal/config.yaml:/config/config.yaml:Z,ro
           Volume=/srv/bofzilla/containers/wg-portal:/data:Z,rw
 
+          # {{ if not .DOMAIN.EXPOSED }}
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:Z,ro
+          # {{ end }}
+
           Notify=healthy
           HealthCmd=["/bin/localhealth", "http://127.0.0.1:8888/", "-I"]
           HealthInterval=5s
@@ -1138,6 +1161,30 @@ storage:
           advanced:
             api_admin_only: true
             log_level: debug
+
+          auth:
+            hide_login_form: true # doesn't disable it tho
+            callback_url_prefix: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0
+            oidc:
+              - id: Authelia
+                provider_name: Authelia
+                display_name: Login with</br>Authelia
+                base_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+                client_id: wgportal
+                client_secret: {{ .AUTHELIA.WG_PORTAL_CLIENT_SECRET }}
+                field_map:
+                  user_identifier: preferred_username
+                  email: email
+                  firstname: name
+                  user_groups: groups
+                admin_mapping:
+                  admin_group_regex: ^(lldap_admin|wg-portal-admin)$
+                extra_scopes:
+                  - openid
+                  - profile
+                  - groups
+                  - email
+                registration_enabled: true
       user:
         name: bofzilla
       group:
@@ -1322,7 +1369,7 @@ passwd:
   users:
     - name: bofzilla
       groups: [wheel]
-      password_hash: $y$j9T$uLiWqr0dmF4Op1GerGVIb.$w0t1TBTgyIbGU5tIT5z04Sl08O9Tx4MFc7GCh/s3KVC
+      password_hash: "{{ .BOFZILLA_PASSWORD }}"
       ssh_authorized_keys_local:
         - .ssh/bofzilla.pub
 
