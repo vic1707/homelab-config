@@ -4,7 +4,7 @@ PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 
 ## Domain configuration
 DOMAIN:
-  URL: telstar.local
+  URL: telstar.localhost
   EXPOSED: false
   # CLOUDFLARE_API_TOKEN
 

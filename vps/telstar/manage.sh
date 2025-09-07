@@ -143,7 +143,7 @@ case "$COMMAND" in
 
         ;;
     hetzner)
-        HCLOUD_TOKEN=toto
+        HCLOUD_TOKEN=$(gopass show -o api-token.hetzner)
         export HCLOUD_TOKEN
         ENABLE_BACKUP=true generate_ignition
         get_fcos_release_infos "$STREAM" aarch64 hetzner raw.xz HETZNER_INFOS

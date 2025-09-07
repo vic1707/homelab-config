@@ -6,5 +6,6 @@
         "tamasfe.even-better-toml",
         "timonwong.shellcheck",
         "gruntfuggly.todo-tree",
+        "nefrob.vscode-just-syntax",
     ]
 }
