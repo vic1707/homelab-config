@@ -1100,7 +1100,7 @@ storage:
           After=authelia.container caddy.container
 
           [Container]
-          Image=ghcr.io/vic1707/homelab/telstar-wg-portal:latest
+          Image=ghcr.io/vic1707/homelab/telstar-wg-portal:pr-76
           ContainerName=wg-portal
           ## Fixes initial OIDC healthcheck
           AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
@@ -1148,8 +1148,7 @@ storage:
       contents:
         inline: |
           core:
-            admin_user: null # bad, reverts to default creds
-            admin_password: null # bad, reverts to default creds
+            disable_admin_user: true
 
           database:
             type: sqlite
