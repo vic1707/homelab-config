@@ -6,6 +6,7 @@ sequenceDiagram
     participant Crowdsec
     participant Caddy
     participant Authelia
+    participant Gatus
 
     Note over Crowdsec, LLDAP: Start independently and in parallel<br/>Need backup restore to be completed
 
@@ -19,4 +20,7 @@ sequenceDiagram
 
     Authelia-->>LLDAP: Waits for
     Authelia->>Authelia: Starts
+
+    Note over Gatus: Waits for everyone to be ready
+    Gatus->>Gatus: Starts
 ```
