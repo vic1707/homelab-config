@@ -7,9 +7,11 @@
     RUN mkdir -p \
         /FS/bin \
         /FS/config \
-        /FS/data
+        /FS/data \
+        /FS/assets
 
     COPY --from=lldap /app/lldap /FS/bin/lldap
+    COPY --from=lldap /app/app /FS/assets
 
 # Final image
     FROM scratch

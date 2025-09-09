@@ -629,6 +629,7 @@ storage:
           http_url = 'https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}'
           database_url = 'sqlite:///data/users.db?mode=rwc'
           ldap_base_dn = '{{ $LLDAP_BASE_DN }}'
+          assets_path = "./assets"
 
           ## Admin account
           ldap_user_dn = '{{ .LLDAP.ADMIN_USER }}'
