@@ -158,6 +158,7 @@ jobs:
     name: Build & Check containerfiles + inline images
     needs: detect-image-changes
     runs-on: ubuntu-latest
+    if: needs.detect-image-changes.outputs.targets != '[]'
     strategy:
       matrix:
         include: ${{ fromJson(needs.detect-image-changes.outputs.targets) }}
