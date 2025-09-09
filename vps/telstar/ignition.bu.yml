@@ -434,7 +434,11 @@ storage:
             appsec
           }
 
-          https://www.{{ .DOMAIN.URL }}, https://{{ .DOMAIN.URL }} {
+          https://{{ .DOMAIN.URL }}/health, https://127.0.0.1/health {
+            respond "OK"
+          }
+
+          https://{{ .DOMAIN.URL }} {
             import site_common
             redir https://github.com/vic1707
           }
@@ -448,12 +452,6 @@ storage:
           https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
             import site_common
             reverse_proxy authelia:9091
-          }
-
-          :9999 {
-            handle /health {
-              respond "OK"
-            }
           }
       user:
         name: bofzilla
@@ -488,7 +486,7 @@ storage:
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/log
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "http://127.0.0.1:9999/health", "-I"]
+          HealthCmd=["/bin/localhealth", "https://127.0.0.1:443/health", "-I"]
           HealthInterval=5s
           HealthTimeout=2s
           HealthRetries=3

@@ -44,7 +44,7 @@
     COPY --from=FS /FS /
 
     HEALTHCHECK --interval=5s --timeout=2s --retries=3 --start-period=2s \
-        CMD ["/bin/localhealth", "http://127.0.0.1:9999/", "-I"]
+        CMD ["/bin/localhealth", "https://127.0.0.1:443/health", "-I"]
 
     # Check that binary can start
     RUN ["/bin/caddy", "--version"]
