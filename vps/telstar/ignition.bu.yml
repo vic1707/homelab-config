@@ -765,7 +765,7 @@ storage:
             default_policy: deny
             rules:
               - domain: {{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}
-                policy: {{ .AUTHELIA.DEFAULT_AUTH_POLICY }}
+                policy: two_factor
                 subject:
                   - group:lldap_admin
 
@@ -805,13 +805,18 @@ storage:
             #   min_score: 4
 
           notifier:
+            {{ if .AUTHELIA.SMTP }}
             smtp:
-              address: smtp://smtp.purelymail.com:587
-              sender: {{ .AUTHELIA.SMTP_ADDRESS }}
-              username: {{ .AUTHELIA.SMTP_ADDRESS }}
-              password: {{ .AUTHELIA.SMTP_PASS }}
+              address: {{ .AUTHELIA.SMTP.SERVER }}
+              sender: {{ .AUTHELIA.SMTP.ADDRESS }}
+              username: {{ .AUTHELIA.SMTP.ADDRESS }}
+              password: {{ .AUTHELIA.SMTP.PASS }}
               subject: '{title}'
               startup_check_address: test@authelia.com
+            {{ else }}
+            filesystem:
+              filename: /data/notifications.txt
+            {{ end }}
 
           telemetry:
             metrics:
