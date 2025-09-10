@@ -115,14 +115,25 @@ case "$COMMAND" in
     vm)
         ENABLE_BACKUP=false generate_ignition
         get_fcos_release_infos "$STREAM" aarch64 qemu qcow2.xz QEMU_INFOS
-        TMP_DIR="$(mktemp --directory ./__TMP__Fedora-CoreOS-image-creation.XXXXXX)"
-        IMG_PATH="$TMP_DIR/fcos.qcow2.xz"
 
-        echo "📦 Downloading FCOS ${QEMU_INFOS[0]}..."
-        curl -L "${QEMU_INFOS[1]}" -o "$IMG_PATH"
+        CACHE_DIR="./__TMP__Fedora-CoreOS-image-creation"
+        IMG_PATH="$CACHE_DIR/fcos.qcow2"
+        XZ_PATH="$IMG_PATH.xz"
+        mkdir -p "$CACHE_DIR"
 
+        if [[ ${1-false} == "true" ]]; then
+            echo "🔄 Forcing re-download of FCOS image..."
+            rm -f "$IMG_PATH" "$XZ_PATH"
+        fi
+
+        if [[ -f $XZ_PATH ]]; then
+            echo "✅ Compressed image already exists at $XZ_PATH, skipping download."
+        else
+            echo "📦 Downloading FCOS ${QEMU_INFOS[0]}..."
+            curl -L "${QEMU_INFOS[1]}" -o "$XZ_PATH"
+        fi
         echo "⚙️ Uncompressing image file..."
-        unxz "$IMG_PATH"
+        unxz --keep -f "$XZ_PATH"
 
         echo "💻 Starting VM..."
 
