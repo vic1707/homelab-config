@@ -60,6 +60,12 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/caddy/srv
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/lldap
       mode: 0755
       user:
@@ -362,6 +368,14 @@ storage:
         name: bofzilla
 
     ## Caddy
+    - path: /home/bofzilla/.config/containers/caddy/srv/icon.png
+      mode: 0400
+      contents:
+        local: ./caddy-srv/icon.png
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy/Caddyfile
       mode: 0400
       contents:
@@ -438,6 +452,12 @@ storage:
             respond "OK"
           }
 
+          https://static.{{ .DOMAIN.URL }} {
+            import site_common
+            root * /srv
+            file_server
+          }
+
           https://{{ .DOMAIN.URL }} {
             import site_common
             redir https://github.com/vic1707
@@ -483,6 +503,7 @@ storage:
           Sysctl=net.ipv4.ip_unprivileged_port_start=80
           Volume=/home/bofzilla/.config/containers/caddy/Caddyfile:/config/Caddyfile:Z,ro
           Volume=/srv/bofzilla/containers/caddy:/data/caddy:Z,rw
+          Volume=/home/bofzilla/.config/containers/caddy/srv:/srv:Z,ro
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/log
 
           Notify=healthy
