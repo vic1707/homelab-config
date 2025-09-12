@@ -985,6 +985,8 @@ storage:
               - "[STATUS] == 200"
               - "[RESPONSE_TIME] < 100"
               - "[BODY].status == OK"
+            client:
+              timeout: 1s
 
           endpoints:
             - name: Caddy (internal)
