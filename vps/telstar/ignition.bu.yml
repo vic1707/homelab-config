@@ -54,7 +54,19 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /srv/bofzilla/containers/gatus
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/caddy/srv
       mode: 0755
       user:
         name: bofzilla
@@ -73,6 +85,12 @@ storage:
       group:
         name: bofzilla
     - path: /home/bofzilla/.config/containers/authelia
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/gatus
       mode: 0755
       user:
         name: bofzilla
@@ -434,8 +452,16 @@ storage:
             appsec
           }
 
-          https://{{ .DOMAIN.URL }}/health, https://127.0.0.1/health {
-            respond "OK"
+          https://{{ .DOMAIN.URL }}/health,
+          http://caddy/health,
+          http://127.0.0.1/health {
+            respond `{ "status": "OK" }`
+          }
+
+          https://static.{{ .DOMAIN.URL }} {
+            import site_common
+            root * /srv
+            file_server
           }
 
           https://{{ .DOMAIN.URL }} {
@@ -445,13 +471,26 @@ storage:
 
           https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
             import site_common
-            import secure *
-            reverse_proxy http://lldap:17170
+
+            # Makes the healthcheck reachable for gatus without auth
+            handle_path /health {
+              reverse_proxy http://lldap:17170
+            }
+
+            handle {
+              import secure *
+              reverse_proxy http://lldap:17170
+            }
           }
 
           https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
             import site_common
             reverse_proxy authelia:9091
+          }
+
+          https://{{ .GATUS.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import site_common
+            reverse_proxy gatus:8080
           }
       user:
         name: bofzilla
@@ -470,6 +509,7 @@ storage:
           Image=ghcr.io/vic1707/homelab/telstar-caddy:latest
           ContainerName=caddy
           Network=tunnel.network
+          IP={{ .CADDY.IP }}
           ReadOnly=true
           DropCapability=ALL
           User=%U
@@ -483,10 +523,11 @@ storage:
           Sysctl=net.ipv4.ip_unprivileged_port_start=80
           Volume=/home/bofzilla/.config/containers/caddy/Caddyfile:/config/Caddyfile:Z,ro
           Volume=/srv/bofzilla/containers/caddy:/data/caddy:Z,rw
+          Volume=/home/bofzilla/.config/containers/caddy/srv:/srv:Z,ro
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/log
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "https://127.0.0.1:443/health", "-I"]
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:80/health", "-I"]
           HealthInterval=5s
           HealthTimeout=2s
           HealthRetries=3
@@ -622,7 +663,6 @@ storage:
       mode: 0400
       contents:
         inline: |
-          ## TODO: SMTP here or done through Authelia?
           ## General settings
           # verbose = true
           http_host = '0.0.0.0'
@@ -854,6 +894,159 @@ storage:
             timeout: 60s
             selection_criteria:
               user_verification: preferred
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/gatus.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Gatus Quadlet
+          After=caddy.container lldap.container crowdsec.container authelia.container
+
+          [Container]
+          Image=ghcr.io/vic1707/homelab/telstar-gatus:latest
+          ContainerName=gatus
+          Network=tunnel.network
+          # {{ if not .DOMAIN.EXPOSED }}
+          AddHost={{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          AddHost={{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:Z,ro
+          # {{ end }}
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Environment="TZ=Europe/Paris"
+          Environment="GATUS_LOG_LEVEL=DEBUG"
+
+          Volume=/home/bofzilla/.config/containers/gatus/config.yaml:/config/config.yaml:Z,ro
+          Volume=/srv/bofzilla/containers/gatus:/data:Z,rw
+
+          Notify=healthy
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:8080/", "-I"]
+          HealthInterval=5s
+          HealthTimeout=2s
+          HealthRetries=3
+          HealthStartPeriod=2s
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/gatus/config.yaml
+      mode: 0400
+      contents:
+        inline: |
+          metrics: false
+
+          storage:
+            type: sqlite
+            path: /data/data.db
+
+          alerts:
+            failure-threshold: 3
+            success-threshold: 2
+
+          ui:
+            default-sort-by: group
+            dark-mode: true
+            description: "Bofzilla's homelab's health dashboard"
+            header: {{ .DOMAIN.URL }}
+            title: {{ .DOMAIN.URL }}
+            link: https://{{ .DOMAIN.URL }}
+
+          x-endpoint-common: &endpoint-common
+            interval: 2m
+            conditions:
+              - "[STATUS] == 200"
+              - "[RESPONSE_TIME] < 500"
+            client:
+              timeout: 1s
+            ui:
+              hide-hostname: true
+
+          x-critical: &critical-endpoint
+            interval: 20s
+            conditions:
+              - "[STATUS] == 200"
+              - "[RESPONSE_TIME] < 250"
+              - "[BODY].status == OK"
+
+          endpoints:
+            - name: Caddy (internal)
+              <<: [*critical-endpoint, *endpoint-common]
+              group: caddy
+              url: http://caddy/health
+              extra-labels:
+                host: telstar
+                connectivity: internal
+            - name: Caddy (external)
+              <<: [*critical-endpoint, *endpoint-common]
+              group: caddy
+              url: https://{{ .DOMAIN.URL }}/health
+              extra-labels:
+                host: telstar
+                connectivity: external
+
+            - name: Authelia (internal)
+              <<: [*critical-endpoint, *endpoint-common]
+              group: authelia
+              url: http://authelia:9091/api/health
+              extra-labels:
+                host: telstar
+                connectivity: internal
+                stack: auth
+            - name: Authelia (external)
+              <<: [*critical-endpoint, *endpoint-common]
+              group: authelia
+              url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/health
+              extra-labels:
+                host: telstar
+                connectivity: external
+                stack: auth
+
+            - name: LLDAP (internal)
+              <<: *endpoint-common
+              group: lldap
+              url: http://lldap:17170/health
+              extra-labels:
+                host: telstar
+                connectivity: internal
+                stack: auth
+            - name: LLDAP (external)
+              <<: *endpoint-common
+              group: lldap
+              url: https://{{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}/health
+              extra-labels:
+                host: telstar
+                connectivity: external
+                stack: auth
+
+            - name: Crowdsec (internal)
+              <<: *endpoint-common
+              group: crowdsec
+              url: http://crowdsec:8080/health
+              conditions:
+                - "[STATUS] == 200"
+                - "[BODY].status == up"
+              extra-labels:
+                host: telstar
+                connectivity: internal
+                stack: security
       user:
         name: bofzilla
       group:
