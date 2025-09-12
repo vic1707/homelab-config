@@ -380,14 +380,6 @@ storage:
         name: bofzilla
 
     ## Caddy
-    - path: /home/bofzilla/.config/containers/caddy/srv/icon.png
-      mode: 0400
-      contents:
-        local: ./caddy-srv/icon.png
-      user:
-        name: bofzilla
-      group:
-        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy/Caddyfile
       mode: 0400
       contents:
@@ -671,7 +663,6 @@ storage:
       mode: 0400
       contents:
         inline: |
-          ## TODO: SMTP here or done through Authelia?
           ## General settings
           # verbose = true
           http_host = '0.0.0.0'
