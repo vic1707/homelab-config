@@ -455,7 +455,7 @@ storage:
           https://{{ .DOMAIN.URL }}/health,
           http://caddy/health,
           http://127.0.0.1/health {
-            respond "OK"
+            respond `{ "status": "OK" }`
           }
 
           https://static.{{ .DOMAIN.URL }} {
@@ -914,6 +914,7 @@ storage:
           AddHost={{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           AddHost={{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:Z,ro
           # {{ end }}
           User=%U
           Group=%G
@@ -974,8 +975,7 @@ storage:
               - "[STATUS] == 200"
               - "[RESPONSE_TIME] < 500"
             client:
-              insecure: {{ not .DOMAIN.EXPOSED }}
-              timeout: 5s
+              timeout: 1s
             ui:
               hide-hostname: true
 
@@ -983,21 +983,19 @@ storage:
             interval: 20s
             conditions:
               - "[STATUS] == 200"
-              - "[RESPONSE_TIME] < 100"
+              - "[RESPONSE_TIME] < 250"
               - "[BODY].status == OK"
-            client:
-              timeout: 1s
 
           endpoints:
             - name: Caddy (internal)
-              <<: [*endpoint-common, *critical-endpoint]
+              <<: [*critical-endpoint, *endpoint-common]
               group: caddy
               url: http://caddy/health
               extra-labels:
                 host: telstar
                 connectivity: internal
             - name: Caddy (external)
-              <<: [*endpoint-common, *critical-endpoint]
+              <<: [*critical-endpoint, *endpoint-common]
               group: caddy
               url: https://{{ .DOMAIN.URL }}/health
               extra-labels:
@@ -1005,7 +1003,7 @@ storage:
                 connectivity: external
 
             - name: Authelia (internal)
-              <<: [*endpoint-common, *critical-endpoint]
+              <<: [*critical-endpoint, *endpoint-common]
               group: authelia
               url: http://authelia:9091/api/health
               extra-labels:
@@ -1013,7 +1011,7 @@ storage:
                 connectivity: internal
                 stack: auth
             - name: Authelia (external)
-              <<: [*endpoint-common, *critical-endpoint]
+              <<: [*critical-endpoint, *endpoint-common]
               group: authelia
               url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/health
               extra-labels:
