@@ -453,8 +453,8 @@ storage:
           }
 
           https://{{ .DOMAIN.URL }}/health,
-          https://caddy/health,
-          https://127.0.0.1/health {
+          http://caddy/health,
+          http://127.0.0.1/health {
             respond "OK"
           }
 
@@ -527,7 +527,7 @@ storage:
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/log
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "https://127.0.0.1:443/health", "-I"]
+          HealthCmd=["/bin/localhealth", "http://127.0.0.1:80/health", "-I"]
           HealthInterval=5s
           HealthTimeout=2s
           HealthRetries=3
@@ -992,7 +992,7 @@ storage:
             - name: Caddy (internal)
               <<: [*endpoint-common, *critical-endpoint]
               group: caddy
-              url: https://{{ .CADDY.IP }}/health
+              url: http://caddy/health
               extra-labels:
                 host: telstar
                 connectivity: internal
