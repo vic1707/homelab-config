@@ -527,11 +527,6 @@ storage:
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/caddy,destination=/log
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "http://127.0.0.1:80/health", "-I"]
-          HealthInterval=5s
-          HealthTimeout=2s
-          HealthRetries=3
-          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -641,11 +636,6 @@ storage:
           Volume=/home/bofzilla/.config/containers/lldap/config.toml:/config/lldap_config.toml:Z,ro
 
           Notify=healthy
-          HealthCmd=["/bin/lldap", "healthcheck", "--config-file", "/config/lldap_config.toml"]
-          HealthInterval=5s
-          HealthTimeout=2s
-          HealthRetries=3
-          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -764,11 +754,6 @@ storage:
           Mount=type=volume,source=CrowdsecLogs.volume,subpath=/authelia,destination=/log
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "http://127.0.0.1:9091/api/health", "-I"]
-          HealthInterval=5s
-          HealthTimeout=2s
-          HealthRetries=3
-          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -930,11 +915,6 @@ storage:
           Volume=/srv/bofzilla/containers/gatus:/data:Z,rw
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "http://127.0.0.1:8080/", "-I"]
-          HealthInterval=5s
-          HealthTimeout=2s
-          HealthRetries=3
-          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
