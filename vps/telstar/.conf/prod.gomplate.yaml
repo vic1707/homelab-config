@@ -1,5 +1,6 @@
 ## General config
 SSH_PORT: {{ gopass "telstar/ssh-port" }}
+TZ: /usr/share/zoneinfo/Europe/Paris
 PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 CADDY:
   IP: 10.89.0.60

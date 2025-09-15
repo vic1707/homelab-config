@@ -13,7 +13,7 @@ storage:
   links:
     # Timezone config
     - path: /etc/localtime
-      target: ../usr/share/zoneinfo/Europe/Paris
+      target: '{{ .TZ }}'
 
   # Base container storage path
   directories:
@@ -516,7 +516,7 @@ storage:
           Group=%G
           UserNS=keep-id:uid=%U,gid=%G
           NoNewPrivileges=true
-          Environment="TZ=Europe/Paris"
+          Volume={{ .TZ }}:/etc/localtime:ro
           {{ if .DOMAIN.EXPOSED }} Environment="CLOUDFLARE_API_TOKEN={{ .DOMAIN.CLOUDFLARE_API_TOKEN }}" {{ end }}
           Environment="CROWDSEC_CADDY_BOUNCER_API_KEY={{ .CROWDSEC.CADDY_BOUNCER_API_KEY }}"
           PublishPort=443:443
@@ -556,7 +556,7 @@ storage:
           ReadOnly=true
           Tmpfs=/var/lib/crowdsec/data
           PublishPort=127.0.0.1:8080:8080
-          Environment="TZ=Europe/Paris"
+          Volume={{ .TZ }}:/etc/localtime:ro
           Environment="BOUNCER_KEY_caddy={{ .CROWDSEC.CADDY_BOUNCER_API_KEY }}"
           Environment="BOUNCER_KEY_firewall={{ .CROWDSEC.FIREWALL_BOUNCER_API_KEY }}"
           Environment="ENROLL_KEY={{ .CROWDSEC.ENROLL_KEY }}"
@@ -630,7 +630,8 @@ storage:
           DropCapability=ALL
           NoNewPrivileges=true
 
-          Environment="TZ=Europe/Paris"
+          # TODO: https://github.com/lldap/lldap/issues/1290
+          # Volume={{ .TZ }}:/etc/localtime:ro
 
           Volume=/srv/bofzilla/containers/lldap:/data:Z,rw
           Volume=/home/bofzilla/.config/containers/lldap/config.toml:/config/lldap_config.toml:Z,ro
@@ -692,7 +693,9 @@ storage:
           DropCapability=ALL
           NoNewPrivileges=true
 
-          Environment="TZ=Europe/Paris"
+          # TODO: https://github.com/lldap/lldap/issues/1290
+          # Volume={{ .TZ }}:/etc/localtime:ro
+
           Environment="LLDAP_URL=http://lldap:17170"
           Environment="LLDAP_ADMIN_PASSWORD={{ .LLDAP.ADMIN_PASS }}"
 
@@ -747,7 +750,7 @@ storage:
           DropCapability=ALL
           NoNewPrivileges=true
 
-          Environment="TZ=Europe/Paris"
+          Volume={{ .TZ }}:/etc/localtime:ro
 
           Volume=/home/bofzilla/.config/containers/authelia/configuration.yml:/config/configuration.yml:Z,ro
           Volume=/srv/bofzilla/containers/authelia:/data:Z,rw
@@ -908,7 +911,7 @@ storage:
           DropCapability=ALL
           NoNewPrivileges=true
 
-          Environment="TZ=Europe/Paris"
+          Volume={{ .TZ }}:/etc/localtime:ro
           Environment="GATUS_LOG_LEVEL=DEBUG"
 
           Volume=/home/bofzilla/.config/containers/gatus/config.yaml:/config/config.yaml:Z,ro
