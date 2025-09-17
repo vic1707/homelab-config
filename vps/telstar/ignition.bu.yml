@@ -1126,11 +1126,6 @@ storage:
           # {{ end }}
 
           Notify=healthy
-          HealthCmd=["/bin/localhealth", "http://127.0.0.1:8888/", "-I"]
-          HealthInterval=5s
-          HealthTimeout=2s
-          HealthRetries=3
-          HealthStartPeriod=2s
 
           [Service]
           Restart=on-failure
@@ -1162,7 +1157,7 @@ storage:
             log_level: debug
 
           auth:
-            hide_login_form: true # doesn't disable it tho
+            hide_login_form: true
             callback_url_prefix: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0
             oidc:
               - id: Authelia

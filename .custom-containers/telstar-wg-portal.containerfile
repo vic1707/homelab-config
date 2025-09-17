@@ -1,5 +1,5 @@
 # Bins
-    FROM ghcr.io/h44z/wg-portal:v2.0.5 as wg-portal
+    FROM ghcr.io/h44z/wg-portal:v2.1.0-beta.3 as wg-portal
 
     # Get all needed libs
     COPY import-libs.sh /bin/import-libs.sh
@@ -17,7 +17,7 @@
 
     COPY --from=wg-portal /app/wg-portal /FS/bin/wg-portal
     COPY --from=wg-portal /bin/bash /FS/bin/bash
-    COPY --from=wg-portal /sbin/resolvconf /FS/bin/resolvconf
+    COPY --from=wg-portal /usr/sbin/resolvconf /FS/bin/resolvconf
     COPY --from=distroless-localhealth /usr/local/bin/localhealth /FS/bin/localhealth
 
     ## Import dynamic libs needed by wg-portal
