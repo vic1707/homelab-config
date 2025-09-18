@@ -1,5 +1,5 @@
 # Bins
-    FROM ghcr.io/twin/gatus:v5.23.2 as gatus
+    FROM ghcr.io/twin/gatus:v5.24.0 as gatus
 
 # Tools
     FROM ghcr.io/11notes/distroless:localhealth AS distroless-localhealth
