@@ -13,7 +13,7 @@ storage:
   links:
     # Timezone config
     - path: /etc/localtime
-      target: '{{ .TZ }}'
+      target: "{{ .TZ }}"
 
   # Base container storage path
   directories:
@@ -832,12 +832,12 @@ storage:
             #   min_score: 4
 
           notifier:
-            {{ if .AUTHELIA.SMTP }}
+            {{ if .SMTP }}
             smtp:
-              address: {{ .AUTHELIA.SMTP.SERVER }}
-              sender: {{ .AUTHELIA.SMTP.ADDRESS }}
-              username: {{ .AUTHELIA.SMTP.ADDRESS }}
-              password: {{ .AUTHELIA.SMTP.PASS }}
+              address: smtp://{{ .SMTP.SERVER }}:{{ .SMTP.PORT }}
+              sender: {{ .SMTP.ADDRESS }}
+              username: {{ .SMTP.ADDRESS }}
+              password: {{ .SMTP.PASS }}
               subject: '{title}'
               startup_check_address: test@authelia.com
             {{ else }}
@@ -940,9 +940,20 @@ storage:
             type: sqlite
             path: /data/data.db
 
-          alerts:
-            failure-threshold: 3
-            success-threshold: 2
+          alerting:
+            # {{ if .SMTP }}
+            email:
+              default-alert:
+                description: "health check failed"
+                send-on-resolved: true
+                failure-threshold: 3
+                success-threshold: 2
+              port: {{ .SMTP.PORT }}
+              host: {{ .SMTP.SERVER }}
+              from: {{ .SMTP.ADDRESS }}
+              password: {{ .SMTP.PASS }}
+              to: {{ .SMTP.ADMIN_ADDRESS }}
+            # {{ end }}
 
           ui:
             default-sort-by: group

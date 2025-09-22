@@ -17,6 +17,9 @@ BACKUP:
   # STORAGEBOX_USER
   # STORAGEBOX_PASS
 
+## Service account Email
+SMTP: false
+
 ## Crowdsec conf
 CROWDSEC:
   ENROLL_KEY: ""
@@ -35,7 +38,6 @@ LLDAP:
 AUTHELIA:
   SUBDOMAIN: auth
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
-  SMTP: false
   STORAGE_ENCRYPTION_KEY: {{ gopass "telstar/authelia-storage-encryption-key" }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
   JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}
