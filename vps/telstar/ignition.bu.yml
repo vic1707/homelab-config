@@ -902,7 +902,7 @@ storage:
           AddHost={{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           AddHost={{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
-          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:Z,ro
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/caddy-ca.crt:Z,ro
           # {{ end }}
           User=%U
           Group=%G
