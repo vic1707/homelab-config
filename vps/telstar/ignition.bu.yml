@@ -944,6 +944,7 @@ storage:
             # {{ if .SMTP }}
             email:
               default-alert:
+                enabled: true
                 description: "health check failed"
                 send-on-resolved: true
                 failure-threshold: 3
@@ -972,6 +973,8 @@ storage:
               timeout: 1s
             ui:
               hide-hostname: true
+            alerts:
+              - type: email
 
           x-critical: &critical-endpoint
             interval: 20s
