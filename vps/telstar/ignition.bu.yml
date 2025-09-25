@@ -835,7 +835,7 @@ storage:
           notifier:
             {{ if .SMTP }}
             smtp:
-              address: submissions://{{ .SMTP.SERVER }}:{{ .SMTP.PORT }}
+              address: smtp://{{ .SMTP.SERVER }}:{{ .SMTP.PORT }}
               sender: {{ .SMTP.ADDRESS }}
               username: {{ .SMTP.ADDRESS }}
               password: {{ .SMTP.PASS }}

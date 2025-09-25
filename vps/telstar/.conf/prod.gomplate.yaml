@@ -19,7 +19,7 @@ BACKUP:
 
 ## Service account Email
 SMTP:
-  PORT: 465
+  PORT: 587
   SERVER: smtp.purelymail.com
   ADMIN_ADDRESS: admin@bofzilla.dev
   ADDRESS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "address" }}
