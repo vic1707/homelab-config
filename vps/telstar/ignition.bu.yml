@@ -190,11 +190,12 @@ storage:
     - path: /var/lib/systemd/linger/bofzilla
 
     # Install semanage
+    ## fc 43 available
     - path: /var/lib/extensions/semanage.raw
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
         verification:
-          hash: sha256-b76a4cb3e95194fd873c07d7220bf65af8ed2f146da35a574cc0dddc1d136939
+          hash: sha256-3574706d1829901336a083c325694c68fff712d8a49645029f2d057aafe72068
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
