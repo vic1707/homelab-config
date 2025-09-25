@@ -17,6 +17,14 @@ BACKUP:
   STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
   STORAGEBOX_PASS: {{ gopass "--password" "backups/backupiter/telstar.account" }}
 
+## Service account Email
+SMTP:
+  PORT: 465
+  SERVER: smtp.purelymail.com
+  ADMIN_ADDRESS: admin@bofzilla.dev
+  ADDRESS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "address" }}
+  PASS: {{ gopass "--password" "domains/bofzilla.dev/smtp/no-reply.purelymail" }}
+
 ## Crowdsec conf
 CROWDSEC:
   ENROLL_KEY: {{ gopass "api-key.crowdsec" }}
@@ -35,10 +43,6 @@ LLDAP:
 AUTHELIA:
   SUBDOMAIN: auth
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
-  SMTP:
-    SERVER: smtp://smtp.purelymail.com:587
-    ADDRESS: {{ gopass "domains/bofzilla.dev/smtp/no-reply.purelymail" "address" }}
-    PASS: {{ gopass "--password" "domains/bofzilla.dev/smtp/no-reply.purelymail" }}
   STORAGE_ENCRYPTION_KEY: {{ gopass "telstar/authelia-storage-encryption-key" }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
   JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}

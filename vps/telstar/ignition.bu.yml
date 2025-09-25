@@ -13,7 +13,7 @@ storage:
   links:
     # Timezone config
     - path: /etc/localtime
-      target: '{{ .TZ }}'
+      target: "{{ .TZ }}"
 
   # Base container storage path
   directories:
@@ -190,11 +190,12 @@ storage:
     - path: /var/lib/systemd/linger/bofzilla
 
     # Install semanage
+    ## fc 43 available
     - path: /var/lib/extensions/semanage.raw
       contents:
         source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
         verification:
-          hash: sha256-b76a4cb3e95194fd873c07d7220bf65af8ed2f146da35a574cc0dddc1d136939
+          hash: sha256-3574706d1829901336a083c325694c68fff712d8a49645029f2d057aafe72068
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
@@ -832,12 +833,12 @@ storage:
             #   min_score: 4
 
           notifier:
-            {{ if .AUTHELIA.SMTP }}
+            {{ if .SMTP }}
             smtp:
-              address: {{ .AUTHELIA.SMTP.SERVER }}
-              sender: {{ .AUTHELIA.SMTP.ADDRESS }}
-              username: {{ .AUTHELIA.SMTP.ADDRESS }}
-              password: {{ .AUTHELIA.SMTP.PASS }}
+              address: submissions://{{ .SMTP.SERVER }}:{{ .SMTP.PORT }}
+              sender: {{ .SMTP.ADDRESS }}
+              username: {{ .SMTP.ADDRESS }}
+              password: {{ .SMTP.PASS }}
               subject: '{title}'
               startup_check_address: test@authelia.com
             {{ else }}
@@ -902,7 +903,7 @@ storage:
           AddHost={{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           AddHost={{ .LLDAP.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
           AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
-          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:Z,ro
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/caddy-ca.crt:Z,ro
           # {{ end }}
           User=%U
           Group=%G
@@ -940,9 +941,21 @@ storage:
             type: sqlite
             path: /data/data.db
 
-          alerts:
-            failure-threshold: 3
-            success-threshold: 2
+          alerting:
+            # {{ if .SMTP }}
+            email:
+              default-alert:
+                enabled: true
+                description: "health check failed"
+                send-on-resolved: true
+                failure-threshold: 3
+                success-threshold: 2
+              port: {{ .SMTP.PORT }}
+              host: {{ .SMTP.SERVER }}
+              from: {{ .SMTP.ADDRESS }}
+              password: {{ .SMTP.PASS }}
+              to: {{ .SMTP.ADMIN_ADDRESS }}
+            # {{ end }}
 
           ui:
             default-sort-by: group
@@ -961,6 +974,8 @@ storage:
               timeout: 1s
             ui:
               hide-hostname: true
+            alerts:
+              - type: email
 
           x-critical: &critical-endpoint
             interval: 20s
