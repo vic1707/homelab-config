@@ -139,7 +139,7 @@ storage:
 
   files:
     #### Backup
-    ## {{ if .BACKUP.ENABLED }}
+    ## {{ if .BACKUP }}
     - path: /etc/sync/paths.conf
       mode: 0400
       contents:
@@ -171,7 +171,7 @@ storage:
         inline: |
           username={{ .BACKUP.STORAGEBOX_USER }}
           password={{ .BACKUP.STORAGEBOX_PASS }}
-    ## {{ end }} ## .BACKUP.ENABLED
+    ## {{ end }} ## .BACKUP
     - path: /etc/selinux/custom-policies/podman-mount-journald.te
       mode: 0400
       contents:
@@ -1133,7 +1133,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    ## {{ if .BACKUP.ENABLED }}
+    ## {{ if .BACKUP }}
     #### Backup
     - name: set-rsync-se-state.service
       enabled: true
@@ -1220,7 +1220,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    ## {{ end }} ## .BACKUP.ENABLED
+    ## {{ end }} ## .BACKUP
 
 passwd:
   users:

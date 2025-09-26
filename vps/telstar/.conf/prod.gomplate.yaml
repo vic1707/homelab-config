@@ -13,7 +13,6 @@ DOMAIN:
 
 ## Backup strategy
 BACKUP:
-  ENABLED: true
   STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
   STORAGEBOX_PASS: {{ gopass "--password" "backups/backupiter/telstar.account" }}
 
