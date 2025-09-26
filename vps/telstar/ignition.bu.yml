@@ -140,15 +140,18 @@ storage:
   files:
     #### Backup
     ## {{ if .BACKUP.ENABLED }}
-    - path: /etc/sync/paths.txt
+    - path: /etc/sync/paths.conf
       mode: 0400
       contents:
-        inline: |
-          /var/srv/bofzilla/
+        local: backup/paths.conf
     - path: /etc/sync/restore.sh
       mode: 0500
       contents:
-        local: ./restore.sh
+        local: backup/restore.sh
+    - path: /etc/sync/backup.sh
+      mode: 0500
+      contents:
+        local: backup/backup.sh
     - path: /etc/selinux/custom-policies/rsync-cifs.te
       mode: 0400
       contents:
@@ -1156,13 +1159,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/rsync --verbose \
-          --archive --recursive \
-          --delete \
-          --fake-super \
-          --log-file=/var/log/sync-to-storagebox.log \
-          --files-from=/etc/sync/paths.txt \
-          --relative / /var/mnt/storagebox
+        ExecStart=/etc/sync/backup.sh "/etc/sync/paths.conf" "/var/mnt/storagebox"
 
         [Install]
         WantedBy=multi-user.target
@@ -1174,7 +1171,7 @@ systemd:
         Description=Periodic sync to mounted Hetzner Storage Box
 
         [Timer]
-        OnUnitActiveSec=3min
+        OnUnitActiveSec=1min
         Persistent=true
 
         [Install]
@@ -1188,7 +1185,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.txt" "/var/mnt/storagebox"
+        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.conf" "/var/mnt/storagebox"
         ExecStartPost=/usr/bin/touch /run/restore-complete
 
         [Install]
