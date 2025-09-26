@@ -20,7 +20,7 @@ to_seconds() {
         h | hr | hrs | hour | hours) factor=3600 ;;
         d | day | days) factor=86400 ;;
         w | week | weeks) factor=604800 ;;
-        mo | month | months) factor=2592000 ;; # approx 30 days
+        mo | month | months) factor=2592000 ;; # ~30 days
         y | yr | yrs | year | years) factor=31536000 ;;
         *)
             echo "Unknown unit: $unit" >&2
@@ -41,7 +41,6 @@ while read -r path interval; do
     stamp_file="$STATE_DIR/$state_key.last"
 
     timeout=$(to_seconds "$interval")
-
     time_last_run=0
     [[ -f $stamp_file ]] && time_last_run=$(cat "$stamp_file")
 
@@ -50,20 +49,23 @@ while read -r path interval; do
     exclude=()
     # path is a glob # we exclude matching paths (precedence handling)
     if [[ $path == */\* ]]; then
+        # needs to remove the pattern for rsync
         path="${path%/*}"
         while read -r cpath _; do
-            [[ $cpath == "$path" ]] && continue
+            [[ $cpath == "$path/*" ]] && continue
             exclude+=("--exclude=$(basename "$cpath")")
-        done < <(grep -F "$path/" "$CONF")
+        done < <(grep -F "$path" "$CONF")
     fi
 
+    echo "[$(date)] - Backing up $path (interval: $interval) - Excluded: [${exclude[*]}]" >> "$LOG"
     /usr/bin/rsync --verbose \
         --archive --recursive \
         --delete \
         --fake-super \
+        --relative \
         --log-file="$LOG" \
         "${exclude[@]}" \
-        "$path/" "$DEST"
+        "$path" "$DEST"
 
     echo "$now" > "$stamp_file"
 done < "$CONF"
