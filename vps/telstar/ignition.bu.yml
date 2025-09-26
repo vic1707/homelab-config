@@ -1159,7 +1159,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/etc/sync/backup.sh "/etc/sync/paths.conf" "/var/mnt/storagebox"
+        ExecStart=/etc/sync/backup.sh "/etc/sync/paths.conf" "{{- .BACKUP.MOUNT_POINT -}}"
 
         [Install]
         WantedBy=multi-user.target
@@ -1185,7 +1185,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.conf" "/var/mnt/storagebox"
+        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.conf" "{{- .BACKUP.MOUNT_POINT -}}"
         ExecStartPost=/usr/bin/touch /run/restore-complete
 
         [Install]
@@ -1201,7 +1201,7 @@ systemd:
         [Mount]
         # https://docs.hetzner.com/storage/storage-box/access/access-samba-cifs/#sambacifs
         What=//{{ .BACKUP.STORAGEBOX_USER }}.your-storagebox.de/{{ .BACKUP.STORAGEBOX_USER }}
-        Where=/var/mnt/storagebox
+        Where={{- .BACKUP.MOUNT_POINT -}}
         Type=cifs
         Options=credentials=/etc/cifs-credentials,_netdev,vers=3.0
 
