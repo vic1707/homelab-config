@@ -14,6 +14,7 @@ DOMAIN:
 ## Backup strategy
 BACKUP:
   MOUNT_POINT: /var/mnt/storagebox
+  BACKUP_SUBDIR: /
   STORAGEBOX_USER: {{ gopass "backups/backupiter/telstar.account" "user" }}
   STORAGEBOX_PASS: {{ gopass "--password" "backups/backupiter/telstar.account" }}
 
