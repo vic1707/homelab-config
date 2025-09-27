@@ -139,16 +139,19 @@ storage:
 
   files:
     #### Backup
-    ## {{ if .BACKUP.ENABLED }}
-    - path: /etc/sync/paths.txt
+    ## {{ if .BACKUP }}
+    - path: /etc/sync/paths.conf
       mode: 0400
       contents:
-        inline: |
-          /var/srv/bofzilla/
+        local: backup/paths.conf
     - path: /etc/sync/restore.sh
       mode: 0500
       contents:
-        local: ./restore.sh
+        local: backup/restore.sh
+    - path: /etc/sync/backup.sh
+      mode: 0500
+      contents:
+        local: backup/backup.sh
     - path: /etc/selinux/custom-policies/rsync-cifs.te
       mode: 0400
       contents:
@@ -168,7 +171,7 @@ storage:
         inline: |
           username={{ .BACKUP.STORAGEBOX_USER }}
           password={{ .BACKUP.STORAGEBOX_PASS }}
-    ## {{ end }} ## .BACKUP.ENABLED
+    ## {{ end }} ## .BACKUP
     - path: /etc/selinux/custom-policies/podman-mount-journald.te
       mode: 0400
       contents:
@@ -1130,7 +1133,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    ## {{ if .BACKUP.ENABLED }}
+    ## {{ if .BACKUP }}
     #### Backup
     - name: set-rsync-se-state.service
       enabled: true
@@ -1156,13 +1159,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/rsync --verbose \
-          --archive --recursive \
-          --delete \
-          --fake-super \
-          --log-file=/var/log/sync-to-storagebox.log \
-          --files-from=/etc/sync/paths.txt \
-          --relative / /var/mnt/storagebox
+        ExecStart=/etc/sync/backup.sh "/etc/sync/paths.conf" "{{ .BACKUP.MOUNT_POINT }}{{ .BACKUP.BACKUP_SUBDIR }}"
 
         [Install]
         WantedBy=multi-user.target
@@ -1174,7 +1171,7 @@ systemd:
         Description=Periodic sync to mounted Hetzner Storage Box
 
         [Timer]
-        OnUnitActiveSec=3min
+        OnUnitActiveSec=1min
         Persistent=true
 
         [Install]
@@ -1188,7 +1185,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.txt" "/var/mnt/storagebox"
+        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.conf" "{{ .BACKUP.MOUNT_POINT }}{{ .BACKUP.BACKUP_SUBDIR }}"
         ExecStartPost=/usr/bin/touch /run/restore-complete
 
         [Install]
@@ -1204,7 +1201,7 @@ systemd:
         [Mount]
         # https://docs.hetzner.com/storage/storage-box/access/access-samba-cifs/#sambacifs
         What=//{{ .BACKUP.STORAGEBOX_USER }}.your-storagebox.de/{{ .BACKUP.STORAGEBOX_USER }}
-        Where=/var/mnt/storagebox
+        Where={{ .BACKUP.MOUNT_POINT }}
         Type=cifs
         Options=credentials=/etc/cifs-credentials,_netdev,vers=3.0
 
@@ -1223,7 +1220,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    ## {{ end }} ## .BACKUP.ENABLED
+    ## {{ end }} ## .BACKUP
 
 passwd:
   users:
