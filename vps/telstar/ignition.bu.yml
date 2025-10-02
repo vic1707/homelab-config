@@ -15,6 +15,13 @@ storage:
     - path: /etc/localtime
       target: "{{ .TZ }}"
 
+    - path: /home/bofzilla/.config/systemd/user/timers.target.wants/podman-auto-update.timer
+      target: /usr/lib/systemd/user/podman-auto-update.timer
+      hard: false
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
   # Base container storage path
   directories:
     - path: /etc/selinux/custom-policies
@@ -117,6 +124,13 @@ storage:
         name: bofzilla
     # Path to manually enable bofzilla's systemd units - these are links back to the unit file
     - path: /home/bofzilla/.config/systemd/user/default.target.wants
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    # Path to manually enable bofzilla's systemd timers - these are links back to the unit file
+    - path: /home/bofzilla/.config/systemd/user/timers.target.wants
       mode: 0755
       user:
         name: bofzilla
