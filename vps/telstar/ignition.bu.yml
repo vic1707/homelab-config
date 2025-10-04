@@ -616,7 +616,7 @@ storage:
 
           [Service]
           # Crazy syntax for the -f because of gomplate
-          ExecStartPost=/usr/bin/bash -c "/usr/bin/mkdir $(/usr/bin/podman inspect CrowdsecLogs -f '{{`{{ .Mountpoint }}`}}')/{caddy,authelia}"
+          ExecStartPost=/usr/bin/bash -c "/usr/bin/mkdir -p $(/usr/bin/podman inspect CrowdsecLogs -f '{{`{{ .Mountpoint }}`}}')/{caddy,authelia}"
       user:
         name: bofzilla
       group:
