@@ -1,5 +1,5 @@
 # Cheating stage
-    FROM ghcr.io/authelia/authelia:4.39.10 as authelia
+    FROM ghcr.io/authelia/authelia:4.39.13 as authelia
     FROM docker.io/library/debian:13.1 as bins
 
     COPY --from=authelia /app/authelia /bin/authelia
@@ -12,7 +12,7 @@
     FROM ghcr.io/11notes/distroless:localhealth AS distroless-localhealth
 
 # FS
-    FROM docker.io/library/alpine:3.22.1 as FS
+    FROM docker.io/library/alpine:3.22.2 as FS
     RUN mkdir -p \
         /FS/bin \
         /FS/config \
