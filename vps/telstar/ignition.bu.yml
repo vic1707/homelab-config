@@ -67,6 +67,12 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /srv/bofzilla/containers/wg-portal
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy
       mode: 0755
       user:
@@ -98,6 +104,12 @@ storage:
       group:
         name: bofzilla
     - path: /home/bofzilla/.config/containers/gatus
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/wg-portal
       mode: 0755
       user:
         name: bofzilla
@@ -510,6 +522,11 @@ storage:
             import site_common
             reverse_proxy gatus:8080
           }
+
+          https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+            import site_common
+            reverse_proxy wg-portal:8888
+          }
       user:
         name: bofzilla
       group:
@@ -741,6 +758,22 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/wg-portal-user-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "wg-portal-user" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/wg-portal-admin-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "wg-portal-admin" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/lldap/authelia-user.json
       mode: 0400
       contents:
@@ -823,6 +856,33 @@ storage:
             reset_password:
               jwt_secret: {{ .AUTHELIA.JWT_SECRET_PWD_RESET }}
               jwt_algorithm: HS512
+
+          identity_providers:
+            oidc:
+              hmac_secret: {{ random.AlphaNum 140 }}
+              jwks:
+                # Trust me, strange syntax is needed
+                - key: |
+                    {{- print "\n" (crypto.RSAGenerateKey | indent 20) }}
+              claims_policies:
+                wgportal_full:
+                  id_token: ['preferred_username', 'email', 'groups', 'name']
+              clients:
+                - client_id: wgportal
+                  client_name: wg-portal
+                  client_secret: {{ crypto.PBKDF2MCF .AUTHELIA.WG_PORTAL_CLIENT_SECRET (random.AlphaNum 150) 2048 75 "SHA512" }}
+                  public: false
+                  authorization_policy: {{ .AUTHELIA.DEFAULT_AUTH_POLICY }}
+                  redirect_uris:
+                    - https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0/auth/login/authelia/callback
+                  scopes:
+                    - openid
+                    - profile
+                    - groups
+                    - email
+                  userinfo_signed_response_alg: none
+                  consent_mode: implicit
+                  claims_policy: wgportal_full
 
           storage:
             encryption_key: {{ .AUTHELIA.STORAGE_ENCRYPTION_KEY }}
@@ -1066,6 +1126,98 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/wg-portal.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=WgPortal Quadlet
+          After=authelia.container caddy.container
+
+          [Container]
+          Image=ghcr.io/vic1707/homelab/telstar-wg-portal:pr-76
+          ContainerName=wg-portal
+          ## Fixes initial OIDC healthcheck
+          AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          Network=tunnel.network
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          ReadOnly=true
+          DropCapability=ALL
+          # Needed to be able to create a new VPN
+          AddCapability=NET_ADMIN
+          NoNewPrivileges=true
+          # TODO: why?
+          Sysctl=net.ipv4.conf.all.src_valid_mark=1
+
+          Environment="TZ=Europe/Paris"
+          PublishPort=51820-51825
+          Volume=/home/bofzilla/.config/containers/wg-portal/config.yaml:/config/config.yaml:Z,ro
+          Volume=/srv/bofzilla/containers/wg-portal:/data:Z,rw
+
+          # {{ if not .DOMAIN.EXPOSED }}
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/ca-certificates.crt:Z,ro
+          # {{ end }}
+
+          Notify=healthy
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/wg-portal/config.yaml
+      mode: 0400
+      contents:
+        inline: |
+          core:
+            disable_admin_user: true
+
+          database:
+            type: sqlite
+            dsn: /data/db.sqlite3
+
+          web:
+            external_url: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+
+          advanced:
+            api_admin_only: true
+            log_level: debug
+
+          auth:
+            hide_login_form: true
+            callback_url_prefix: https://{{ .WG_PORTAL.SUBDOMAIN }}.{{ .DOMAIN.URL }}/api/v0
+            oidc:
+              - id: Authelia
+                provider_name: Authelia
+                display_name: Login with</br>Authelia
+                base_url: https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+                client_id: wgportal
+                client_secret: {{ .AUTHELIA.WG_PORTAL_CLIENT_SECRET }}
+                field_map:
+                  user_identifier: preferred_username
+                  email: email
+                  firstname: name
+                  user_groups: groups
+                admin_mapping:
+                  admin_group_regex: ^(lldap_admin|wg-portal-admin)$
+                extra_scopes:
+                  - openid
+                  - profile
+                  - groups
+                  - email
+                registration_enabled: true
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
 
 systemd:
   units:
@@ -1240,7 +1392,7 @@ passwd:
   users:
     - name: bofzilla
       groups: [wheel]
-      password_hash: $y$j9T$uLiWqr0dmF4Op1GerGVIb.$w0t1TBTgyIbGU5tIT5z04Sl08O9Tx4MFc7GCh/s3KVC
+      password_hash: "{{ .BOFZILLA_PASSWORD }}"
       ssh_authorized_keys_local:
         - .ssh/bofzilla.pub
 

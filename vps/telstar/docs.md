@@ -7,6 +7,7 @@ sequenceDiagram
     participant Caddy
     participant Authelia
     participant Gatus
+    participant WGPortal
 
     Note over Crowdsec, LLDAP: Start independently and in parallel<br/>Need backup restore to be completed
 
@@ -23,4 +24,8 @@ sequenceDiagram
 
     Note over Gatus: Waits for everyone to be ready
     Gatus->>Gatus: Starts
+
+    WGPortal-->>Caddy: Waits for
+    WGPortal-->>Authelia: Waits for
+    WGPortal->>WGPortal: Starts
 ```
