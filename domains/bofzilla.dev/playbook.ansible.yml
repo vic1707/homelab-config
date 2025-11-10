@@ -58,6 +58,7 @@
   vars_files:
     - dns-records/purelymail.ansible.yml
     - dns-records/homelab.ansible.yml
+    - dns-records/purelymail-ansible-testing.ansible.yml
 
   tasks:
     - name: Zone SSL security
@@ -118,5 +119,6 @@
               {{
                 purelymail_dns_records_map
                 | combine(homelab_dns_records_map, list_merge='append')
+                | combine(purelymail_ansible_testing_dns_records_map, list_merge='append')
                 | moreati.jq.jq('to_entries | map(.value[] + { type: .key })')
               }}
