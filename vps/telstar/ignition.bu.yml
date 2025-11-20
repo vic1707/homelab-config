@@ -210,9 +210,9 @@ storage:
     ## fc 43 available
     - path: /var/lib/extensions/semanage.raw
       contents:
-        source: https://github.com/travier/fedora-sysexts/releases/download/semanage-3.8-1.fc42-42-arm64/semanage-3.8-1.fc42-42-arm64.raw
+        source: https://github.com/fedora-sysexts/fedora/releases/download/semanage-3.9-5.fc43-43-arm64/semanage-3.9-5.fc43-43-arm64.raw
         verification:
-          hash: sha256-3574706d1829901336a083c325694c68fff712d8a49645029f2d057aafe72068
+          hash: sha256-feaecbc47cab5c3d556ffb4010388c5b3297f5e04ada9829aba4580debb30b6a
     # Additional crowdsec bouncer
     - path: /var/opt/crowdsec-firewall-bouncer.tgz
       mode: 0400
