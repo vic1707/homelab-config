@@ -1302,7 +1302,7 @@ storage:
           After=headscale.container
 
           [Container]
-          Image=ghcr.io/rickli-cloud/headscale-console:0.5.0
+          Image=ghcr.io/vic1707/homelab/telstar-headscale-console:pr-101
           ContainerName=headscale-console
           Network=tunnel.network
           User=%U
@@ -1322,11 +1322,6 @@ storage:
           Volume=/home/bofzilla/.config/containers/headscale-console/config.json:/config.json:Z,ro
 
           Notify=healthy
-          HealthCmd=headscale-console health
-          HealthInterval=30s
-          HealthTimeout=5s
-          HealthRetries=5
-          HealthStartPeriod=180s
 
           [Service]
           Restart=on-failure
