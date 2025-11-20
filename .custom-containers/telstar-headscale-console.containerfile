@@ -23,4 +23,4 @@
     # Check that binary can start
     RUN ["/bin/headscale-console", "--help"]
 
-    ENTRYPOINT ["/bin/headscale-console", "serve"]
+    ENTRYPOINT ["/bin/headscale-console"]
