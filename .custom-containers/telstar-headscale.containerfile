@@ -1,4 +1,5 @@
 # Bins
+	# keep in sync with headscale-console env config
     FROM ghcr.io/juanfont/headscale:v0.27.1 as headscale
 
 # Tools
