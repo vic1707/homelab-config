@@ -1319,11 +1319,14 @@ storage:
 
           Volume={{ .TZ }}:/etc/localtime:ro
 
-          Volume=/home/bofzilla/.config/containers/headscale-console/config.yaml:/etc/headscale-console/config.yaml:Z,ro
-          Volume=/home/bofzilla/.config/containers/headscale/config.yaml:/etc/headscale/config.yaml:Z,ro
-          Volume=/srv/bofzilla/containers/headscale-console:/var/lib/headscale-console:Z,rw
+          Volume=/home/bofzilla/.config/containers/headscale-console/config.json:/config.json:Z,ro
 
           Notify=healthy
+          HealthCmd=headscale-console health
+          HealthInterval=30s
+          HealthTimeout=5s
+          HealthRetries=5
+          HealthStartPeriod=180s
 
           [Service]
           Restart=on-failure
