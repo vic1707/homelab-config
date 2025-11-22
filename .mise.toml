@@ -21,6 +21,7 @@ jq = "1.8.1"
 just = "1.42.4"
 python = "3.13.7"
 ripgrep = "14.1.1"
+rust-script = "0.36.0" # Temporary, requires cargo
 shellcheck = "0.11.0"
 shfmt = "3.12.0"
 typos = "1.36.3"
@@ -31,6 +32,7 @@ butane = "asdf:Okeanos/asdf-butane"
 gomplate = "asdf:tapih/asdf-gomplate"
 hcloud-upload-image = "asdf:vic1707/asdf-hcloud-upload-image"
 zizmor = "asdf:vic1707/asdf-zizmor"
+rust-script = "asdf:vic1707/asdf-rust-script"
 
 [settings.python]
 compile = false ## Forces download of precompiled bin

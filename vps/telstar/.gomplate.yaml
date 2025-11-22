@@ -5,3 +5,13 @@ verbose: true
 context:
   .:
     url: stdin:///_.yaml
+
+plugins:
+  yescrypt:
+    cmd: .conf/hash
+    args:
+     - --algo=yescrypt
+  pbkdf2:
+    cmd: .conf/hash
+    args:
+     - --algo=pbkdf2

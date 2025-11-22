@@ -1,0 +1,103 @@
+#!/usr/bin/env rust-script
+//! ```cargo
+//! [dependencies]
+//! anyhow = { version = "1.0.100", default-features = false }
+//! clap = { version = "4.5.53", default-features = false, features = ["derive", "std"] }
+//! clap-stdin = { version = "0.8.0", default-features = false }
+//! pbkdf2 = { version = "0.13.0-rc.2", default-features = false, features = ["simple"] }
+//! rand = { version = "0.9.2", default-features = false, features = ["alloc", "thread_rng"]}
+//! yescrypt = { version = "0.1.0-rc.0", default-features = false, features = ["simple"] }
+//! ```
+
+use clap::{Parser, ValueEnum};
+use clap_stdin::MaybeStdin;
+use pbkdf2::{
+    password_hash::{self, PasswordHasher, PasswordVerifier, SaltString},
+    Pbkdf2,
+};
+
+const DEFAULT_PWD_LENGTH: usize = 64;
+const PBKDF2_ALGO: password_hash::Ident = password_hash::Ident::new_unwrap("pbkdf2-sha512");
+const PBKDF2_PARAMS: ::pbkdf2::Params = ::pbkdf2::Params {
+    rounds: 600_000,   // Authelia's default == 310_000
+    output_length: 64, // Authelia's default == 72, crate only supports <=64
+};
+
+#[derive(Parser)]
+struct Cli {
+    #[arg(long, value_enum)]
+    algo: Algo,
+
+    #[arg(short, long, default_value_t = DEFAULT_PWD_LENGTH)]
+    length: usize,
+
+    #[arg()]
+    input: Option<MaybeStdin<String>>,
+}
+
+fn main() -> anyhow::Result<()> {
+    let Cli {
+        input,
+        algo,
+        length,
+    } = Cli::parse();
+    let salt = SaltString::generate();
+    let password = input
+        .map(|v| v.into_inner())
+        .unwrap_or_else(|| random_string(length));
+
+    let hash = &algo.hash_and_verify(password.as_bytes(), &salt)?;
+    // dbg!(password, salt, hash);
+    print!("{}", hash);
+
+    Ok(())
+}
+
+fn random_string(lenght: usize) -> String {
+    use rand::distr::{Alphanumeric, SampleString};
+    Alphanumeric.sample_string(&mut ::rand::rng(), lenght)
+}
+
+#[derive(ValueEnum, Clone)]
+enum Algo {
+    Pbkdf2,
+    Yescrypt,
+}
+
+impl Algo {
+    fn hash_and_verify(&self, password: &[u8], salt: &SaltString) -> anyhow::Result<String> {
+        match self {
+            Self::Yescrypt => {
+                let hash = ::yescrypt::yescrypt(
+                    password,
+                    salt.as_str().as_bytes(),
+                    &::yescrypt::Params::default(),
+                )?;
+
+                ::yescrypt::yescrypt_verify(password, &hash)?;
+
+                Ok(hash)
+            }
+            Self::Pbkdf2 => {
+                let hcp_hash = Pbkdf2.hash_password_customized(
+                    password,
+                    Some(PBKDF2_ALGO),
+                    None,
+                    PBKDF2_PARAMS,
+                    salt,
+                )?;
+
+                Pbkdf2.verify_password(password, &hcp_hash)?;
+
+                // dirty convert to mcf format
+                Ok(format!(
+                    "${}${}${}${}",
+                    hcp_hash.algorithm,
+                    PBKDF2_PARAMS.rounds,
+                    hcp_hash.salt.expect("Pbkdf2 no salt"),
+                    hcp_hash.hash.expect("Pbkdf2 no hash"),
+                ))
+            }
+        }
+    }
+}
