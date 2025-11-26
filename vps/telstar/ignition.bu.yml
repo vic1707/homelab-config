@@ -566,7 +566,7 @@ storage:
 
           [Container]
           AutoUpdate=registry
-          Image=docker.io/crowdsecurity/crowdsec:v1.7.0-debian
+          Image=ghcr.io/vic1707/homelab/telstar-crowdsec:latest
           ContainerName=crowdsec
           Network=tunnel.network
           NoNewPrivileges=true
