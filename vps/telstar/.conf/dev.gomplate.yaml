@@ -1,6 +1,6 @@
 ## General config
 BOFZILLA_PASSWORD: admin
-SSH_PORT: {{ gopass "telstar/ssh-port" }}
+SSH_PORT: 22 # hardcoded in manage.sh
 TZ: /usr/share/zoneinfo/Europe/Paris
 PODMAN_TUNNEL_SUBNET: 10.89.0.0/26
 CADDY:
@@ -28,15 +28,15 @@ CROWDSEC:
 ## Auth
 LLDAP:
   SUBDOMAIN: lldap
-  ADMIN_USER: {{ gopass "telstar/lldap-admin" "user" }}
-  ADMIN_PASS: {{ gopass "--password" "telstar/lldap-admin" }}
-  KEY_SEED: {{ gopass "telstar/lldap-key-seed" }}
+  ADMIN_USER: admin
+  ADMIN_PASS: adminadmin
+  KEY_SEED: {{ random.AlphaNum 120 }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
 
 AUTHELIA:
   SUBDOMAIN: auth
   LLDAP_PASSWORD: {{ random.AlphaNum 120 }}
-  STORAGE_ENCRYPTION_KEY: {{ gopass "telstar/authelia-storage-encryption-key" }}
+  STORAGE_ENCRYPTION_KEY: {{ random.AlphaNum 120 }}
   JWT_SECRET: {{ random.AlphaNum 120 }}
   JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}
 

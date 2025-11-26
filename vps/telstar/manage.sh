@@ -138,7 +138,7 @@ case "$COMMAND" in
         echo "💻 Starting VM..."
 
         # Define port mappings
-        INTERNAL_SSH_PORT=$(gopass show -o telstar/ssh-port)
+        INTERNAL_SSH_PORT=$(gopass show -o telstar/ssh-port || echo "22")
         HOSTFWD_ARGS=$(build_hostfwd_args "2222:$INTERNAL_SSH_PORT" "443:443")
 
         # shellcheck disable=SC2086 # $HOSTFWD_ARGS not in quotes
