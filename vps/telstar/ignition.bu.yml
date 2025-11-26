@@ -158,14 +158,10 @@ storage:
       mode: 0400
       contents:
         local: backup/paths.conf
-    - path: /etc/sync/restore.sh
+    - path: /etc/sync/storagebox.sh
       mode: 0500
       contents:
-        local: backup/restore.sh
-    - path: /etc/sync/backup.sh
-      mode: 0500
-      contents:
-        local: backup/backup.sh
+        local: backup/storagebox.sh
     - path: /etc/selinux/custom-policies/rsync-cifs.te
       mode: 0400
       contents:
@@ -1173,7 +1169,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/etc/sync/backup.sh "/etc/sync/paths.conf" "{{ .BACKUP.MOUNT_POINT }}{{ .BACKUP.BACKUP_SUBDIR }}"
+        ExecStart=/etc/sync/storagebox.sh backup "/etc/sync/paths.conf" "{{ .BACKUP.MOUNT_POINT }}{{ .BACKUP.BACKUP_SUBDIR }}"
 
         [Install]
         WantedBy=multi-user.target
@@ -1199,7 +1195,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/etc/sync/restore.sh "/etc/sync/paths.conf" "{{ .BACKUP.MOUNT_POINT }}{{ .BACKUP.BACKUP_SUBDIR }}"
+        ExecStart=/etc/sync/storagebox.sh restore "/etc/sync/paths.conf" "{{ .BACKUP.MOUNT_POINT }}{{ .BACKUP.BACKUP_SUBDIR }}"
         ExecStartPost=/usr/bin/touch /run/restore-complete
 
         [Install]
