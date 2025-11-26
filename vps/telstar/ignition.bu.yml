@@ -575,7 +575,7 @@ storage:
           Environment="BOUNCER_KEY_firewall={{ .CROWDSEC.FIREWALL_BOUNCER_API_KEY }}"
           Environment="ENROLL_KEY={{ .CROWDSEC.ENROLL_KEY }}"
           Environment="USE_WAL=true"
-          Environment="ENROLL_INSTANCE_NAME=telstar"
+          Environment="ENROLL_INSTANCE_NAME={{ .CROWDSEC.INSTANCE_NAME }}"
           Environment="COLLECTIONS=crowdsecurity/linux crowdsecurity/sshd crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/whitelist-good-actors crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules LePresidente/authelia"
           Volume=/srv/bofzilla/containers/crowdsec:/etc/crowdsec:Z,rw
           Volume=/home/bofzilla/.config/containers/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:Z,rw
