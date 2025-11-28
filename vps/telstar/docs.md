@@ -4,16 +4,18 @@
 sequenceDiagram
     participant Headscale-console
     participant Headscale
+    participant Authelia
     participant LLDAP
     participant Crowdsec
     participant Caddy
-    participant Authelia
     participant Gatus
 
-    Note over Headscale, Crowdsec: Start independently and in parallel<br/>Need backup restore to be completed
+    Note over Authelia, Crowdsec: Start independently and in parallel<br/>Need backup restore to be completed
 
     Crowdsec->>Crowdsec: Starts
 
+    Headscale-->>Authelia: Waits for
+    Headscale-->>Caddy: Waits for
     Headscale->>Headscale: Starts
     Headscale-console-->>Headscale: Waits for
     Headscale-console-->>Headscale-console: Starts

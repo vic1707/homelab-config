@@ -909,7 +909,7 @@ storage:
               clients:
                 - client_id: headscale
                   client_name: headscale
-                  client_secret: {{ pbkdf2 .AUTHELIA.WG_PORTAL_CLIENT_SECRET }}
+                  client_secret: "{{ pbkdf2 .AUTHELIA.HEADSCALE_CLIENT_SECRET }}"
                   public: false
                   authorization_policy: {{ .AUTHELIA.DEFAULT_AUTH_POLICY }}
                   require_pkce: true
@@ -921,7 +921,6 @@ storage:
                     - email
                     - profile
                     - groups
-                  userinfo_signed_response_alg: none
                   consent_mode: implicit
                   response_types:
                     - code
@@ -1135,9 +1134,14 @@ storage:
         inline: |
           [Unit]
           Description=Headscale Quadlet
+          After=caddy.container authelia.container
 
           [Container]
           Image=ghcr.io/vic1707/homelab/telstar-headscale:pr-101
+           # {{ if not .DOMAIN.EXPOSED }}
+          AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/caddy-ca.crt:Z,ro
+          # {{ end }}
           ContainerName=headscale
           Network=tunnel.network
           User=%U
@@ -1173,7 +1177,8 @@ storage:
         inline: |
           ---
           server_url: https://{{ .HEADSCALE.SUBDOMAIN }}.{{ .DOMAIN.URL }}
-          listen_addr: 127.0.0.1:8080
+          # listen_addr: 127.0.0.1:8080
+          listen_addr: 0.0.0.0:8080
           metrics_listen_addr: 127.0.0.1:9090
           grpc_listen_addr: 127.0.0.1:50443
           disable_check_updates: false

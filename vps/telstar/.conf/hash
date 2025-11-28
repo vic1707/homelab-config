@@ -96,7 +96,7 @@ impl Algo {
                     PBKDF2_PARAMS.rounds,
                     hcp_hash.salt.expect("Pbkdf2 no salt"),
                     hcp_hash.hash.expect("Pbkdf2 no hash"),
-                ))
+                ).replace('+', "."))
             }
         }
     }
