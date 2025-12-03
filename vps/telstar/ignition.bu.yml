@@ -770,6 +770,14 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/headscale-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "headscale" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/lldap/authelia-user.json
       mode: 0400
       contents:
