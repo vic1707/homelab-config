@@ -9,7 +9,7 @@ MODE="$1" # backup/restore
 CONF="$2"
 STORAGEBOX_ROOT="$3"
 
-log () {
+log()  {
     echo "$1"
     echo "$1" >> "$LOG"
 }
@@ -109,9 +109,9 @@ while read -r path interval; do
         done < <(grep -F "$path" "$CONF")
     fi
 
-    if [[ "$MODE" == "backup" ]]; then
+    if [[ $MODE == "backup" ]]; then
         backup "$path" "$interval" "${exclude[@]}"
-    elif [[ "$MODE" == "restore" ]]; then
+    elif [[ $MODE == "restore" ]]; then
         restore "$path" "${exclude[@]}"
     fi
 done < "$CONF"

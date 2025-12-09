@@ -46,9 +46,9 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn random_string(lenght: usize) -> String {
+fn random_string(length: usize) -> String {
     use rand::distr::{Alphanumeric, SampleString};
-    Alphanumeric.sample_string(&mut ::rand::rng(), lenght)
+    Alphanumeric.sample_string(&mut ::rand::rng(), length)
 }
 
 #[derive(ValueEnum, Clone)]
