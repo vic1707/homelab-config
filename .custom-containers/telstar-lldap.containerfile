@@ -2,7 +2,7 @@
     FROM ghcr.io/lldap/lldap:v0.6.2 as lldap
 
 # FS
-    FROM docker.io/library/alpine:3.22.2 as FS
+    FROM docker.io/library/alpine:3.23.0 as FS
 
     RUN mkdir -p \
         /FS/bin \
