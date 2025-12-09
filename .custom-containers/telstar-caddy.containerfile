@@ -24,7 +24,7 @@
     FROM ghcr.io/11notes/distroless:localhealth AS distroless-localhealth
 
 # FS
-    FROM docker.io/library/alpine:3.22.2 as FS
+    FROM docker.io/library/alpine:3.23.0 as FS
 
     RUN mkdir -p \
         /FS/bin \
