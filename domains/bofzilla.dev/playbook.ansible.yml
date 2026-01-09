@@ -58,7 +58,7 @@
   vars_files:
     - dns-records/purelymail.ansible.yml
     - dns-records/homelab.ansible.yml
-    - dns-records/purelymail-ansible-testing.ansible.yml
+    - purelymail/purelymail.ansible.yml
 
   tasks:
     - name: Zone SSL security
@@ -122,3 +122,18 @@
                 | combine(purelymail_ansible_testing_dns_records_map, list_merge='append')
                 | moreati.jq.jq('to_entries | map(.value[] + { type: .key })')
               }}
+
+    - name: Configure purelymail domains
+      bofzilla.purelymail.domains:
+        api_token: "{{ purelymail_api_key }}"
+        canonical: true
+        domains: >-
+          {{ purelymail_domains }}
+
+    - name: Configure purelymail routing rules
+      bofzilla.purelymail.routing_rules:
+        api_token: "{{ purelymail_api_key }}"
+        canonical: [bofzilla.dev]
+        inferred_safety: true
+        rules: >-
+          {{ purelymail_routing_rules }}

@@ -1,0 +1,11 @@
+---
+purelymail_api_key: "{{ lookup('community.general.passwordstore', 'domains/bofzilla.dev/api-key.purelymail') }}"
+
+purelymail_domains:
+  - name: bofzilla.dev
+    symbolic_subaddressing: true
+
+purelymail_routing_rules:
+  - domain_name: bofzilla.dev
+    preset: catchall_except_valid
+    target_addresses: ["admin@bofzilla.dev"]
