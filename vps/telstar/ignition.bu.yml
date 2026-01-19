@@ -9,6 +9,10 @@
 variant: fcos
 version: 1.6.0
 
+# kernel_arguments:
+#   should_exist:
+#     - fips=1 # <https://github.com/coreos/fedora-coreos-tracker/issues/302>
+
 storage:
   links:
     # Timezone config
@@ -152,6 +156,26 @@ storage:
         name: bofzilla
 
   files:
+
+    # - path: /etc/system-fips
+    # - path: /etc/ssl/openssl.cnf
+    #   overwrite: true
+    #   mode: 0644
+    #   contents:
+    #     inline: |
+    #       config_diagnostics = 1
+    #       openssl_conf = openssl_init
+    #       # it includes the fipsmodule configuration
+    #       .include /etc/ssl/fipsmodule.cnf
+    #       [openssl_init]
+    #       providers = provider_sect
+    #       [provider_sect]
+    #       fips = fips_sect
+    #       base = base_sect
+    #       [base_sect]
+    #       activate = 1
+
+
     #### Backup
     ## {{ if .BACKUP }}
     - path: /etc/sync/paths.conf
