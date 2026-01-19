@@ -11,6 +11,8 @@ collections:
     version: 2.5.0
   - name: https://github.com/vic1707/ansible-collection-purelymail#ansible_collections/bofzilla/purelymail
     type: git
+  - name: devsec.hardening
+    version: 10.3.0
 
 roles:
   - name: rywillia.ssh-copy-id

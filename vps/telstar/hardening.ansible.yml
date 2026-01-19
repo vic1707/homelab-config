@@ -1,0 +1,11 @@
+# Waiting for https://github.com/dev-sec/ansible-collection-hardening/pull/864
+## Start VM with `qemu-system-aarch64 -machine virt,highmem=off -cpu cortex-a72 -smp 2 -m 2048 -nographic -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd -drive if=virtio,file=__TMP__Fedora-CoreOS-image-creation.QcHfPJ/fcos-telstar.iso,media=cdrom -netdev user,id=net0,hostfwd=tcp::2222-:22 -device virtio-net-device,netdev=net0 -serial mon:stdio`
+## kill it with `kill <pid>` after `ps aux | grep qemu-system`
+---
+- name: Run DevSec InSpec profiles on FCOS
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - devsec.hardening.os_hardening
+    - devsec.hardening.ssh_hardening
