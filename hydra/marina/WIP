@@ -1,0 +1,78 @@
+### CADDY/CRAFTY
+https://github.com/mholt/caddy-l4/issues/254
+
+### PROMETHEUS
+https://github.com/docker/awesome-compose/blob/master/prometheus-grafana/prometheus/prometheus.yml
+
+### RSS
+https://github.com/0x2E/fusion
+https://github.com/ncarlier/feedpushr
+https://github.com/nkanaev/yarr
+
+### CADDY/CROWDSEC
+https://www.linuxserver.io/blog/blocking-malicious-connections-with-crowdsec-and-swag
+https://github.com/hslatman/caddy-crowdsec-bouncer
+https://github.com/crowdsecurity/example-docker-compose/blob/main/caddy/docker-compose.yml
+
+### ROMS
+https://github.com/rommapp/romm
+
+### RANDOM
+https://vikunja.io/
+https://github.com/dgtlmoon/changedetection.io
+https://github.com/lldap/lldap
+https://hub.docker.com/r/privatebin/nginx-fpm-alpine/
+https://github.com/siyuan-note/siyuan
+https://github.com/CorentinTh/enclosed
+
+### NTFY vs GOTIFY
+
+## check SANNI
+
+```sh
+/usr/bin/mount -o noauto -t nfs 10.0.0.2:/mnt/Fluffy/Marina /home/marina/.local/share/containers/storage/volumes/containers_config_rw/_data
+```
+
+```sh
+podman run --rm \
+    --pod=pod_containers --network=container:gluetun \
+    tianon/speedtest speedtest -L
+podman run --rm \
+    --pod=pod_containers --network=container:gluetun \
+    tianon/speedtest speedtest --accept-license  --accept-gdpr --server-id <inser_server_id>
+podman run --rm \
+    tianon/speedtest speedtest --accept-license  --accept-gdpr --server-id 61025
+```
+
+```sh
+podman ps --format '{{.ID}} {{.Names}}' | 
+    while read -r id name; do
+        echo "Container: $name";
+        podman top "$id" user huser capeff;
+        echo '';
+    done
+```
+
+
+gaming
+windows
+with virtio drives
+q35
+ovmf uefi, with efi storage
+with tpm
+disk 512Go scsi
+8 cores
+32G ram non balooning
+
+on net vmbr0
+mtu 1
+
+----
+### Hardware
+Pass in
+    - 3090
+With options:
+    Primary GPU: Yes => no VNC, NO => ok VNC
+    All functions: Yes
+    ROM-Bar: Yes
+    PCI-Express: Yes
