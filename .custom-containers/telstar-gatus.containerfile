@@ -1,11 +1,11 @@
 # Bins
-    FROM ghcr.io/twin/gatus:v5.33.0 as gatus
+    FROM ghcr.io/twin/gatus:v5.34.0 as gatus
 
 # Tools
     FROM ghcr.io/11notes/distroless:localhealth AS distroless-localhealth
 
 # Updated ca-certificates
-    FROM docker.io/library/alpine:3.23.0 as ssl
+    FROM docker.io/library/alpine:3.23.3 as ssl
 
     RUN apk add --no-cache ca-certificates && \
         update-ca-certificates
@@ -17,7 +17,7 @@
     # TODO: look for warning about certs being already present!
 
 # FS
-    FROM docker.io/library/alpine:3.23.0 as FS
+    FROM docker.io/library/alpine:3.23.3 as FS
 
     RUN mkdir -p \
         /FS/bin \
