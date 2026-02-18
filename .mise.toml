@@ -7,7 +7,7 @@ ANSIBLE_HOME="{{ config_root }}/.ansible"
 GOPASS_HOMEDIR="{{ config_root }}"
 
 [tools]
-actionlint = "1.7.7"
+actionlint = "1.7.11"
 bat = "0.25.0"
 butane = "0.25.0"
 dive = "0.13.1"
@@ -18,13 +18,13 @@ grype = "0.100.0"
 hcloud = "1.53.0"
 hcloud-upload-image = "1.1.0"
 jq = "1.8.1"
-just = "1.42.4"
-python = "3.13.7"
+just = "1.46.0"
+python = "3.14.3"
 ripgrep = "14.1.1"
 rust-script = "0.36.0" # Temporary, requires cargo
 shellcheck = "0.11.0"
 shfmt = "3.12.0"
-typos = "1.36.3"
+typos = "1.43.5"
 zizmor = "1.14.1"
 
 [alias]

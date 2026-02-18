@@ -8,7 +8,7 @@ collections:
   - name: moreati.jq
     version: 0.2.1
   - name: community.hrobot
-    version: 2.5.0
+    version: 2.7.0
   - name: https://github.com/vic1707/ansible-collection-purelymail#ansible_collections/bofzilla/purelymail
     type: git
 
