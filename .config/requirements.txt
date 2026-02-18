@@ -1,7 +1,7 @@
 ansible==13.3.0
 ansible-lint==26.1.1
-jmespath==1.0.1
-jq==1.10.0
+jmespath==1.1.0
+jq==1.11.0
 paramiko==4.0.0
 pydantic==2.12.5
 requests==2.32.5
