@@ -67,6 +67,18 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /srv/bofzilla/containers/headscale
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /srv/bofzilla/containers/headscale-console
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/caddy
       mode: 0755
       user:
@@ -98,6 +110,18 @@ storage:
       group:
         name: bofzilla
     - path: /home/bofzilla/.config/containers/gatus
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/headscale
+      mode: 0755
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/headscale-console
       mode: 0755
       user:
         name: bofzilla
@@ -506,6 +530,15 @@ storage:
             import site_common
             reverse_proxy gatus:8080
           }
+
+          https://{{ .HEADSCALE.SUBDOMAIN }}.{{ .DOMAIN.URL }} {
+
+            handle_path /admin {
+              reverse_proxy headscale-console:3000
+            }
+
+            reverse_proxy headscale:8080
+          }
       user:
         name: bofzilla
       group:
@@ -737,6 +770,14 @@ storage:
         name: bofzilla
       group:
         name: bofzilla
+    - path: /home/bofzilla/.config/containers/lldap/headscale-group.json
+      mode: 0400
+      contents:
+        inline: '{ "name": "headscale" }'
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
     - path: /home/bofzilla/.config/containers/lldap/authelia-user.json
       mode: 0400
       contents:
@@ -862,6 +903,39 @@ storage:
           telemetry:
             metrics:
               enabled: false
+
+          identity_providers:
+            oidc:
+              hmac_secret: {{ random.AlphaNum 140 }}
+              jwks:
+                # Trust me, strange syntax is needed
+                - key: |
+                    {{- print "\n" (crypto.RSAGenerateKey | indent 20) }}
+              claims_policies:
+                headscale:
+                  id_token: ['email', 'groups']
+              clients:
+                - client_id: headscale
+                  client_name: headscale
+                  client_secret: "{{ pbkdf2 .AUTHELIA.HEADSCALE_CLIENT_SECRET }}"
+                  public: false
+                  authorization_policy: {{ .AUTHELIA.DEFAULT_AUTH_POLICY }}
+                  require_pkce: true
+                  pkce_challenge_method: 'S256'
+                  redirect_uris:
+                    - https://{{ .HEADSCALE.SUBDOMAIN }}.{{ .DOMAIN.URL }}/oidc/callback
+                  scopes:
+                    - openid
+                    - email
+                    - profile
+                    - groups
+                  consent_mode: implicit
+                  response_types:
+                    - code
+                  grant_types:
+                    - authorization_code
+                  userinfo_signed_response_alg: none
+                  token_endpoint_auth_method: 'client_secret_basic'
 
           #####################
           ## Auth strategies ##
@@ -1058,6 +1132,216 @@ storage:
                 host: telstar
                 connectivity: internal
                 stack: security
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/headscale.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=Headscale Quadlet
+          After=caddy.container authelia.container
+
+          [Container]
+          Image=ghcr.io/vic1707/homelab/telstar-headscale:pr-101
+           # {{ if not .DOMAIN.EXPOSED }}
+          AddHost={{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}:{{ .CADDY.IP }}
+          Volume=/srv/bofzilla/containers/caddy/pki/authorities/local/root.crt:/etc/ssl/certs/caddy-ca.crt:Z,ro
+          # {{ end }}
+          ContainerName=headscale
+          Network=tunnel.network
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Volume={{ .TZ }}:/etc/localtime:ro
+
+          Tmpfs=/tmp
+          Volume=/home/bofzilla/.config/containers/headscale/config.yaml:/config/config.yaml:Z,ro
+          Volume=/home/bofzilla/.config/containers/headscale/acl.json:/config/acl.json:Z,ro
+          Volume=/srv/bofzilla/containers/headscale:/data:Z,rw
+
+          Notify=healthy
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/headscale/config.yaml
+      mode: 0400
+      contents:
+        inline: |
+          ---
+          server_url: https://{{ .HEADSCALE.SUBDOMAIN }}.{{ .DOMAIN.URL }}
+          # listen_addr: 127.0.0.1:8080
+          listen_addr: 0.0.0.0:8080
+          metrics_listen_addr: 127.0.0.1:9090
+          grpc_listen_addr: 127.0.0.1:50443
+          disable_check_updates: false
+          ephemeral_node_inactivity_timeout: 30m
+
+          grpc_allow_insecure: false
+
+          noise:
+            private_key_path: /tmp/noise_private.key
+
+          prefixes:
+            v4: 100.64.0.0/10
+            v6: fd7a:115c:a1e0::/48
+            allocation: random
+
+          derp:
+            server:
+              enabled: false
+
+            urls:
+              - https://controlplane.tailscale.com/derpmap/default
+
+            paths: []
+            auto_update_enabled: true
+            update_frequency: 3h
+
+          database:
+            type: sqlite
+            # Enable debug mode. This setting requires the log.level to be set to "debug" or "trace".
+            debug: false
+
+            gorm:
+              prepare_stmt: true
+              parameterized_queries: true
+              skip_err_record_not_found: true
+              slow_threshold: 1000
+
+            sqlite:
+              path: /data/db.sqlite
+              write_ahead_log: true
+              wal_autocheckpoint: 1000
+
+          log:
+            # Valid log levels: panic, fatal, error, warn, info, debug, trace
+            level: info
+            format: text
+
+          policy:
+            mode: file
+            path: /config/acl.json
+
+          dns:
+            magic_dns: true
+            base_domain: internal.{{ .DOMAIN.URL }}
+            override_local_dns: true
+            nameservers:
+              global:
+                - 1.1.1.1
+                - 1.0.0.1
+                - 2606:4700:4700::1111
+                - 2606:4700:4700::1001
+              split: {}
+            search_domains: []
+            extra_records: []
+
+          unix_socket: /tmp/headscale.sock
+          unix_socket_permission: "0770"
+
+          oidc:
+            only_start_if_oidc_is_available: true
+            issuer: "https://{{ .AUTHELIA.SUBDOMAIN }}.{{ .DOMAIN.URL }}"
+            client_id: "headscale"
+            client_secret: "{{ .AUTHELIA.HEADSCALE_CLIENT_SECRET }}"
+          #   # Setting the value to "0" will mean no expiry.
+          #   expiry: 180d
+            scope: ["openid", "profile", "email", "groups"]
+
+          #   # Only accept users which are members of at least one group in the
+          #   # allowed_groups list.
+          #   allowed_groups:
+          #     - /headscale
+            pkce:
+              enabled: true
+              method: S256
+
+          logtail:
+            enabled: false
+
+          # Enabling this option makes devices prefer a random port for WireGuard traffic over the
+          # default static port 41641. This option is intended as a workaround for some buggy
+          # firewall devices. See https://tailscale.com/kb/1181/firewalls/ for more information.
+          randomize_client_port: false
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/headscale/acl.json
+      mode: 0400
+      contents:
+        inline: "{}"
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/systemd/headscale-console.container
+      mode: 0400
+      contents:
+        inline: |
+          [Unit]
+          Description=headscale-console Quadlet
+          After=headscale.container
+
+          [Container]
+          Image=ghcr.io/vic1707/homelab/telstar-headscale-console:pr-101
+          ContainerName=headscale-console
+          Network=tunnel.network
+          User=%U
+          Group=%G
+          UserNS=keep-id:uid=%U,gid=%G
+          ReadOnly=true
+          DropCapability=ALL
+          NoNewPrivileges=true
+
+          Exec=serve
+
+          Environment=HEADSCALE_SERVER_HOSTNAME="{{ .HEADSCALE.SUBDOMAIN }}.{{ .DOMAIN.URL }}"
+          Environment=HEADSCALE_VERSION=0.27.1
+
+          Volume={{ .TZ }}:/etc/localtime:ro
+
+          Volume=/home/bofzilla/.config/containers/headscale-console/config.json:/config.json:Z,ro
+
+          Notify=healthy
+
+          [Service]
+          Restart=on-failure
+          # Podman handles it via Healthcheck and Notify=healthy
+          TimeoutStartSec=infinity
+
+          [Install]
+          WantedBy=default.target
+      user:
+        name: bofzilla
+      group:
+        name: bofzilla
+    - path: /home/bofzilla/.config/containers/headscale-console/config.json
+      mode: 0400
+      contents:
+        inline: |
+          {
+            "logLevel": "DEBUG",
+            "controlUrl": "https://{{ .HEADSCALE.SUBDOMAIN }}.{{ .DOMAIN.URL }}"
+          }
+        # "selfserviceHostname": "self-service",
+        # "policyserviceHostname": "policy-service"
       user:
         name: bofzilla
       group:

@@ -40,5 +40,11 @@ AUTHELIA:
   JWT_SECRET: {{ random.AlphaNum 120 }}
   JWT_SECRET_PWD_RESET: {{ random.AlphaNum 120 }}
 
+  HEADSCALE_CLIENT_SECRET: {{ random.AlphaNum 120 }}
+  DEFAULT_AUTH_POLICY: one_factor
+
 GATUS:
   SUBDOMAIN: uptime
+
+HEADSCALE:
+  SUBDOMAIN: headscale
