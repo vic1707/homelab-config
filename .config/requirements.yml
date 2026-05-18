@@ -2,7 +2,7 @@
 ## ansible-galaxy install -f -r .config/requirements.yml
 collections:
   - name: community.general
-    version: 12.3.0
+    version: 13.0.0
   - name: linuxhq.cloudflare
     version: 2.0.4
   - name: moreati.jq
