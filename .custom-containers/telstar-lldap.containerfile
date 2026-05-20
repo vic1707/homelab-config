@@ -1,8 +1,8 @@
 # Bins
-    FROM ghcr.io/lldap/lldap:v0.6.2 as lldap
+    FROM ghcr.io/lldap/lldap:v0.6.3 as lldap
 
 # FS
-    FROM docker.io/library/alpine:3.23.3 as FS
+    FROM docker.io/library/alpine:3.23.4 as FS
 
     RUN mkdir -p \
         /FS/bin \

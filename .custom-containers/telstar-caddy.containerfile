@@ -1,5 +1,5 @@
 # Build stage
-    FROM docker.io/library/caddy:2.10.2-builder-alpine AS builder
+    FROM docker.io/library/caddy:2.11.3-builder-alpine AS builder
 
     RUN xcaddy build \
         `# Use cloudflare dns validation` \
@@ -24,7 +24,7 @@
     FROM ghcr.io/11notes/distroless:localhealth AS distroless-localhealth
 
 # FS
-    FROM docker.io/library/alpine:3.23.3 as FS
+    FROM docker.io/library/alpine:3.23.4 as FS
 
     RUN mkdir -p \
         /FS/bin \
