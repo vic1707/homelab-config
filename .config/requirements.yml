@@ -2,13 +2,13 @@
 ## ansible-galaxy install -f -r .config/requirements.yml
 collections:
   - name: community.general
-    version: 12.3.0
+    version: 12.6.1
   - name: linuxhq.cloudflare
-    version: 2.0.4
+    version: 2.0.7
   - name: moreati.jq
     version: 0.2.1
   - name: community.hrobot
-    version: 2.7.0
+    version: 2.7.2
   - name: https://github.com/vic1707/ansible-collection-purelymail#ansible_collections/bofzilla/purelymail
     type: git
 
